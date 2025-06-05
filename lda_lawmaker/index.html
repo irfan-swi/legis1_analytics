@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legislation by LDA</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="fluidRow">
+            <!-- Sidebar Panel -->
+            <div id="sidebar">
+                <div id="sidebar-content">
+                    <div class="grid-container">
+                        
+                        <!-- Number of Bills Filter -->
+                        <div class="form-group">
+                            <label for="num-bills">Number of Bills to Display</label>
+                            <select id="num-bills">
+                                <option value="10">10</option>
+                                <option value="20" selected>20</option>
+                                <option value="40">40</option>
+                            </select>
+                        </div>
+
+                        <!-- Congress Filter (Single Selection) -->
+                        <div class="form-group">
+                            <label for="congress-version">Congress</label>
+                            <select id="congress-version">
+                            </select>
+                        </div>
+
+                        <!-- Organization Filter (Chip Input) -->
+                        <div class="form-group">
+                            <label for="selected-organizations">Organization</label>
+                            <div class="chip-input-container" id="organizations-container">
+                                <input type="text" class="chip-input" id="organizations-search" placeholder="Type to search organizations...">
+                                <select id="selected-organizations" multiple style="display: none;">
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Sponsor Filter (Chip Input) -->
+                        <div class="form-group">
+                            <label for="selected-sponsors">Sponsor</label>
+                            <div class="chip-input-container" id="sponsors-container">
+                                <input type="text" class="chip-input" id="sponsors-search" placeholder="Type to search sponsors...">
+                                <select id="selected-sponsors" multiple style="display: none;">
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Party Filter (Chip Input) -->
+                        <div class="form-group">
+                            <label for="selected-party">Sponsor's Party</label>
+                            <div class="chip-input-container" id="party-container">
+                                <input type="text" class="chip-input" id="party-search" placeholder="Type to search parties...">
+                                <select id="selected-party" multiple style="display: none;">
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Status Filter (Chip Input) -->
+                        <div class="form-group">
+                            <label for="selected-status">Bill Status</label>
+                            <div class="chip-input-container" id="status-container">
+                                <input type="text" class="chip-input" id="status-search" placeholder="Type to search statuses...">
+                                <select id="selected-status" multiple style="display: none;">
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Issue Filter (Chip Input) -->
+                        <div class="form-group">
+                            <label for="selected-issues">Issue</label>
+                            <div class="chip-input-container" id="issues-container">
+                                <input type="text" class="chip-input" id="issues-search" placeholder="Type to search issues...">
+                                <select id="selected-issues" multiple style="display: none;">
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Panel -->
+        <div id="main">
+            <h1 id="main-title">Legislation by LDA</h1>
+            <h3 id="subtitle">All Organizations, Categorized by Party Color</h3>
+            <div id="chart-container">
+                <canvas id="legislation-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

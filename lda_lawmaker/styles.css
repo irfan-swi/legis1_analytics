@@ -1,0 +1,310 @@
+/* styles.css */
+
+body {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  color: #333333;
+  background-color: #F3F3EC;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow-x: hidden;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 100%;
+  margin: 0;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* Styles for the main title */
+#custom-html-section h1 {
+  font-size: 36px; 
+  font-weight: 700;
+  color: #555961;
+  /*margin-left: 20px;*/
+}
+
+/* Flex container for fluidRow */
+.fluidRow {
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+
+/* Sidebar styles */
+#sidebar {
+  width: 100%;
+  font-size: 13px;
+  padding: 10px 15px;
+  background-color: #FFFFFF;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+}
+
+/* Sidebar content */
+/* Sidebar content */
+#sidebar-content .grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  box-sizing: border-box;
+  gap: 15px;
+  row-gap: 8px;
+  margin-bottom: 10px;
+}
+
+#sidebar-content .grid-container .form-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+#sidebar-content .grid-container select {
+  width: 100%; /* Full width for selectInput */
+  box-sizing: border-box; /* Ensure padding and border are included in the width */
+  margin: 0; /* Remove default margins */
+  padding: 0;
+}
+
+
+/* Sidebar titles */
+#sidebar h3, #sidebar label {
+  font-weight: 700; /* Bold */
+  font-size: 16px;
+}
+
+/* Adjust the look of select input */
+#sidebar .selectize-input {
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+/* Adjust look of select input dropdown*/
+#sidebar .selectize-dropdown {
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+/* Adjust the look of  slider input */
+#sidebar .irs-bar, #sidebar .irs-bar-edge, #sidebar .irs-single {
+  background-color: #31598B; /* Blue color */
+  border: 1px solid #31598B;
+  width: 100%; /* Full width for sliderInput */
+  margin-top: 10px; /* Add some spacing */
+}
+
+
+/* Main panel */
+#main {
+  flex: 1;
+  padding: 15px;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Main title */
+#main #main-title, #main h1{
+  font-weight: 700;
+  color: #333333;
+  font-size: 18px;
+  padding-left: 30px;
+  margin-top: 0;
+}
+
+/* Subtitle */
+#main #subtitle, #main h3 {
+  color: #555961;
+  font-size: 16px;
+  padding-left: 15px;
+  padding-bottom: 20px;
+  margin-top: 0;
+}
+
+/* Chart container */
+#chart-container {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#legislation-chart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Form styling */
+.form-group {
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 3px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: #31598B;
+  box-shadow: 0 0 0 2px rgba(49, 89, 139, 0.2);
+}
+
+/* Multi-select styling */
+select[multiple] {
+  min-height: 100px;
+}
+
+/* Chip input styling */
+.chip-input-container {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background-color: white;
+  min-height: 38px;
+  cursor: text;
+}
+
+.chip-input-container:focus-within {
+  border-color: #31598B;
+  box-shadow: 0 0 0 2px rgba(49, 89, 139, 0.2);
+}
+
+.chip-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  font-family: inherit;
+  flex: 1;
+  min-width: 120px;
+  padding: 2px 0;
+}
+
+.chip-input::placeholder {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.chip {
+  background-color: #e9ecef;
+  color: #495057;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chip .remove {
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 4px;
+  color: #6c757d;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.chip .remove:hover {
+  color: #dc3545;
+}
+
+.placeholder {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.chip-dropdown {
+  position: absolute;
+  top: 100%;
+  left: -1px;
+  right: -1px;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #ced4da;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+}
+
+.chip-dropdown.show {
+  display: block;
+}
+
+.multi-select-dropdown.show {
+  display: block;
+}
+
+.dropdown-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.dropdown-option:hover {
+  background-color: #f8f9fa;
+}
+
+.dropdown-option.selected {
+  background-color: #e3f2fd;
+  color: #31598B;
+  font-weight: 500;
+}
+
+.dropdown-option:last-child {
+  border-bottom: none;
+}
+
+/* Search input styling */
+.search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  flex: 1;
+  min-width: 100px;
+  font-family: inherit;
+  color: #333;
+}
+
+.search-input::placeholder {
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Hide placeholder when search is active */
+.multi-select-display.searching .placeholder {
+  display: none;
+}

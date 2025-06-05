@@ -3,6 +3,8 @@ let orgData = [];
 let issueData = [];
 let chart = null;
 let filteredData = [];
+let availableCongresses = [];
+let currentCongress = null;
 
 // Helper function to generate bill URL safely
 function generateBillUrl(bill) {
@@ -28,18 +30,63 @@ const organizationColors = [
     '#89C1C4', '#4A001E', '#810000', '#973D7D', '#6B56AA'
 ];
 
-// Load data and initialize app
-async function loadData() {
+// Load manifest and initialize congress selector
+async function loadManifest() {
     try {
-        console.log('Starting data load...');
+        console.log('Loading data manifest...');
+        const response = await fetch('data/manifest.json');
+        if (!response.ok) {
+            throw new Error(`Failed to load manifest: ${response.status}`);
+        }
+        
+        const manifest = await response.json();
+        availableCongresses = manifest.congresses;
+        console.log('Available congresses:', availableCongresses.map(c => c.congress));
+        
+        // Initialize congress selector with available options
+        const congressSelect = document.getElementById('congress-version');
+        congressSelect.innerHTML = '';
+        
+        availableCongresses.forEach(congress => {
+            const option = document.createElement('option');
+            option.value = congress.congress;
+            option.textContent = congress.congress;
+            congressSelect.appendChild(option);
+        });
+        
+        // Set default to latest congress
+        const latestCongress = availableCongresses[0].congress;
+        congressSelect.value = latestCongress;
+        currentCongress = latestCongress;
+        
+        // Add change listener for congress selector
+        congressSelect.addEventListener('change', loadCongressData);
+        
+        // Load initial data
+        await loadCongressData();
+        
+    } catch (error) {
+        console.error('Error loading manifest:', error);
+        document.getElementById('main-title').textContent = 'Error loading data manifest. Please check console.';
+    }
+}
+
+// Load data for specific congress
+async function loadCongressData() {
+    try {
+        const selectedCongress = document.getElementById('congress-version').value;
+        console.log(`Loading data for Congress ${selectedCongress}...`);
+        
+        // Show loading indicator
+        document.getElementById('subtitle').textContent = `Loading Congress ${selectedCongress} data...`;
         
         const [orgResponse, issueResponse] = await Promise.all([
-            fetch('lda_orgs.json'),
-            fetch('lda_bill_issues.json')
+            fetch(`data/lda_orgs_${selectedCongress}.json`),
+            fetch('data/lda_bill_issues.json')
         ]);
         
         if (!orgResponse.ok) {
-            throw new Error(`Failed to load organizations data: ${orgResponse.status}`);
+            throw new Error(`Failed to load organizations data for Congress ${selectedCongress}: ${orgResponse.status}`);
         }
         if (!issueResponse.ok) {
             throw new Error(`Failed to load issues data: ${issueResponse.status}`);
@@ -47,20 +94,43 @@ async function loadData() {
         
         orgData = await orgResponse.json();
         issueData = await issueResponse.json();
+        currentCongress = selectedCongress;
         
         console.log('Data loaded:', {
+            congress: selectedCongress,
             orgData: orgData.length,
             issueData: issueData.length
         });
         
+        // Clear existing chips and reinitialize filters
+        clearAllChips();
         initializeFilters();
         updateChart();
         
     } catch (error) {
-        console.error('Error loading data:', error);
-        // Show error message to user
-        document.getElementById('main-title').textContent = 'Error loading data. Please check console and ensure you are running a web server.';
+        console.error('Error loading congress data:', error);
+        document.getElementById('subtitle').textContent = `Error loading Congress data: ${error.message}`;
     }
+}
+
+// Clear all existing chips and reset filters
+function clearAllChips() {
+    const chipContainers = document.querySelectorAll('.chip-input-container');
+    chipContainers.forEach(container => {
+        const chips = container.querySelectorAll('.chip');
+        chips.forEach(chip => chip.remove());
+        
+        const select = container.querySelector('select[multiple]');
+        if (select) {
+            Array.from(select.options).forEach(option => option.selected = false);
+        }
+        
+        const searchInput = container.querySelector('.chip-input');
+        if (searchInput) {
+            searchInput.value = '';
+            searchInput.placeholder = searchInput.placeholder.replace('Add more...', `Type to search ${searchInput.id.replace('-search', '').replace('-', ' ')}...`);
+        }
+    });
 }
 
 // Initialize filter options
@@ -73,10 +143,7 @@ function initializeFilters() {
     }
     
     try {
-        // Congress filter (single selection)
-        const congressValues = [...new Set(orgData.map(d => d.congress))].sort((a, b) => b - a);
-        console.log('Congress values:', congressValues);
-        populateSingleSelect('congress-version', congressValues, congressValues[0]); // Default to latest
+        // Congress filter is now handled by loadManifest function
         
         // Organization filter (chip input)
         const organizations = [...new Set(orgData.map(d => d.combined_name).filter(Boolean))].sort();
@@ -107,8 +174,7 @@ function initializeFilters() {
         console.log('Issues count:', issues.length);
         initializeChipInput('selected-issues', 'issues-container', issues);
         
-        // Add event listeners to single-select filters
-        document.getElementById('congress-version').addEventListener('change', updateChart);
+        // Add event listeners to single-select filters (congress listener is added in loadManifest)
         document.getElementById('num-bills').addEventListener('change', updateChart);
         
         // Global click handler to close all chip dropdowns when clicking outside
@@ -690,6 +756,10 @@ function createPartyChart(ctx, bills) {
                     title: {
                         display: true,
                         text: 'Number of LDAs'
+                    },
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0
                     }
                 },
                 y: {
@@ -776,6 +846,10 @@ function createStackedChart(ctx, bills, selectedOrgs) {
                     title: {
                         display: true,
                         text: 'Number of LDAs'
+                    },
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0
                     }
                 },
                 y: {
@@ -791,4 +865,4 @@ function createStackedChart(ctx, bills, selectedOrgs) {
 }
 
 // Initialize app when page loads
-document.addEventListener('DOMContentLoaded', loadData);
+document.addEventListener('DOMContentLoaded', loadManifest);

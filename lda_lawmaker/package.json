@@ -1,0 +1,25 @@
+{
+  "name": "legislation-by-lda",
+  "version": "1.0.0",
+  "description": "Interactive visualization of lobbying activity on congressional bills",
+  "main": "index.html",
+  "scripts": {
+    "split-data": "node split_data.js",
+    "serve": "python3 -m http.server 8000",
+    "dev": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "lobbying",
+    "congress",
+    "legislation",
+    "lda",
+    "visualization",
+    "government",
+    "transparency"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

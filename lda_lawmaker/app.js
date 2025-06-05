@@ -645,7 +645,7 @@ function updateChart() {
         const selectedOrgs = getSelectedValues('selected-organizations');
         const subtitle = selectedOrgs.length > 0 
             ? selectedOrgs.join(', ')
-            : 'All Organizations, Categorized by Party Color';
+            : 'All Organizations, by Party';
         document.getElementById('subtitle').textContent = subtitle;
         
         // Destroy existing chart

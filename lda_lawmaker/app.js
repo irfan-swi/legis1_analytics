@@ -760,12 +760,18 @@ function createPartyChart(ctx, bills) {
                     ticks: {
                         stepSize: 1,
                         precision: 0
+                    },
+                    grid: {
+                        display: false
                     }
                 },
                 y: {
                     title: {
                         display: true,
                         text: 'Bill'
+                    },
+                    grid: {
+                        display: false
                     }
                 }
             }
@@ -850,6 +856,9 @@ function createStackedChart(ctx, bills, selectedOrgs) {
                     ticks: {
                         stepSize: 1,
                         precision: 0
+                    },
+                    grid: {
+                        display: false
                     }
                 },
                 y: {
@@ -857,6 +866,9 @@ function createStackedChart(ctx, bills, selectedOrgs) {
                     title: {
                         display: true,
                         text: 'Bill'
+                    },
+                    grid: {
+                        display: false
                     }
                 }
             }

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Congressional Tweets</title>
+</head>
+<body>
+    <h1>Debug Mode</h1>
+    <div id="status">Loading...</div>
+    <div id="output"></div>
+
+    <script type="module">
+        import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/+esm';
+
+        async function debug() {
+            const output = document.getElementById('output');
+            const status = document.getElementById('status');
+            
+            try {
+                status.textContent = 'Initializing DuckDB...';
+                
+                // Initialize DuckDB
+                const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
+                const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
+                const worker_url = URL.createObjectURL(
+                    new Blob([`importScripts("${bundle.mainWorker}");`], {type: 'text/javascript'})
+                );
+                const worker = new Worker(worker_url);
+                const logger = new duckdb.ConsoleLogger();
+                const db = new duckdb.AsyncDuckDB(logger, worker);
+                await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+                URL.revokeObjectURL(worker_url);
+                const conn = await db.connect();
+                
+                output.innerHTML += '<p>✅ DuckDB initialized</p>';
+                
+                // Load metadata
+                status.textContent = 'Loading metadata...';
+                const response = await fetch('data/metadata.json');
+                if (!response.ok) {
+                    throw new Error(`Metadata fetch failed: ${response.status}`);
+                }
+                const metadata = await response.json();
+                output.innerHTML += `<p>✅ Metadata loaded: ${metadata.files.length} files, ${metadata.total_rows} total rows</p>`;
+                
+                // Show file list
+                output.innerHTML += '<p><strong>Available files:</strong></p>';
+                output.innerHTML += '<ul>';
+                metadata.files.forEach(file => {
+                    output.innerHTML += `<li>${file.file} (${file.rows} rows, ${file.size_mb}MB)</li>`;
+                });
+                output.innerHTML += '</ul>';
+                
+                // Register sample file
+                status.textContent = 'Loading sample data...';
+                
+                // Try direct query first (DuckDB-WASM can often access files directly)
+                try {
+                    await conn.query(`CREATE OR REPLACE VIEW tweets AS SELECT * FROM 'data/sample.parquet'`);
+                    output.innerHTML += '<p>✅ Direct file access successful</p>';
+                } catch (directError) {
+                    output.innerHTML += `<p>⚠️ Direct access failed: ${directError.message}</p>`;
+                    
+                    // Try with file registration
+                    const fullUrl = new URL('data/sample.parquet', window.location.href).href;
+                    output.innerHTML += `<p>Trying full URL: ${fullUrl}</p>`;
+                    
+                    await db.registerFileURL('sample.parquet', fullUrl, duckdb.DuckDBDataProtocol.HTTP, false);
+                    await conn.query(`CREATE OR REPLACE VIEW tweets AS SELECT * FROM 'sample.parquet'`);
+                    output.innerHTML += '<p>✅ URL registration successful</p>';
+                }
+                
+                // Test basic queries
+                const countResult = await conn.query('SELECT COUNT(*) as count FROM tweets');
+                const countTable = await countResult;
+                const totalRows = countTable.get(0)?.count;
+                output.innerHTML += `<p>✅ Sample data loaded: ${totalRows} rows</p>`;
+                
+                // Test member query
+                const memberResult = await conn.query('SELECT DISTINCT display_name FROM tweets LIMIT 10');
+                const memberTable = await memberResult;
+                const members = [];
+                for (let i = 0; i < memberTable.numRows; i++) {
+                    members.push(memberTable.get(i)?.display_name);
+                }
+                output.innerHTML += `<p>✅ Found ${members.length} sample members:</p>`;
+                output.innerHTML += `<ul>${members.map(m => `<li>${m}</li>`).join('')}</ul>`;
+                
+                // Test sentiment query
+                const sentimentResult = await conn.query(`
+                    SELECT 
+                        pub_date,
+                        party_name,
+                        AVG(CAST(score AS DOUBLE)) as avg_score,
+                        COUNT(*) as tweet_count
+                    FROM tweets
+                    WHERE pub_date >= '2024-01-01'
+                    GROUP BY pub_date, party_name
+                    ORDER BY pub_date
+                    LIMIT 10
+                `);
+                const sentimentTable = await sentimentResult;
+                output.innerHTML += `<p>✅ Sentiment query returned ${sentimentTable.numRows} results</p>`;
+                
+                for (let i = 0; i < Math.min(sentimentTable.numRows, 5); i++) {
+                    const row = sentimentTable.get(i);
+                    output.innerHTML += `<p>${row?.pub_date}: ${row?.party_name} = ${row?.avg_score?.toFixed(3)} (${row?.tweet_count} tweets)</p>`;
+                }
+                
+                status.textContent = 'Debug complete!';
+                
+            } catch (error) {
+                status.textContent = 'Error occurred';
+                output.innerHTML += `<p>❌ Error: ${error.message}</p>`;
+                console.error('Debug error:', error);
+            }
+        }
+        
+        debug();
+    </script>
+</body>
+</html>

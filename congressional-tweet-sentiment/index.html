@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congressional Tweet Sentiment Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <style>
+        /* Legis1 Application Theme - Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 14.5px;
+            line-height: 1.4;
+            color: #333333;
+            background-color: #F3F3EC;
+            margin: 0;
+        }
+
+        :root {
+            --democrat-color: #4a90e2;
+            --republican-color: #d32f2f;
+            --independent-color: #757575;
+            --combined-color: #9c27b0;
+            --bg-primary: #F3F3EC;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #f8f8f8;
+            --text-primary: #333333;
+            --text-secondary: #555961;
+            --text-muted: #999999;
+            --border-light: #ced4da;
+            --border-medium: #ced4da;
+            --border-dark: #c0c0c0;
+            --chart-grid: #f0f0f0;
+            --hover-bg: #f8f8f8;
+            --focus-outline: #31598B;
+            --legis-blue: #31598B;
+            --positive-color: #28a745;
+            --negative-color: #d32f2f;
+        }
+
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px;
+            gap: 15px;
+            box-sizing: border-box;
+        }
+
+        .filter-panel {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px;
+            align-items: end;
+            margin-bottom: 15px;
+        }
+
+        .filter-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        select, input[type="date"], input[type="text"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--legis-blue);
+            box-shadow: 0 0 0 2px rgba(49, 89, 139, 0.2);
+        }
+
+        .autocomplete-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .autocomplete-container input {
+            width: 100%;
+            padding: 8px 30px 8px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 12px;
+        }
+
+        .autocomplete-container input:focus {
+            outline: none;
+            border-color: var(--legis-blue);
+            box-shadow: 0 0 0 2px rgba(49, 89, 139, 0.2);
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .autocomplete-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.highlighted {
+            background-color: var(--hover-bg);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-group {
+            grid-column: span 2;
+        }
+
+        .search-input {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        .chart-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .chart-header {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .chart-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .chart-content {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        .results-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .results-header {
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .results-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .results-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .toggle-group {
+            display: flex;
+            border: 1px solid var(--border-medium);
+            border-radius: 4px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .toggle-btn {
+            padding: 6px 14px;
+            background: var(--bg-secondary);
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            min-width: 90px;
+        }
+
+        .toggle-btn.active {
+            background: var(--legis-blue);
+            color: white;
+        }
+
+        .toggle-btn:not(.active):hover {
+            background: var(--hover-bg);
+        }
+
+        .summary-stats {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .results-table {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+            min-height: 0;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* Subtle scrollbar styling */
+        .results-table::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .results-table::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .results-table::-webkit-scrollbar-thumb {
+            background: var(--border-light);
+            border-radius: 1.5px;
+            opacity: 0.5;
+        }
+
+        .results-table::-webkit-scrollbar-thumb:hover {
+            background: var(--border-medium);
+            opacity: 1;
+        }
+
+        .member-row {
+            display: grid;
+            grid-template-columns: 25px 1fr auto;
+            gap: 8px;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-light);
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .member-row:first-child {
+            padding-top: 0;
+        }
+
+        .member-row:last-child {
+            border-bottom: none;
+        }
+
+        .member-rank {
+            font-weight: 700;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            min-width: 25px;
+            text-align: right;
+        }
+
+        .member-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        a.member-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            display: block;
+        }
+
+        a.member-name:hover {
+            color: var(--legis-blue);
+            text-decoration: underline;
+        }
+
+        .member-details {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            line-height: 1.2;
+        }
+
+        .member-score {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 1px;
+        }
+
+        .score-value {
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .score-positive {
+            color: var(--positive-color);
+        }
+
+        .score-negative {
+            color: var(--negative-color);
+        }
+
+        .score-neutral {
+            color: var(--text-secondary);
+        }
+
+        .tweet-count {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .party-democrat {
+            color: var(--democrat-color);
+        }
+
+        .party-republican {
+            color: var(--republican-color);
+        }
+
+        .party-independent {
+            color: var(--independent-color);
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            border: 3px solid var(--border-light);
+            border-top: 3px solid var(--legis-blue);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: 2fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .search-group {
+                grid-column: span 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Filter Panel -->
+        <div class="filter-panel">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label">Chamber</label>
+                    <select id="chamberFilter">
+                        <option value="all">All Chambers</option>
+                        <option value="House">House</option>
+                        <option value="Senate">Senate</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Party</label>
+                    <select id="partyFilter">
+                        <option value="all">All Parties</option>
+                        <option value="Democrat">Democrat</option>
+                        <option value="Republican">Republican</option>
+                        <option value="Independent">Independent</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">State</label>
+                    <select id="stateFilter">
+                        <option value="all">All States</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Member</label>
+                    <div class="autocomplete-container">
+                        <input type="text" id="memberFilter" placeholder="All Members" autocomplete="off">
+                        <div id="memberDropdown" class="autocomplete-dropdown"></div>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Issue Area</label>
+                    <select id="issueFilter">
+                        <option value="all">All Issues</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Start Date</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">End Date</label>
+                    <input type="date" id="endDate">
+                </div>
+                <div class="filter-group search-group">
+                    <label class="filter-label">Search Tweets</label>
+                    <div class="search-input">
+                        <input type="text" id="searchBox" placeholder="Search tweet content...">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Chart Section -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">Congressional Tweet Sentiment Over Time</div>
+                    <div class="chart-subtitle">Daily averages (dots) with 5-day rolling average trends (lines) • Sentiment ranges from -1 (negative) to +1 (positive)</div>
+                </div>
+                <div class="chart-content">
+                    <canvas id="sentimentChart"></canvas>
+                    <div class="loading-overlay" id="chartLoading">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text" id="loadingText">Initializing database...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="results-panel">
+                <div class="results-header">
+                    <div class="results-title">Member Rankings</div>
+                    <div class="results-controls">
+                        <div class="toggle-group">
+                            <button class="toggle-btn active" id="positiveBtn">Most Positive</button>
+                            <button class="toggle-btn" id="negativeBtn">Most Negative</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="summary-stats">
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalTweets">0</div>
+                            <div class="stat-label">Total Tweets</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="avgSentiment">0.00</div>
+                            <div class="stat-label">Avg Sentiment</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="uniqueMembers">0</div>
+                            <div class="stat-label">Members</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="dateRange">-</div>
+                            <div class="stat-label">Date Range</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="results-table" id="resultsTable">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import DuckDB-WASM
+        import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/+esm';
+        
+        // DuckDB instance and connection
+        let db;
+        let conn;
+        let chart;
+        let currentSort = 'positive';
+        let searchTimeout;
+        let metadata;
+        
+        // Performance tracking
+        let queryStartTime;
+        let loadingStartTime;
+
+        // Initialize date filters to last 12 months
+        function initializeDates() {
+            // Default to last 12 months for better performance
+            const endDate = new Date('2025-06-02');  // Latest data date
+            const startDate = new Date('2024-06-02'); // 12 months back
+            
+            document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+            document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+            
+            console.log(`Default date range: ${startDate.toISOString().split('T')[0]} to ${endDate.toISOString().split('T')[0]}`);
+        }
+
+        // Format date for display
+        function formatDate(date) {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return months[date.getMonth()] + ' ' + date.getDate();
+        }
+
+        // Update loading text
+        function updateLoadingText(text) {
+            const loadingText = document.getElementById('loadingText');
+            if (loadingText) {
+                loadingText.textContent = text;
+            }
+        }
+
+        // Initialize DuckDB
+        async function initializeDuckDB() {
+            try {
+                updateLoadingText('Initializing DuckDB...');
+                
+                // Create DuckDB instance
+                const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
+                
+                // Select bundle based on browser support
+                const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
+                
+                const worker_url = URL.createObjectURL(
+                    new Blob([`importScripts("${bundle.mainWorker}");`], {type: 'text/javascript'})
+                );
+                
+                // Instantiate DuckDB
+                const worker = new Worker(worker_url);
+                const logger = new duckdb.ConsoleLogger();
+                db = new duckdb.AsyncDuckDB(logger, worker);
+                await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+                URL.revokeObjectURL(worker_url);
+                
+                // Open connection
+                conn = await db.connect();
+                
+                console.log('DuckDB initialized successfully');
+                
+                // Load metadata
+                updateLoadingText('Loading metadata...');
+                await loadMetadata();
+                
+                // Initialize UI first (sets up date filters)
+                await initializeUI();
+                
+                // Load relevant data files based on initial date range
+                updateLoadingText('Loading relevant data files...');
+                await loadRelevantFiles();
+                
+                // If no files loaded, try sample data
+                if (currentDataFiles.length === 0) {
+                    updateLoadingText('Loading sample data...');
+                    try {
+                        const sampleUrl = new URL('data/sample.parquet', window.location.href).href;
+                        await db.registerFileURL(
+                            'sample.parquet',
+                            sampleUrl,
+                            duckdb.DuckDBDataProtocol.HTTP,
+                            false
+                        );
+                        await conn.query(`
+                            CREATE OR REPLACE VIEW tweets AS 
+                            SELECT * FROM 'sample.parquet'
+                        `);
+                        currentDataFiles = [{file: 'sample.parquet', rows: 1000}];
+                        console.log('Loaded sample data as fallback');
+                    } catch (sampleError) {
+                        console.error('Could not load sample data:', sampleError);
+                    }
+                }
+                
+                // Populate filters after data is loaded
+                updateLoadingText('Populating filters...');
+                await populateFilters();
+                
+                // Hide loading overlay
+                document.getElementById('chartLoading').style.display = 'none';
+                
+                // Load initial data
+                await applyFilters();
+                
+            } catch (error) {
+                console.error('Error initializing DuckDB:', error);
+                document.getElementById('loadingText').textContent = 'Error loading data. Please refresh.';
+            }
+        }
+
+        // Load metadata
+        async function loadMetadata() {
+            try {
+                const response = await fetch('data/metadata.json');
+                if (!response.ok) {
+                    throw new Error(`Failed to load metadata: ${response.status}`);
+                }
+                metadata = await response.json();
+                console.log('Metadata loaded successfully');
+            } catch (error) {
+                console.warn('Could not load metadata, using fallback:', error.message);
+                // Use comprehensive fallback metadata
+                metadata = {
+                    total_rows: 847634,
+                    date_range: {
+                        start: "2023-01-02",
+                        end: "2025-06-02"
+                    },
+                    files: [
+                        {file: "tweets_2023_Q1.parquet", rows: 24401, size_mb: 2.1, year: 2023, quarter: 1, start_date: "2023-01-02", end_date: "2023-03-31"},
+                        {file: "tweets_2023_Q2.parquet", rows: 30700, size_mb: 2.8, year: 2023, quarter: 2, start_date: "2023-04-01", end_date: "2023-06-30"},
+                        {file: "tweets_2023_Q3.parquet", rows: 45779, size_mb: 4.3, year: 2023, quarter: 3, start_date: "2023-07-01", end_date: "2023-09-30"},
+                        {file: "tweets_2023_Q4_M10.parquet", rows: 34931, size_mb: 3.3, year: 2023, quarter: 4, month: 10, start_date: "2023-10-01", end_date: "2023-10-31"},
+                        {file: "tweets_2023_Q4_M11.parquet", rows: 39360, size_mb: 3.9, year: 2023, quarter: 4, month: 11, start_date: "2023-11-01", end_date: "2023-11-30"},
+                        {file: "tweets_2023_Q4_M12.parquet", rows: 28823, size_mb: 2.9, year: 2023, quarter: 4, month: 12, start_date: "2023-12-01", end_date: "2023-12-31"},
+                        {file: "tweets_2024_Q1_M01.parquet", rows: 47177, size_mb: 4.6, year: 2024, quarter: 1, month: 1, start_date: "2024-01-01", end_date: "2024-01-31"},
+                        {file: "tweets_2024_Q1_M02.parquet", rows: 50869, size_mb: 4.9, year: 2024, quarter: 1, month: 2, start_date: "2024-02-01", end_date: "2024-02-29"},
+                        {file: "tweets_2024_Q1_M03.parquet", rows: 53104, size_mb: 5.1, year: 2024, quarter: 1, month: 3, start_date: "2024-03-01", end_date: "2024-03-31"},
+                        {file: "tweets_2024_Q2_M04.parquet", rows: 36828, size_mb: 3.7, year: 2024, quarter: 2, month: 4, start_date: "2024-04-01", end_date: "2024-04-30"},
+                        {file: "tweets_2024_Q2_M05.parquet", rows: 40918, size_mb: 3.7, year: 2024, quarter: 2, month: 5, start_date: "2024-05-01", end_date: "2024-05-31"},
+                        {file: "tweets_2024_Q2_M06.parquet", rows: 32205, size_mb: 2.7, year: 2024, quarter: 2, month: 6, start_date: "2024-06-01", end_date: "2024-06-30"},
+                        {file: "tweets_2024_Q3.parquet", rows: 58574, size_mb: 6.3, year: 2024, quarter: 3, start_date: "2024-07-01", end_date: "2024-09-30"},
+                        {file: "tweets_2024_Q4_M10.parquet", rows: 37454, size_mb: 3.5, year: 2024, quarter: 4, month: 10, start_date: "2024-10-01", end_date: "2024-10-31"},
+                        {file: "tweets_2024_Q4_M11.parquet", rows: 26351, size_mb: 2.2, year: 2024, quarter: 4, month: 11, start_date: "2024-11-01", end_date: "2024-11-30"},
+                        {file: "tweets_2024_Q4_M12.parquet", rows: 35941, size_mb: 3.0, year: 2024, quarter: 4, month: 12, start_date: "2024-12-01", end_date: "2024-12-31"},
+                        {file: "tweets_2025_Q1_M01.parquet", rows: 55108, size_mb: 4.5, year: 2025, quarter: 1, month: 1, start_date: "2025-01-01", end_date: "2025-01-31"},
+                        {file: "tweets_2025_Q1_M02.parquet", rows: 57182, size_mb: 4.7, year: 2025, quarter: 1, month: 2, start_date: "2025-02-01", end_date: "2025-02-28"},
+                        {file: "tweets_2025_Q1_M03.parquet", rows: 22545, size_mb: 1.8, year: 2025, quarter: 1, month: 3, start_date: "2025-03-01", end_date: "2025-03-30"},
+                        {file: "tweets_2025_Q2_M04.parquet", rows: 34836, size_mb: 2.9, year: 2025, quarter: 2, month: 4, start_date: "2025-04-01", end_date: "2025-04-30"},
+                        {file: "tweets_2025_Q2_M05.parquet", rows: 53715, size_mb: 4.6, year: 2025, quarter: 2, month: 5, start_date: "2025-05-01", end_date: "2025-05-31"},
+                        {file: "tweets_2025_Q2_M06.parquet", rows: 833, size_mb: 0.1, year: 2025, quarter: 2, month: 6, start_date: "2025-06-01", end_date: "2025-06-02"}
+                    ],
+                    unique_values: {
+                        chambers: ['House', 'Senate'],
+                        parties: ['Democrat', 'Republican', 'Independent'],
+                        states: ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY'],
+                        issues: ['Agriculture', 'Armed Forces and National Security', 'Civil Rights and Liberties', 'Crime and Law Enforcement', 'Economics and Public Finance', 'Education', 'Emergency Management', 'Energy', 'Environmental Protection', 'Families', 'Foreign Trade and International Finance', 'Government Operations and Politics', 'Health', 'Housing and Community Development', 'Immigration', 'International Affairs', 'Labor and Employment', 'Law', 'Native Americans', 'Science and Technology', 'Transportation and Public Works']
+                    }
+                };
+                console.log('Using fallback metadata');
+            }
+        }
+
+        // Smart file loading based on date filters
+        let loadedFiles = new Set();
+        let currentDataFiles = [];
+        let lastDateRange = null;  // Track date changes
+        
+        async function loadRelevantFiles() {
+            try {
+                // Get date range from filters
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const currentDateRange = `${startDate}:${endDate}`;
+                
+                // Check if date range changed
+                const dateRangeChanged = lastDateRange !== currentDateRange;
+                if (dateRangeChanged) {
+                    console.log(`Date range changed from ${lastDateRange} to ${currentDateRange}`);
+                    lastDateRange = currentDateRange;
+                }
+                
+                // Determine which files we need based on date range
+                const relevantFiles = getRelevantFiles(startDate, endDate);
+                
+                // Check if we need to load different files
+                const filesToLoad = relevantFiles.filter(f => !loadedFiles.has(f.file));
+                const filesToUnload = currentDataFiles.filter(f => !relevantFiles.some(rf => rf.file === f.file));
+                
+                if (filesToLoad.length === 0 && filesToUnload.length === 0 && !dateRangeChanged) {
+                    return; // No changes needed
+                }
+                
+                updateLoadingText(`Loading ${filesToLoad.length} data files...`);
+                
+                // Register new files
+                for (const fileInfo of filesToLoad) {
+                    const fullUrl = new URL(`data/${fileInfo.file}`, window.location.href).href;
+                    await db.registerFileURL(
+                        fileInfo.file,
+                        fullUrl,
+                        duckdb.DuckDBDataProtocol.HTTP,
+                        false
+                    );
+                    loadedFiles.add(fileInfo.file);
+                    console.log(`Loaded: ${fileInfo.file} (${fileInfo.rows.toLocaleString()} rows)`);
+                }
+                
+                // Update current files list
+                currentDataFiles = relevantFiles;
+                
+                // Create view with relevant files only
+                if (currentDataFiles.length > 0) {
+                    try {
+                        const fileList = currentDataFiles.map(f => `'${f.file}'`).join(', ');
+                        await conn.query(`
+                            CREATE OR REPLACE VIEW tweets AS 
+                            SELECT * FROM read_parquet([${fileList}])
+                        `);
+                        
+                        const totalRows = currentDataFiles.reduce((sum, f) => sum + f.rows, 0);
+                        console.log(`Active dataset: ${totalRows.toLocaleString()} rows from ${currentDataFiles.length} files`);
+                    
+                        // Test query to verify data structure
+                        try {
+                            const testResult = await conn.query('SELECT COUNT(*) as count FROM tweets');
+                            const testTable = await testResult;
+                            const actualRows = testTable.get(0)?.count;
+                            console.log(`Data verification: ${actualRows} rows loaded successfully`);
+                        } catch (testError) {
+                            console.error('Data verification failed:', testError);
+                            throw testError;
+                        }
+                    } catch (multiFileError) {
+                        console.error('Error loading multiple files:', multiFileError);
+                        // Fall back to sample data
+                        throw multiFileError;
+                    }
+                } else {
+                    // Use sample as fallback
+                    const sampleUrl = new URL('data/sample.parquet', window.location.href).href;
+                    await db.registerFileURL(
+                        'sample.parquet',
+                        sampleUrl,
+                        duckdb.DuckDBDataProtocol.HTTP,
+                        false
+                    );
+                    await conn.query(`
+                        CREATE OR REPLACE VIEW tweets AS 
+                        SELECT * FROM 'sample.parquet'
+                    `);
+                    console.log('Using sample data');
+                }
+                
+            } catch (error) {
+                console.error('Error loading files:', error);
+                // Fallback to sample data
+                try {
+                    const sampleUrl = new URL('data/sample.parquet', window.location.href).href;
+                    await db.registerFileURL(
+                        'sample.parquet',
+                        sampleUrl,
+                        duckdb.DuckDBDataProtocol.HTTP,
+                        false
+                    );
+                    await conn.query(`
+                        CREATE OR REPLACE VIEW tweets AS 
+                        SELECT * FROM 'sample.parquet'
+                    `);
+                    currentDataFiles = [{file: 'sample.parquet', rows: 1000}];
+                    console.log('Fallback: Using sample data only');
+                } catch (error2) {
+                    console.error('Critical error with data loading:', error2);
+                    // Last resort: create empty table with proper schema
+                    try {
+                        await conn.query(`
+                            CREATE OR REPLACE TABLE tweets AS 
+                            SELECT 
+                                '' as comm_content_id,
+                                '' as display_name,
+                                '' as party_name,
+                                '' as chamber,
+                                '' as us_state_id,
+                                '' as person_id,
+                                CAST(0.0 AS DOUBLE) as score,
+                                '2024-01-01' as pub_date,
+                                '' as content,
+                                '' as issue_name
+                            WHERE 1=0
+                        `);
+                        currentDataFiles = [];
+                        console.log('Created empty tweets table as fallback');
+                    } catch (error3) {
+                        console.error('Failed to create fallback table:', error3);
+                        document.getElementById('loadingText').textContent = 'Error: Please serve this app from a web server (not file://)';
+                        throw error3;
+                    }
+                }
+            }
+        }
+        
+        // Determine which files are needed for the given date range
+        function getRelevantFiles(startDate, endDate) {
+            if (!metadata || !metadata.files) {
+                console.warn('No metadata or files available for date filtering');
+                return [];
+            }
+            
+            const start = startDate ? new Date(startDate) : new Date('2020-01-01');
+            const end = endDate ? new Date(endDate) : new Date('2030-12-31');
+            
+            const relevantFiles = metadata.files.filter(file => {
+                const fileStart = new Date(file.start_date);
+                const fileEnd = new Date(file.end_date);
+                
+                // Check if there's any overlap between date ranges
+                const hasOverlap = fileStart <= end && fileEnd >= start;
+                
+                if (hasOverlap) {
+                    console.log(`Including file: ${file.file} (${file.start_date} to ${file.end_date})`);
+                }
+                
+                return hasOverlap;
+            });
+            
+            console.log(`Found ${relevantFiles.length} relevant files for date range ${startDate} to ${endDate}`);
+            return relevantFiles;
+        }
+
+        // Initialize UI components
+        async function initializeUI() {
+            // Initialize chart
+            initChart();
+            
+            // Populate filters from metadata first (fast)
+            if (metadata && metadata.unique_values) {
+                populateSelect('stateFilter', metadata.unique_values.states || []);
+                populateSelect('issueFilter', metadata.unique_values.issues || []);
+                console.log('Pre-populated filters from metadata');
+            }
+            
+            // Add event listeners
+            setupEventListeners();
+        }
+
+        // Initialize chart
+        function initChart() {
+            const ctx = document.getElementById('sentimentChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'scatter',  // Changed to scatter to support mixed chart types
+                data: {
+                    datasets: [
+                        // Daily average scatter plots (moderately visible)
+                        {
+                            label: 'Democratic Daily Avg',
+                            type: 'scatter',
+                            data: [],
+                            backgroundColor: 'rgba(74, 144, 226, 0.4)',
+                            borderColor: 'rgba(74, 144, 226, 0.6)',
+                            pointRadius: 2,
+                            pointHoverRadius: 4,
+                            showLine: false
+                        },
+                        {
+                            label: 'Republican Daily Avg',
+                            type: 'scatter',
+                            data: [],
+                            backgroundColor: 'rgba(211, 47, 47, 0.4)',
+                            borderColor: 'rgba(211, 47, 47, 0.6)',
+                            pointRadius: 2,
+                            pointHoverRadius: 4,
+                            showLine: false
+                        },
+                        {
+                            label: 'Independent Daily Avg',
+                            type: 'scatter',
+                            data: [],
+                            backgroundColor: 'rgba(117, 117, 117, 0.4)',
+                            borderColor: 'rgba(117, 117, 117, 0.6)',
+                            pointRadius: 2,
+                            pointHoverRadius: 4,
+                            showLine: false,
+                            hidden: true
+                        },
+                        // Rolling average lines (prominent)
+                        {
+                            label: 'Democratic Trend (5-day avg)',
+                            type: 'line',
+                            data: [],
+                            borderColor: 'rgba(74, 144, 226, 0.9)',
+                            backgroundColor: 'transparent',
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'Republican Trend (5-day avg)',
+                            type: 'line',
+                            data: [],
+                            borderColor: 'rgba(211, 47, 47, 0.9)',
+                            backgroundColor: 'transparent',
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'Independent Trend (5-day avg)',
+                            type: 'line',
+                            data: [],
+                            borderColor: 'rgba(117, 117, 117, 0.9)',
+                            backgroundColor: 'transparent',
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            borderWidth: 3,
+                            hidden: true
+                        },
+                        {
+                            label: 'Combined Trend (5-day avg)',
+                            type: 'line',
+                            data: [],
+                            borderColor: '#9c27b0',
+                            backgroundColor: 'transparent',
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 5,
+                            borderWidth: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    // Show the actual date in tooltip title
+                                    if (chart && chart.data.originalDates && context[0]) {
+                                        const date = chart.data.originalDates[context[0].dataIndex];
+                                        return new Date(date).toLocaleDateString('en-US', { 
+                                            weekday: 'short',
+                                            month: 'short', 
+                                            day: 'numeric', 
+                                            year: 'numeric' 
+                                        });
+                                    }
+                                    return '';
+                                },
+                                label: function(context) {
+                                    let label = context.dataset.label + ': ' + context.parsed.y.toFixed(3);
+                                    
+                                    // Add tweet count for daily dots (not trend lines)
+                                    if (context.dataset.type === 'scatter' && chart.data.tweetCounts) {
+                                        const dateIndex = context.dataIndex;
+                                        const party = context.dataset.label.replace(' Daily Avg', '').replace('Democratic', 'Democrat').replace('Republican', 'Republican');
+                                        const tweetCount = chart.data.tweetCounts[`${dateIndex}_${party}`];
+                                        if (tweetCount) {
+                                            label += ` (${tweetCount} tweets)`;
+                                        }
+                                    }
+                                    
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            },
+                            grid: {
+                                color: '#f0f0f0'
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                callback: function(value, index, values) {
+                                    // Show date labels with year at regular intervals
+                                    if (chart && chart.data.labels && chart.data.labels[Math.floor(value)]) {
+                                        const label = chart.data.labels[Math.floor(value)];
+                                        // Add year for first label of each month or every few labels
+                                        if (index % 15 === 0 && chart.data.originalDates && chart.data.originalDates[Math.floor(value)]) {
+                                            const date = new Date(chart.data.originalDates[Math.floor(value)]);
+                                            return `${label} ${date.getFullYear()}`;
+                                        }
+                                        return label;
+                                    }
+                                    return '';
+                                }
+                            }
+                        },
+                        y: {
+                            min: -1,
+                            max: 1,
+                            title: {
+                                display: true,
+                                text: 'Sentiment Score'
+                            },
+                            grid: {
+                                color: function(context) {
+                                    // Make the zero line black and more prominent
+                                    if (context.tick.value === 0) {
+                                        return '#000000';
+                                    }
+                                    return '#f0f0f0';
+                                },
+                                lineWidth: function(context) {
+                                    // Make the zero line thicker
+                                    if (context.tick.value === 0) {
+                                        return 2;
+                                    }
+                                    return 1;
+                                }
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toFixed(1);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate filter dropdowns - use metadata first, then query for dynamic updates
+        async function populateFilters() {
+            try {
+                // Use metadata first for initial population (faster)
+                if (metadata && metadata.unique_values) {
+                    populateSelect('stateFilter', metadata.unique_values.states || []);
+                    populateSelect('issueFilter', metadata.unique_values.issues || []);
+                    console.log('Populated filters from metadata');
+                }
+                
+                // Then query for accurate results from currently loaded data
+                if (currentDataFiles.length > 0) {
+                    console.log('Querying filters from loaded data...');
+                    
+                    // Test basic connectivity first
+                    try {
+                        const testResult = await conn.query('SELECT COUNT(*) as total FROM tweets');
+                        const testTable = await testResult;
+                        const totalRows = testTable.get(0)?.total;
+                        console.log(`Connected to tweets table with ${totalRows} rows`);
+                    } catch (testError) {
+                        console.error('Cannot access tweets table:', testError);
+                        return;
+                    }
+                    
+                    // Members - highest priority query, sorted by last name
+                    try {
+                        const membersResult = await conn.query(`
+                            SELECT DISTINCT display_name, last_name 
+                            FROM tweets 
+                            WHERE display_name IS NOT NULL AND display_name != '' 
+                            AND last_name IS NOT NULL AND last_name != ''
+                            ORDER BY last_name, display_name
+                            LIMIT 1000
+                        `);
+                        const membersTable = await membersResult;
+                        const members = [];
+                        for (let i = 0; i < membersTable.numRows; i++) {
+                            const member = membersTable.get(i)?.display_name;
+                            if (member) members.push(member);
+                        }
+                        console.log(`Found ${members.length} members in data`);
+                        if (members.length > 0) {
+                            populateSelectWithAutocomplete('memberFilter', members);
+                        }
+                    } catch (memberError) {
+                        console.error('Error loading members:', memberError);
+                    }
+                    
+                    // States - try to update from actual data
+                    try {
+                        const statesResult = await conn.query(`
+                            SELECT DISTINCT us_state_id 
+                            FROM tweets 
+                            WHERE us_state_id IS NOT NULL AND us_state_id != '' 
+                            ORDER BY us_state_id 
+                            LIMIT 100
+                        `);
+                        const statesTable = await statesResult;
+                        const states = [];
+                        for (let i = 0; i < statesTable.numRows; i++) {
+                            const state = statesTable.get(i)?.us_state_id;
+                            if (state) states.push(state);
+                        }
+                        if (states.length > 0) {
+                            populateSelect('stateFilter', states);
+                        }
+                    } catch (stateError) {
+                        console.warn('Could not update states from data:', stateError);
+                    }
+                    
+                    // Issues - try to update from actual data
+                    try {
+                        const issuesResult = await conn.query(`
+                            SELECT DISTINCT issue_name 
+                            FROM tweets 
+                            WHERE issue_name IS NOT NULL AND issue_name != '' 
+                            ORDER BY issue_name 
+                            LIMIT 100
+                        `);
+                        const issuesTable = await issuesResult;
+                        const issues = [];
+                        for (let i = 0; i < issuesTable.numRows; i++) {
+                            const issue = issuesTable.get(i)?.issue_name;
+                            if (issue) issues.push(issue);
+                        }
+                        if (issues.length > 0) {
+                            populateSelect('issueFilter', issues);
+                        }
+                    } catch (issueError) {
+                        console.warn('Could not update issues from data:', issueError);
+                    }
+                    
+                    console.log('Completed filter population from database');
+                }
+                
+            } catch (error) {
+                console.error('Error populating filters:', error);
+                // Fallback to metadata if query fails
+                if (metadata && metadata.unique_values) {
+                    populateSelect('stateFilter', metadata.unique_values.states || []);
+                    populateSelect('issueFilter', metadata.unique_values.issues || []);
+                    console.log('Using fallback metadata for filters');
+                }
+            }
+        }
+
+        // Helper to populate select elements
+        function populateSelect(selectId, options) {
+            const select = document.getElementById(selectId);
+            // Keep the "All" option
+            const allOption = select.querySelector('option[value="all"]');
+            select.innerHTML = '';
+            select.appendChild(allOption);
+            
+            options.forEach(option => {
+                if (option) {  // Skip null/empty values
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.textContent = option;
+                    select.appendChild(optionElement);
+                }
+            });
+        }
+
+        // Helper to populate autocomplete member filter
+        let allMembers = [];
+        let selectedMember = 'all';
+        
+        function populateSelectWithAutocomplete(inputId, options) {
+            allMembers = ['All Members', ...options];
+            const input = document.getElementById(inputId);
+            const dropdown = document.getElementById('memberDropdown');
+            
+            // Set up autocomplete functionality
+            input.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                if (query === '' || query === 'all members') {
+                    showDropdown(allMembers.slice(0, 10), dropdown, input);
+                } else {
+                    const filtered = allMembers.filter(member => 
+                        member.toLowerCase().includes(query)
+                    ).slice(0, 10); // Limit to 10 results
+                    showDropdown(filtered, dropdown, input);
+                }
+            });
+            
+            input.addEventListener('focus', function() {
+                // Always show dropdown on focus, like a real dropdown
+                if (this.value === '' || this.value === 'All Members') {
+                    showDropdown(allMembers.slice(0, 10), dropdown, input);
+                } else {
+                    // Show filtered results
+                    const query = this.value.toLowerCase();
+                    const filtered = allMembers.filter(member => 
+                        member.toLowerCase().includes(query)
+                    ).slice(0, 10);
+                    showDropdown(filtered, dropdown, input);
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                // Delay hiding to allow for clicks
+                setTimeout(() => {
+                    dropdown.style.display = 'none';
+                    // Reset to "All Members" if empty, like a dropdown would
+                    if (this.value === '') {
+                        this.placeholder = 'All Members';
+                        selectedMember = 'all';
+                    }
+                }, 150);
+            });
+            
+            // Handle keyboard navigation
+            input.addEventListener('keydown', function(e) {
+                const items = dropdown.querySelectorAll('.autocomplete-item');
+                const highlighted = dropdown.querySelector('.autocomplete-item.highlighted');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const next = highlighted ? highlighted.nextElementSibling : items[0];
+                    if (next) {
+                        if (highlighted) highlighted.classList.remove('highlighted');
+                        next.classList.add('highlighted');
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const prev = highlighted ? highlighted.previousElementSibling : items[items.length - 1];
+                    if (prev) {
+                        if (highlighted) highlighted.classList.remove('highlighted');
+                        prev.classList.add('highlighted');
+                    }
+                } else if (e.key === 'Enter' && highlighted) {
+                    e.preventDefault();
+                    selectMember(highlighted.textContent, input, dropdown);
+                }
+            });
+        }
+        
+        function showDropdown(items, dropdown, input) {
+            dropdown.innerHTML = '';
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                div.textContent = item;
+                div.addEventListener('click', () => selectMember(item, input, dropdown));
+                dropdown.appendChild(div);
+            });
+            dropdown.style.display = items.length > 0 ? 'block' : 'none';
+        }
+        
+        function selectMember(member, input, dropdown) {
+            if (member === 'All Members') {
+                input.value = '';
+                input.placeholder = 'All Members';
+                selectedMember = 'all';
+            } else {
+                input.value = member;
+                selectedMember = member;
+            }
+            dropdown.style.display = 'none';
+            applyFilters(); // Trigger filter update
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Filter change events (memberFilter handled separately in autocomplete)
+            ['chamberFilter', 'partyFilter', 'stateFilter', 'issueFilter', 
+             'startDate', 'endDate'].forEach(id => {
+                document.getElementById(id).addEventListener('change', applyFilters);
+            });
+            
+            // Search box with debouncing and user feedback
+            document.getElementById('searchBox').addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const searchTerm = this.value.trim();
+                
+                // Provide user feedback for search
+                if (searchTerm.length > 0 && searchTerm.length < 3) {
+                    // Show hint for short searches
+                    return;
+                }
+                
+                // Longer delay for search queries to reduce server load
+                const delay = searchTerm.length > 0 ? 500 : 100;
+                searchTimeout = setTimeout(applyFilters, delay);
+            });
+            
+            // Toggle buttons
+            document.getElementById('positiveBtn').addEventListener('click', function() {
+                currentSort = 'positive';
+                document.getElementById('positiveBtn').classList.add('active');
+                document.getElementById('negativeBtn').classList.remove('active');
+                updateResults();
+            });
+
+            document.getElementById('negativeBtn').addEventListener('click', function() {
+                currentSort = 'negative';
+                document.getElementById('negativeBtn').classList.add('active');
+                document.getElementById('positiveBtn').classList.remove('active');
+                updateResults();
+            });
+        }
+
+        // Build WHERE clause from filters
+        function buildWhereClause() {
+            const conditions = [];
+            
+            // Chamber filter
+            const chamber = document.getElementById('chamberFilter').value;
+            if (chamber !== 'all') {
+                conditions.push(`chamber = '${chamber}'`);
+            }
+            
+            // Party filter
+            const party = document.getElementById('partyFilter').value;
+            if (party !== 'all') {
+                conditions.push(`party_name = '${party}'`);
+            }
+            
+            // State filter
+            const state = document.getElementById('stateFilter').value;
+            if (state !== 'all') {
+                conditions.push(`us_state_id = '${state}'`);
+            }
+            
+            // Member filter (using selectedMember variable for autocomplete)
+            if (selectedMember !== 'all') {
+                conditions.push(`display_name = '${selectedMember.replace(/'/g, "''")}'`);
+            }
+            
+            // Issue filter
+            const issue = document.getElementById('issueFilter').value;
+            if (issue !== 'all') {
+                conditions.push(`issue_name = '${issue.replace(/'/g, "''")}'`);
+            }
+            
+            // Date filters
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            if (startDate) {
+                conditions.push(`pub_date >= '${startDate}'`);
+            }
+            if (endDate) {
+                conditions.push(`pub_date <= '${endDate}'`);
+            }
+            
+            // Search filter - optimized for performance
+            const searchTerm = document.getElementById('searchBox').value.trim();
+            if (searchTerm) {
+                // Use more efficient search with word boundaries for better performance
+                const escapedTerm = searchTerm.toLowerCase().replace(/'/g, "''");
+                conditions.push(`LOWER(content) LIKE '%${escapedTerm}%'`);
+            }
+            
+            return conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
+        }
+
+        // Apply filters and update visualizations
+        async function applyFilters() {
+            try {
+                queryStartTime = performance.now();
+                document.getElementById('chartLoading').style.display = 'flex';
+                updateLoadingText('Checking data files...');
+                
+                // Load relevant files based on current date filter
+                await loadRelevantFiles();
+                
+                updateLoadingText('Querying data...');
+                const whereClause = buildWhereClause();
+                console.log('WHERE clause:', whereClause || 'No filters applied');
+                
+                // Get daily averages as scatter + rolling averages as lines (Option A)
+                console.log('Fetching daily sentiment data - much faster approach...');
+                
+                // Get daily averages for scatter plot dots
+                const dailyDotsQuery = `
+                    SELECT 
+                        pub_date as date,
+                        party_name,
+                        AVG(CAST(score AS DOUBLE)) as daily_avg_score,
+                        COUNT(*) as daily_tweet_count
+                    FROM tweets
+                    ${whereClause}
+                    GROUP BY pub_date, party_name
+                    ORDER BY pub_date, party_name
+                `;
+                
+                // Get rolling averages for smooth trend lines
+                const rollingAvgQuery = `
+                    WITH daily_sentiment AS (
+                        SELECT 
+                            pub_date as date,
+                            party_name,
+                            AVG(CAST(score AS DOUBLE)) as daily_avg_score,
+                            COUNT(*) as daily_tweet_count
+                        FROM tweets
+                        ${whereClause}
+                        GROUP BY pub_date, party_name
+                    )
+                    SELECT 
+                        date,
+                        party_name,
+                        AVG(daily_avg_score) OVER (
+                            PARTITION BY party_name 
+                            ORDER BY date 
+                            ROWS BETWEEN 4 PRECEDING AND CURRENT ROW
+                        ) as avg_score,
+                        SUM(daily_tweet_count) OVER (
+                            PARTITION BY party_name 
+                            ORDER BY date 
+                            ROWS BETWEEN 4 PRECEDING AND CURRENT ROW
+                        ) as tweet_count
+                    FROM daily_sentiment
+                    ORDER BY date, party_name
+                `;
+                
+                console.log('Executing daily dots query...');
+                try {
+                    // Execute both queries
+                    const [dailyResult, rollingResult] = await Promise.all([
+                        conn.query(dailyDotsQuery),
+                        conn.query(rollingAvgQuery)
+                    ]);
+                    
+                    console.log('Both queries completed successfully');
+                    await updateChartWithDailyDots(dailyResult, rollingResult);
+                } catch (chartError) {
+                    console.error('Chart query failed:', chartError);
+                    console.log('Falling back to rolling average only...');
+                    
+                    // Fallback to just rolling averages if individual tweets fail
+                    try {
+                        const rollingResult = await conn.query(rollingAvgQuery);
+                        await updateChart(rollingResult);
+                    } catch (fallbackError) {
+                        console.error('Fallback also failed:', fallbackError);
+                        // Show empty chart
+                        chart.data.labels = [];
+                        chart.data.datasets.forEach(dataset => dataset.data = []);
+                        chart.update();
+                    }
+                }
+                
+                // Get member statistics - optimized query  
+                const memberQuery = `
+                    SELECT 
+                        display_name,
+                        party_name,
+                        chamber,
+                        us_state_id,
+                        person_id,
+                        AVG(CAST(score AS DOUBLE)) as avg_score,
+                        COUNT(*) as tweet_count
+                    FROM tweets
+                    ${whereClause}
+                    GROUP BY display_name, party_name, chamber, us_state_id, person_id
+                    HAVING COUNT(*) >= 1
+                `;
+                
+                const memberResult = await conn.query(memberQuery);
+                await updateMemberStats(memberResult);
+                
+                // Get summary statistics - optimized query
+                const summaryQuery = `
+                    SELECT 
+                        COUNT(*) as total_tweets,
+                        AVG(CAST(score AS DOUBLE)) as avg_sentiment,
+                        COUNT(DISTINCT display_name) as unique_members,
+                        MIN(pub_date) as min_date,
+                        MAX(pub_date) as max_date
+                    FROM tweets
+                    ${whereClause}
+                `;
+                
+                const summaryResult = await conn.query(summaryQuery);
+                await updateSummaryStats(summaryResult);
+                
+                // Performance logging
+                const queryTime = performance.now() - queryStartTime;
+                console.log(`Query completed in ${queryTime.toFixed(0)}ms`);
+                
+                document.getElementById('chartLoading').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error applying filters:', error);
+                document.getElementById('chartLoading').style.display = 'none';
+            }
+        }
+
+        // Update chart with daily dots + rolling averages (Option A)
+        async function updateChartWithDailyDots(dailyResult, rollingResult) {
+            const dailyTable = await dailyResult;
+            const rollingTable = await rollingResult;
+            
+            console.log(`Daily averages: ${dailyTable.numRows} rows`);
+            console.log(`Rolling averages: ${rollingTable.numRows} rows`);
+            
+            // This should be much more manageable (~365-1000 points max)
+            console.log(`Performance: ~${dailyTable.numRows} daily points (much better than individual tweets)`);
+            
+            // Create date mapping for consistent x-axis
+            const allDates = new Set();
+            
+            // Collect all unique dates
+            for (let i = 0; i < dailyTable.numRows; i++) {
+                const row = dailyTable.get(i);
+                allDates.add(row?.date);
+            }
+            for (let i = 0; i < rollingTable.numRows; i++) {
+                const row = rollingTable.get(i);
+                allDates.add(row?.date);
+            }
+            
+            const sortedDates = Array.from(allDates).sort();
+            const dateToIndex = {};
+            sortedDates.forEach((date, index) => {
+                dateToIndex[date] = index;
+            });
+            
+            // Process daily averages for scatter plot dots
+            const scatterData = {
+                Democrat: [],
+                Republican: [],
+                Independent: []
+            };
+            
+            // Store tweet counts for tooltips
+            const tweetCounts = {};
+            
+            for (let i = 0; i < dailyTable.numRows; i++) {
+                const row = dailyTable.get(i);
+                const dateIndex = dateToIndex[row?.date];
+                const party = row?.party_name;
+                const score = Number(row?.daily_avg_score);
+                const count = Number(row?.daily_tweet_count);
+                
+                if (scatterData[party] && dateIndex !== undefined) {
+                    scatterData[party].push({
+                        x: dateIndex,
+                        y: score
+                    });
+                    
+                    // Store tweet count for tooltip
+                    tweetCounts[`${dateIndex}_${party}`] = count;
+                }
+            }
+            
+            // Process rolling averages for line chart
+            const lineData = {};
+            for (let i = 0; i < rollingTable.numRows; i++) {
+                const row = rollingTable.get(i);
+                const dateIndex = dateToIndex[row?.date];
+                const party = row?.party_name;
+                const score = Number(row?.avg_score);
+                
+                if (dateIndex !== undefined) {
+                    if (!lineData[party]) lineData[party] = [];
+                    lineData[party].push({
+                        x: dateIndex,
+                        y: score
+                    });
+                }
+            }
+            
+            // Calculate combined line
+            const combinedData = [];
+            const uniqueDateIndices = new Set();
+            Object.values(lineData).forEach(partyData => {
+                partyData.forEach(point => uniqueDateIndices.add(point.x));
+            });
+            
+            Array.from(uniqueDateIndices).sort((a, b) => a - b).forEach(dateIndex => {
+                const democratPoint = lineData.Democrat?.find(p => p.x === dateIndex);
+                const republicanPoint = lineData.Republican?.find(p => p.x === dateIndex);
+                
+                if (democratPoint && republicanPoint) {
+                    combinedData.push({
+                        x: dateIndex,
+                        y: (democratPoint.y + republicanPoint.y) / 2
+                    });
+                }
+            });
+            
+            // Update chart datasets
+            chart.data.datasets[0].data = scatterData.Democrat || [];     // Democratic scatter
+            chart.data.datasets[1].data = scatterData.Republican || [];   // Republican scatter  
+            chart.data.datasets[2].data = scatterData.Independent || [];  // Independent scatter
+            chart.data.datasets[3].data = lineData.Democrat || [];        // Democratic line
+            chart.data.datasets[4].data = lineData.Republican || [];      // Republican line
+            chart.data.datasets[5].data = lineData.Independent || [];     // Independent line
+            chart.data.datasets[6].data = combinedData;                   // Combined line
+            
+            // Update labels for x-axis
+            chart.data.labels = sortedDates.map(date => formatDate(new Date(date)));
+            
+            // Store original dates and tweet counts for tooltips
+            chart.data.originalDates = sortedDates;
+            chart.data.tweetCounts = tweetCounts;
+            
+            chart.update();
+            console.log('Scatter chart updated successfully');
+        }
+
+        // Update chart with query results (fallback function)
+        async function updateChart(result) {
+            const table = await result;
+            const data = [];
+            
+            console.log(`Chart data: ${table.numRows} rows returned`);
+            
+            if (table.numRows === 0) {
+                console.warn('No data returned for chart');
+                // Set empty chart
+                chart.data.labels = [];
+                chart.data.datasets.forEach(dataset => dataset.data = []);
+                chart.update();
+                return;
+            }
+            
+            for (let i = 0; i < table.numRows; i++) {
+                const row = table.get(i);
+                data.push({
+                    date: row?.date,
+                    party_name: row?.party_name,
+                    avg_score: Number(row?.avg_score),
+                    tweet_count: Number(row?.tweet_count)
+                });
+            }
+            
+            console.log('Sample chart data:', data.slice(0, 3));
+            
+            // Group by date and party
+            const chartData = {};
+            data.forEach(row => {
+                const date = row.date;
+                if (!chartData[date]) {
+                    chartData[date] = {
+                        Democrat: { sum: 0, count: 0 },
+                        Republican: { sum: 0, count: 0 },
+                        Independent: { sum: 0, count: 0 },
+                        Combined: { sum: 0, count: 0 }
+                    };
+                }
+                
+                if (chartData[date][row.party_name]) {
+                    chartData[date][row.party_name].sum = Number(row.avg_score) * Number(row.tweet_count);
+                    chartData[date][row.party_name].count = Number(row.tweet_count);
+                }
+                chartData[date].Combined.sum += Number(row.avg_score) * Number(row.tweet_count);
+                chartData[date].Combined.count += Number(row.tweet_count);
+            });
+            
+            // Prepare data for chart
+            const dates = Object.keys(chartData).sort();
+            const labels = dates.map(date => formatDate(new Date(date)));
+            
+            const democratData = dates.map(date => 
+                chartData[date].Democrat.count > 0 ? 
+                    chartData[date].Democrat.sum / chartData[date].Democrat.count : null
+            );
+            
+            const republicanData = dates.map(date => 
+                chartData[date].Republican.count > 0 ? 
+                    chartData[date].Republican.sum / chartData[date].Republican.count : null
+            );
+            
+            const independentData = dates.map(date => 
+                chartData[date].Independent.count > 0 ? 
+                    chartData[date].Independent.sum / chartData[date].Independent.count : null
+            );
+            
+            const combinedData = dates.map(date => 
+                chartData[date].Combined.count > 0 ? 
+                    chartData[date].Combined.sum / chartData[date].Combined.count : null
+            );
+            
+            // Update chart
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = democratData;
+            chart.data.datasets[1].data = republicanData;
+            chart.data.datasets[2].data = independentData;
+            chart.data.datasets[3].data = combinedData;
+            
+            // Adjust x-axis tick display based on number of data points
+            const numPoints = labels.length;
+            if (numPoints > 60) {
+                chart.options.scales.x.ticks.maxTicksLimit = 12;
+            } else if (numPoints > 30) {
+                chart.options.scales.x.ticks.maxTicksLimit = 15;
+            } else {
+                chart.options.scales.x.ticks.maxTicksLimit = numPoints;
+            }
+            
+            chart.update();
+        }
+
+        // Update member statistics
+        let memberStats = [];
+        async function updateMemberStats(result) {
+            const table = await result;
+            memberStats = [];
+            
+            for (let i = 0; i < table.numRows; i++) {
+                const row = table.get(i);
+                memberStats.push({
+                    display_name: row?.display_name,
+                    party_name: row?.party_name,
+                    chamber: row?.chamber,
+                    us_state_id: row?.us_state_id,
+                    person_id: row?.person_id,
+                    avg_score: Number(row?.avg_score),
+                    tweet_count: Number(row?.tweet_count)
+                });
+            }
+            
+            updateResults();
+        }
+
+        // Update results table
+        function updateResults() {
+            const sortedMembers = [...memberStats].sort((a, b) => {
+                return currentSort === 'positive' ? b.avg_score - a.avg_score : a.avg_score - b.avg_score;
+            });
+            
+            const resultsHtml = sortedMembers.map((member, index) => {
+                const scoreClass = member.avg_score > 0.1 ? 'score-positive' : 
+                                 member.avg_score < -0.1 ? 'score-negative' : 'score-neutral';
+                
+                // Extract clean name from display name
+                const nameParts = member.display_name.split(' ');
+                const cleanName = nameParts.slice(1, -1).join(' ');
+                
+                // Create Legis1 URL
+                const legis1Url = `https://app.legis1.com/lawmaker/detail?id=${member.person_id}#communications`;
+                
+                return `
+                    <div class="member-row">
+                        <div class="member-rank">${index + 1}</div>
+                        <div class="member-info">
+                            <a href="${legis1Url}" target="_blank" class="member-name">${cleanName}</a>
+                            <div class="member-details">
+                                <span class="party-${member.party_name.toLowerCase()}">${member.party_name}</span> • 
+                                ${member.us_state_id}
+                            </div>
+                        </div>
+                        <div class="member-score">
+                            <div class="score-value ${scoreClass}">${member.avg_score.toFixed(3)}</div>
+                            <div class="tweet-count">${member.tweet_count} tweets</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('resultsTable').innerHTML = resultsHtml || '<div style="text-align: center; padding: 20px; color: #999;">No data to display</div>';
+        }
+
+        // Update summary statistics
+        async function updateSummaryStats(result) {
+            const table = await result;
+            const data = table.get(0);
+            
+            document.getElementById('totalTweets').textContent = Number(data?.total_tweets || 0).toLocaleString();
+            
+            const avgSentiment = data?.avg_sentiment ? Number(data.avg_sentiment).toFixed(3) : '0.000';
+            document.getElementById('avgSentiment').textContent = avgSentiment;
+            document.getElementById('avgSentiment').className = 'stat-value ' + 
+                (parseFloat(avgSentiment) > 0.1 ? 'score-positive' : 
+                 parseFloat(avgSentiment) < -0.1 ? 'score-negative' : 'score-neutral');
+            
+            document.getElementById('uniqueMembers').textContent = Number(data?.unique_members || 0);
+            
+            if (data?.min_date && data?.max_date) {
+                const minDate = new Date(data.min_date);
+                const maxDate = new Date(data.max_date);
+                const dateRange = `${(minDate.getMonth() + 1)}/${minDate.getDate()}/${minDate.getFullYear()} - ${(maxDate.getMonth() + 1)}/${maxDate.getDate()}/${maxDate.getFullYear()}`;
+                document.getElementById('dateRange').textContent = dateRange;
+            } else {
+                document.getElementById('dateRange').textContent = '-';
+            }
+        }
+
+        // Initialize everything when page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            initializeDates();
+            initializeDuckDB();
+        });
+    </script>
+</body>
+</html>

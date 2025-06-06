@@ -1,0 +1,3116 @@
+{
+  "total_rows": 847634,
+  "date_range": {
+    "start": "2023-01-02",
+    "end": "2025-06-02"
+  },
+  "files": [
+    {
+      "file": "tweets_2023_Q1.parquet",
+      "rows": 24401,
+      "size_mb": 2.09,
+      "year": 2023,
+      "quarter": 1,
+      "start_date": "2023-01-02",
+      "end_date": "2023-03-31"
+    },
+    {
+      "file": "tweets_2023_Q2.parquet",
+      "rows": 30700,
+      "size_mb": 2.75,
+      "year": 2023,
+      "quarter": 2,
+      "start_date": "2023-04-01",
+      "end_date": "2023-06-30"
+    },
+    {
+      "file": "tweets_2023_Q3.parquet",
+      "rows": 45779,
+      "size_mb": 4.25,
+      "year": 2023,
+      "quarter": 3,
+      "start_date": "2023-07-01",
+      "end_date": "2023-09-30"
+    },
+    {
+      "file": "tweets_2023_Q4_M10.parquet",
+      "rows": 34931,
+      "size_mb": 3.35,
+      "year": 2023,
+      "quarter": 4,
+      "month": 10,
+      "start_date": "2023-10-01",
+      "end_date": "2023-10-31"
+    },
+    {
+      "file": "tweets_2023_Q4_M11.parquet",
+      "rows": 39360,
+      "size_mb": 3.89,
+      "year": 2023,
+      "quarter": 4,
+      "month": 11,
+      "start_date": "2023-11-01",
+      "end_date": "2023-11-30"
+    },
+    {
+      "file": "tweets_2023_Q4_M12.parquet",
+      "rows": 28823,
+      "size_mb": 2.89,
+      "year": 2023,
+      "quarter": 4,
+      "month": 12,
+      "start_date": "2023-12-01",
+      "end_date": "2023-12-31"
+    },
+    {
+      "file": "tweets_2024_Q1_M01.parquet",
+      "rows": 47177,
+      "size_mb": 4.61,
+      "year": 2024,
+      "quarter": 1,
+      "month": 1,
+      "start_date": "2024-01-01",
+      "end_date": "2024-01-31"
+    },
+    {
+      "file": "tweets_2024_Q1_M02.parquet",
+      "rows": 50869,
+      "size_mb": 4.95,
+      "year": 2024,
+      "quarter": 1,
+      "month": 2,
+      "start_date": "2024-02-01",
+      "end_date": "2024-02-29"
+    },
+    {
+      "file": "tweets_2024_Q1_M03.parquet",
+      "rows": 53104,
+      "size_mb": 5.13,
+      "year": 2024,
+      "quarter": 1,
+      "month": 3,
+      "start_date": "2024-03-01",
+      "end_date": "2024-03-31"
+    },
+    {
+      "file": "tweets_2024_Q2_M04.parquet",
+      "rows": 36828,
+      "size_mb": 3.72,
+      "year": 2024,
+      "quarter": 2,
+      "month": 4,
+      "start_date": "2024-04-01",
+      "end_date": "2024-04-30"
+    },
+    {
+      "file": "tweets_2024_Q2_M05.parquet",
+      "rows": 40918,
+      "size_mb": 3.68,
+      "year": 2024,
+      "quarter": 2,
+      "month": 5,
+      "start_date": "2024-05-01",
+      "end_date": "2024-05-31"
+    },
+    {
+      "file": "tweets_2024_Q2_M06.parquet",
+      "rows": 32205,
+      "size_mb": 2.69,
+      "year": 2024,
+      "quarter": 2,
+      "month": 6,
+      "start_date": "2024-06-01",
+      "end_date": "2024-06-30"
+    },
+    {
+      "file": "tweets_2024_Q3.parquet",
+      "rows": 58574,
+      "size_mb": 6.29,
+      "year": 2024,
+      "quarter": 3,
+      "start_date": "2024-07-01",
+      "end_date": "2024-09-30"
+    },
+    {
+      "file": "tweets_2024_Q4_M10.parquet",
+      "rows": 37454,
+      "size_mb": 3.48,
+      "year": 2024,
+      "quarter": 4,
+      "month": 10,
+      "start_date": "2024-10-01",
+      "end_date": "2024-10-31"
+    },
+    {
+      "file": "tweets_2024_Q4_M11.parquet",
+      "rows": 26351,
+      "size_mb": 2.17,
+      "year": 2024,
+      "quarter": 4,
+      "month": 11,
+      "start_date": "2024-11-01",
+      "end_date": "2024-11-30"
+    },
+    {
+      "file": "tweets_2024_Q4_M12.parquet",
+      "rows": 35941,
+      "size_mb": 3.03,
+      "year": 2024,
+      "quarter": 4,
+      "month": 12,
+      "start_date": "2024-12-01",
+      "end_date": "2024-12-31"
+    },
+    {
+      "file": "tweets_2025_Q1_M01.parquet",
+      "rows": 55108,
+      "size_mb": 4.47,
+      "year": 2025,
+      "quarter": 1,
+      "month": 1,
+      "start_date": "2025-01-01",
+      "end_date": "2025-01-31"
+    },
+    {
+      "file": "tweets_2025_Q1_M02.parquet",
+      "rows": 57182,
+      "size_mb": 4.66,
+      "year": 2025,
+      "quarter": 1,
+      "month": 2,
+      "start_date": "2025-02-01",
+      "end_date": "2025-02-28"
+    },
+    {
+      "file": "tweets_2025_Q1_M03.parquet",
+      "rows": 22545,
+      "size_mb": 1.84,
+      "year": 2025,
+      "quarter": 1,
+      "month": 3,
+      "start_date": "2025-03-01",
+      "end_date": "2025-03-30"
+    },
+    {
+      "file": "tweets_2025_Q2_M04.parquet",
+      "rows": 34836,
+      "size_mb": 2.92,
+      "year": 2025,
+      "quarter": 2,
+      "month": 4,
+      "start_date": "2025-04-01",
+      "end_date": "2025-04-30"
+    },
+    {
+      "file": "tweets_2025_Q2_M05.parquet",
+      "rows": 53715,
+      "size_mb": 4.58,
+      "year": 2025,
+      "quarter": 2,
+      "month": 5,
+      "start_date": "2025-05-01",
+      "end_date": "2025-05-31"
+    },
+    {
+      "file": "tweets_2025_Q2_M06.parquet",
+      "rows": 833,
+      "size_mb": 0.09,
+      "year": 2025,
+      "quarter": 2,
+      "month": 6,
+      "start_date": "2025-06-01",
+      "end_date": "2025-06-02"
+    }
+  ],
+  "columns": [
+    "comm_content_id",
+    "pub_date",
+    "chamber",
+    "content",
+    "person_id",
+    "title",
+    "first_name",
+    "last_name",
+    "display_name",
+    "party_name",
+    "us_state_id",
+    "issue_name",
+    "score",
+    "pub_date_parsed",
+    "year",
+    "quarter"
+  ],
+  "unique_values": {
+    "chambers": [
+      "House",
+      "Senate"
+    ],
+    "parties": [
+      "Democrat",
+      "Democrat, Republican",
+      "Independent",
+      "Republican"
+    ],
+    "states": [
+      "AK",
+      "AL",
+      "AR",
+      "AS",
+      "AZ",
+      "CA",
+      "CO",
+      "CT",
+      "DC",
+      "DE",
+      "FL",
+      "GA",
+      "GU",
+      "HI",
+      "IA",
+      "ID",
+      "IL",
+      "IN",
+      "KS",
+      "KY",
+      "LA",
+      "MA",
+      "MD",
+      "ME",
+      "MI",
+      "MN",
+      "MO",
+      "MS",
+      "MT",
+      "NC",
+      "ND",
+      "NE",
+      "NH",
+      "NJ",
+      "NM",
+      "NV",
+      "NY",
+      "OH",
+      "OK",
+      "OR",
+      "PA",
+      "RI",
+      "SC",
+      "SD",
+      "TN",
+      "TX",
+      "UT",
+      "VA",
+      "VI",
+      "VT",
+      "WA",
+      "WI",
+      "WV",
+      "WY"
+    ],
+    "issues": [
+      "Agriculture",
+      "Banking, Finance, and Domestic Commerce",
+      "Civil Rights, Minority Issues, and Civil Liberties",
+      "Community Development and Housing",
+      "Culture",
+      "Defense",
+      "Education",
+      "Energy",
+      "Environment",
+      "Foreign Trade",
+      "Government Operations",
+      "Health",
+      "Immigration",
+      "International Affairs and Foreign Aid",
+      "Labor and Employment",
+      "Law, Crime, and Family Issues",
+      "Macroeconomics",
+      "Public Lands and Water Management",
+      "Social Welfare",
+      "Space, Science, Technology, and Communications",
+      "Transportation"
+    ],
+    "members": 456
+  },
+  "member_list": [
+    {
+      "person_id": 2968,
+      "display_name": "Rep. Josh Brecheen R-OK-2",
+      "chamber": "House",
+      "us_state_id": "OK"
+    },
+    {
+      "person_id": 3265,
+      "display_name": "Rep. Chip Roy R-TX-21",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 3787,
+      "display_name": "Rep. David Rouzer R-NC-7",
+      "chamber": "House",
+      "us_state_id": "NC"
+    },
+    {
+      "person_id": 5061,
+      "display_name": "Rep. Ayanna Pressley D-MA-7",
+      "chamber": "House",
+      "us_state_id": "MA"
+    },
+    {
+      "person_id": 6774,
+      "display_name": "Sen. Katie Britt R-AL-2",
+      "chamber": "Senate",
+      "us_state_id": "AL"
+    },
+    {
+      "person_id": 15290,
+      "display_name": "Rep. Lori Trahan D-MA-3",
+      "chamber": "House",
+      "us_state_id": "MA"
+    },
+    {
+      "person_id": 16683,
+      "display_name": "Rep. Nick Langworthy R-NY-23",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 16857,
+      "display_name": "Rep. Young Kim R-CA-40",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 22560,
+      "display_name": "Rep. Marlin Stutzman R-IN-3",
+      "chamber": "House",
+      "us_state_id": "IN"
+    },
+    {
+      "person_id": 24817,
+      "display_name": "Rep. William Timmons R-SC-4",
+      "chamber": "House",
+      "us_state_id": "SC"
+    },
+    {
+      "person_id": 25648,
+      "display_name": "Sen. Andy Kim D-NJ-1",
+      "chamber": "House",
+      "us_state_id": "NJ"
+    },
+    {
+      "person_id": 25648,
+      "display_name": "Sen. Andy Kim D-NJ-1",
+      "chamber": "Senate",
+      "us_state_id": "NJ"
+    },
+    {
+      "person_id": 26913,
+      "display_name": "Del. Amata Radewagen R-AS-1",
+      "chamber": "House",
+      "us_state_id": "AS"
+    },
+    {
+      "person_id": 27589,
+      "display_name": "Rep. Marc Veasey D-TX-33",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 32319,
+      "display_name": "Rep. Bryan Steil R-WI-1",
+      "chamber": "House",
+      "us_state_id": "WI"
+    },
+    {
+      "person_id": 34364,
+      "display_name": "Sen. Jon Ossoff D-GA-1",
+      "chamber": "Senate",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 39781,
+      "display_name": "Rep. Morgan McGarvey D-KY-3",
+      "chamber": "House",
+      "us_state_id": "KY"
+    },
+    {
+      "person_id": 41337,
+      "display_name": "Rep. Jimmy Gomez D-CA-34",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 43694,
+      "display_name": "Rep. Richard Hudson R-NC-9",
+      "chamber": "House",
+      "us_state_id": "NC"
+    },
+    {
+      "person_id": 51132,
+      "display_name": "Rep. Darrell Issa R-CA-48",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 51134,
+      "display_name": "Rep. Linda S\u00e1nchez D-CA-38",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 51135,
+      "display_name": "Rep. Pete Sessions R-TX-17",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 51160,
+      "display_name": "Sen. Maria Cantwell D-WA-1",
+      "chamber": "Senate",
+      "us_state_id": "WA"
+    },
+    {
+      "person_id": 51168,
+      "display_name": "Sen. Susan Collins R-ME-1",
+      "chamber": "Senate",
+      "us_state_id": "ME"
+    },
+    {
+      "person_id": 51170,
+      "display_name": "Sen. John Cornyn R-TX-1",
+      "chamber": "Senate",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 51173,
+      "display_name": "Sen. Mike Crapo R-ID-2",
+      "chamber": "Senate",
+      "us_state_id": "ID"
+    },
+    {
+      "person_id": 51180,
+      "display_name": "Sen. Dick Durbin D-IL-1",
+      "chamber": "Senate",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 51185,
+      "display_name": "Rep. Adrian Smith R-NE-3",
+      "chamber": "House",
+      "us_state_id": "NE"
+    },
+    {
+      "person_id": 51186,
+      "display_name": "Sen. Lindsey Graham R-SC-2",
+      "chamber": "Senate",
+      "us_state_id": "SC"
+    },
+    {
+      "person_id": 51187,
+      "display_name": "Sen. Chuck Grassley R-IA-1",
+      "chamber": "Senate",
+      "us_state_id": "IA"
+    },
+    {
+      "person_id": 51207,
+      "display_name": "Rep. Tim Walberg R-MI-5",
+      "chamber": "House",
+      "us_state_id": "MI"
+    },
+    {
+      "person_id": 51216,
+      "display_name": "Sen. Mitch McConnell R-KY-2",
+      "chamber": "Senate",
+      "us_state_id": "KY"
+    },
+    {
+      "person_id": 51218,
+      "display_name": "Sen. Lisa Murkowski R-AK",
+      "chamber": "Senate",
+      "us_state_id": "AK"
+    },
+    {
+      "person_id": 51219,
+      "display_name": "Sen. Patty Murray D-WA-2",
+      "chamber": "Senate",
+      "us_state_id": "WA"
+    },
+    {
+      "person_id": 51223,
+      "display_name": "Sen. Jack Reed D-RI-1",
+      "chamber": "Senate",
+      "us_state_id": "RI"
+    },
+    {
+      "person_id": 51230,
+      "display_name": "Sen. Peter Welch D-VT",
+      "chamber": "Senate",
+      "us_state_id": "VT"
+    },
+    {
+      "person_id": 51231,
+      "display_name": "Sen. Chuck Schumer D-NY-2",
+      "chamber": "Senate",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 51242,
+      "display_name": "Sen. John Thune R-SD",
+      "chamber": "Senate",
+      "us_state_id": "SD"
+    },
+    {
+      "person_id": 51247,
+      "display_name": "Sen. Ron Wyden D-OR-2",
+      "chamber": "Senate",
+      "us_state_id": "OR"
+    },
+    {
+      "person_id": 51250,
+      "display_name": "Rep. Robert Aderholt R-AL-4",
+      "chamber": "House",
+      "us_state_id": "AL"
+    },
+    {
+      "person_id": 51260,
+      "display_name": "Sen. Tammy Baldwin D-WI-2",
+      "chamber": "Senate",
+      "us_state_id": "WI"
+    },
+    {
+      "person_id": 51277,
+      "display_name": "Rep. Sanford Bishop D-GA-2",
+      "chamber": "House",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 51279,
+      "display_name": "Sen. Marsha Blackburn R-TN-2",
+      "chamber": "Senate",
+      "us_state_id": "TN"
+    },
+    {
+      "person_id": 51287,
+      "display_name": "Sen. John Boozman R-AR-1",
+      "chamber": "Senate",
+      "us_state_id": "AR"
+    },
+    {
+      "person_id": 51306,
+      "display_name": "Rep. Ken Calvert R-CA-41",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 51310,
+      "display_name": "Sen. Shelley Moore Capito R-WV-2",
+      "chamber": "Senate",
+      "us_state_id": "WV"
+    },
+    {
+      "person_id": 51316,
+      "display_name": "Rep. John Carter R-TX-31",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 51318,
+      "display_name": "Rep. Ed Case D-HI-1",
+      "chamber": "House",
+      "us_state_id": "HI"
+    },
+    {
+      "person_id": 51324,
+      "display_name": "Rep. Emanuel Cleaver D-MO-5",
+      "chamber": "House",
+      "us_state_id": "MO"
+    },
+    {
+      "person_id": 51325,
+      "display_name": "Rep. Jim Clyburn D-SC-6",
+      "chamber": "House",
+      "us_state_id": "SC"
+    },
+    {
+      "person_id": 51327,
+      "display_name": "Rep. Tom Cole R-OK-4",
+      "chamber": "House",
+      "us_state_id": "OK"
+    },
+    {
+      "person_id": 51331,
+      "display_name": "Rep. Jim Costa D-CA-21",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 51338,
+      "display_name": "Rep. Henry Cuellar D-TX-28",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 51341,
+      "display_name": "Rep. Danny Davis D-IL-7",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 51349,
+      "display_name": "Rep. Diana DeGette D-CO-1",
+      "chamber": "House",
+      "us_state_id": "CO"
+    },
+    {
+      "person_id": 51351,
+      "display_name": "Rep. Rosa DeLauro D-CT-3",
+      "chamber": "House",
+      "us_state_id": "CT"
+    },
+    {
+      "person_id": 51356,
+      "display_name": "Rep. Mario Diaz-Balart R-FL-26",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 51359,
+      "display_name": "Rep. Lloyd Doggett D-TX-37",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 51389,
+      "display_name": "Rep. Virginia Foxx R-NC-5",
+      "chamber": "House",
+      "us_state_id": "NC"
+    },
+    {
+      "person_id": 51407,
+      "display_name": "Rep. Sam Graves R-MO-6",
+      "chamber": "House",
+      "us_state_id": "MO"
+    },
+    {
+      "person_id": 51410,
+      "display_name": "Rep. Al Green D-TX-9",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 51411,
+      "display_name": "Rep. Ra\u00fal Grijalva D-AZ-7",
+      "chamber": "House",
+      "us_state_id": "AZ"
+    },
+    {
+      "person_id": 51438,
+      "display_name": "Rep. Steny Hoyer D-MD-5",
+      "chamber": "House",
+      "us_state_id": "MD"
+    },
+    {
+      "person_id": 51457,
+      "display_name": "Rep. Marcy Kaptur D-OH-9",
+      "chamber": "House",
+      "us_state_id": "OH"
+    },
+    {
+      "person_id": 51476,
+      "display_name": "Rep. Rick Larsen D-WA-2",
+      "chamber": "House",
+      "us_state_id": "WA"
+    },
+    {
+      "person_id": 51477,
+      "display_name": "Rep. John Larson D-CT-1",
+      "chamber": "House",
+      "us_state_id": "CT"
+    },
+    {
+      "person_id": 51490,
+      "display_name": "Rep. Zoe Lofgren D-CA-18",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 51492,
+      "display_name": "Rep. Frank Lucas R-OK-3",
+      "chamber": "House",
+      "us_state_id": "OK"
+    },
+    {
+      "person_id": 51493,
+      "display_name": "Sen. Chris Murphy D-CT-2",
+      "chamber": "Senate",
+      "us_state_id": "CT"
+    },
+    {
+      "person_id": 51495,
+      "display_name": "Rep. Stephen Lynch D-MA-8",
+      "chamber": "House",
+      "us_state_id": "MA"
+    },
+    {
+      "person_id": 51500,
+      "display_name": "Sen. Ed Markey D-MA-2",
+      "chamber": "Senate",
+      "us_state_id": "MA"
+    },
+    {
+      "person_id": 51503,
+      "display_name": "Sen. Kirsten Gillibrand D-NY-1",
+      "chamber": "Senate",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 51504,
+      "display_name": "Rep. Doris Matsui D-CA-7",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 51507,
+      "display_name": "Rep. Michael McCaul R-TX-10",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 51508,
+      "display_name": "Rep. Betty McCollum D-MN-4",
+      "chamber": "House",
+      "us_state_id": "MN"
+    },
+    {
+      "person_id": 51512,
+      "display_name": "Rep. Jim McGovern D-MA-2",
+      "chamber": "House",
+      "us_state_id": "MA"
+    },
+    {
+      "person_id": 51521,
+      "display_name": "Rep. Gregory Meeks D-NY-5",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 51533,
+      "display_name": "Rep. Gwen Moore D-WI-4",
+      "chamber": "House",
+      "us_state_id": "WI"
+    },
+    {
+      "person_id": 51535,
+      "display_name": "Sen. Jerry Moran R-KS-1",
+      "chamber": "Senate",
+      "us_state_id": "KS"
+    },
+    {
+      "person_id": 51541,
+      "display_name": "Rep. Jerry Nadler D-NY-12",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 51543,
+      "display_name": "Rep. Richard Neal D-MA-1",
+      "chamber": "House",
+      "us_state_id": "MA"
+    },
+    {
+      "person_id": 51557,
+      "display_name": "Rep. Frank Pallone D-NJ-6",
+      "chamber": "House",
+      "us_state_id": "NJ"
+    },
+    {
+      "person_id": 51558,
+      "display_name": "Sen. Mazie Hirono D-HI-1",
+      "chamber": "Senate",
+      "us_state_id": "HI"
+    },
+    {
+      "person_id": 51564,
+      "display_name": "Rep. Nancy Pelosi D-CA-11",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 51589,
+      "display_name": "Rep. Hal Rogers R-KY-5",
+      "chamber": "House",
+      "us_state_id": "KY"
+    },
+    {
+      "person_id": 51605,
+      "display_name": "Sen. Bernie Sanders I-VT",
+      "chamber": "Senate",
+      "us_state_id": "VT"
+    },
+    {
+      "person_id": 51607,
+      "display_name": "Rep. Jan Schakowsky D-IL-9",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 51608,
+      "display_name": "Sen. Adam Schiff D-CA-2",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 51608,
+      "display_name": "Sen. Adam Schiff D-CA-2",
+      "chamber": "Senate",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 51612,
+      "display_name": "Rep. David Scott D-GA-13",
+      "chamber": "House",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 51613,
+      "display_name": "Rep. Bobby Scott D-VA-3",
+      "chamber": "House",
+      "us_state_id": "VA"
+    },
+    {
+      "person_id": 51618,
+      "display_name": "Rep. Brad Sherman D-CA-32",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 51623,
+      "display_name": "Rep. Mike Simpson R-ID-2",
+      "chamber": "House",
+      "us_state_id": "ID"
+    },
+    {
+      "person_id": 51626,
+      "display_name": "Rep. Adam Smith D-WA-9",
+      "chamber": "House",
+      "us_state_id": "WA"
+    },
+    {
+      "person_id": 51647,
+      "display_name": "Rep. Bennie Thompson D-MS-2",
+      "chamber": "House",
+      "us_state_id": "MS"
+    },
+    {
+      "person_id": 51648,
+      "display_name": "Rep. Mike Thompson D-CA-4",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 51654,
+      "display_name": "Rep. Mike Turner R-OH-10",
+      "chamber": "House",
+      "us_state_id": "OH"
+    },
+    {
+      "person_id": 51658,
+      "display_name": "Sen. Chris Van Hollen D-MD-2",
+      "chamber": "Senate",
+      "us_state_id": "MD"
+    },
+    {
+      "person_id": 51659,
+      "display_name": "Rep. Nydia Vel\u00e1zquez D-NY-7",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 51663,
+      "display_name": "Rep. Debbie Wasserman Schultz D-FL-25",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 51664,
+      "display_name": "Rep. Maxine Waters D-CA-43",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 51675,
+      "display_name": "Sen. Roger Wicker R-MS-2",
+      "chamber": "Senate",
+      "us_state_id": "MS"
+    },
+    {
+      "person_id": 51677,
+      "display_name": "Rep. Joe Wilson R-SC-2",
+      "chamber": "House",
+      "us_state_id": "SC"
+    },
+    {
+      "person_id": 51689,
+      "display_name": "Del. Eleanor Holmes Norton D-DC-1",
+      "chamber": "House",
+      "us_state_id": "DC"
+    },
+    {
+      "person_id": 51692,
+      "display_name": "Rep. Mike Rogers R-AL-3",
+      "chamber": "House",
+      "us_state_id": "AL"
+    },
+    {
+      "person_id": 51745,
+      "display_name": "Rep. Jim Jordan R-OH-4",
+      "chamber": "House",
+      "us_state_id": "OH"
+    },
+    {
+      "person_id": 51796,
+      "display_name": "Rep. Hank Johnson D-GA-4",
+      "chamber": "House",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 51842,
+      "display_name": "Sen. Amy Klobuchar D-MN-2",
+      "chamber": "Senate",
+      "us_state_id": "MN"
+    },
+    {
+      "person_id": 51844,
+      "display_name": "Sen. Sheldon Whitehouse D-RI-2",
+      "chamber": "Senate",
+      "us_state_id": "RI"
+    },
+    {
+      "person_id": 51850,
+      "display_name": "Rep. Gus Bilirakis R-FL-12",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 51853,
+      "display_name": "Rep. Vern Buchanan R-FL-16",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 51854,
+      "display_name": "Rep. Kathy Castor D-FL-14",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 51855,
+      "display_name": "Rep. Yvette Clarke D-NY-9",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 51856,
+      "display_name": "Rep. Steve Cohen D-TN-9",
+      "chamber": "House",
+      "us_state_id": "TN"
+    },
+    {
+      "person_id": 51857,
+      "display_name": "Rep. Joe Courtney D-CT-2",
+      "chamber": "House",
+      "us_state_id": "CT"
+    },
+    {
+      "person_id": 51863,
+      "display_name": "Sen. John Barrasso R-WY",
+      "chamber": "Senate",
+      "us_state_id": "WY"
+    },
+    {
+      "person_id": 51885,
+      "display_name": "Rep. Bob Latta R-OH-5",
+      "chamber": "House",
+      "us_state_id": "OH"
+    },
+    {
+      "person_id": 51886,
+      "display_name": "Rep. Rob Wittman R-VA-1",
+      "chamber": "House",
+      "us_state_id": "VA"
+    },
+    {
+      "person_id": 52758,
+      "display_name": "Rep. Zach Nunn R-IA-3",
+      "chamber": "House",
+      "us_state_id": "IA"
+    },
+    {
+      "person_id": 52983,
+      "display_name": "Sen. Todd Young R-IN-1",
+      "chamber": "Senate",
+      "us_state_id": "IN"
+    },
+    {
+      "person_id": 54720,
+      "display_name": "Rep. Bill Huizenga R-MI-4",
+      "chamber": "House",
+      "us_state_id": "MI"
+    },
+    {
+      "person_id": 56036,
+      "display_name": "Rep. Brad Finstad R-MN-1",
+      "chamber": "House",
+      "us_state_id": "MN"
+    },
+    {
+      "person_id": 57292,
+      "display_name": "Rep. Ben Cline R-VA-6",
+      "chamber": "House",
+      "us_state_id": "VA"
+    },
+    {
+      "person_id": 59063,
+      "display_name": "Del. Stacey Plaskett D-VI-1",
+      "chamber": "House",
+      "us_state_id": "VI"
+    },
+    {
+      "person_id": 59655,
+      "display_name": "Rep. Steve Scalise R-LA-1",
+      "chamber": "House",
+      "us_state_id": "LA"
+    },
+    {
+      "person_id": 59657,
+      "display_name": "Rep. Andr\u00e9 Carson D-IN-7",
+      "chamber": "House",
+      "us_state_id": "IN"
+    },
+    {
+      "person_id": 65916,
+      "display_name": "Rep. Bill Foster D-IL-11",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 66832,
+      "display_name": "Sen. Jim Risch R-ID-1",
+      "chamber": "Senate",
+      "us_state_id": "ID"
+    },
+    {
+      "person_id": 66834,
+      "display_name": "Sen. Jeanne Shaheen D-NH-2",
+      "chamber": "Senate",
+      "us_state_id": "NH"
+    },
+    {
+      "person_id": 66836,
+      "display_name": "Sen. Jeff Merkley D-OR-1",
+      "chamber": "Senate",
+      "us_state_id": "OR"
+    },
+    {
+      "person_id": 66837,
+      "display_name": "Sen. Mark Warner D-VA-2",
+      "chamber": "Senate",
+      "us_state_id": "VA"
+    },
+    {
+      "person_id": 66841,
+      "display_name": "Rep. Tom McClintock R-CA-5",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 66846,
+      "display_name": "Rep. Jim Himes D-CT-4",
+      "chamber": "House",
+      "us_state_id": "CT"
+    },
+    {
+      "person_id": 66855,
+      "display_name": "Rep. Brett Guthrie R-KY-2",
+      "chamber": "House",
+      "us_state_id": "KY"
+    },
+    {
+      "person_id": 66858,
+      "display_name": "Sen. Bill Cassidy R-LA-2",
+      "chamber": "Senate",
+      "us_state_id": "LA"
+    },
+    {
+      "person_id": 66859,
+      "display_name": "Rep. Chellie Pingree D-ME-1",
+      "chamber": "House",
+      "us_state_id": "ME"
+    },
+    {
+      "person_id": 66862,
+      "display_name": "Sen. Gary Peters D-MI-2",
+      "chamber": "Senate",
+      "us_state_id": "MI"
+    },
+    {
+      "person_id": 66866,
+      "display_name": "Rep. Dina Titus D-NV-1",
+      "chamber": "House",
+      "us_state_id": "NV"
+    },
+    {
+      "person_id": 66869,
+      "display_name": "Sen. Martin Heinrich D-NM-1",
+      "chamber": "Senate",
+      "us_state_id": "NM"
+    },
+    {
+      "person_id": 66871,
+      "display_name": "Sen. Ben Ray Luj\u00e1n D-NM-2",
+      "chamber": "Senate",
+      "us_state_id": "NM"
+    },
+    {
+      "person_id": 66873,
+      "display_name": "Rep. Paul Tonko D-NY-20",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 66884,
+      "display_name": "Rep. G.T. Thompson R-PA-15",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 66890,
+      "display_name": "Rep. Gerry Connolly D-VA-11",
+      "chamber": "House",
+      "us_state_id": "VA"
+    },
+    {
+      "person_id": 66891,
+      "display_name": "Sen. Cynthia Lummis R-WY",
+      "chamber": "Senate",
+      "us_state_id": "WY"
+    },
+    {
+      "person_id": 69394,
+      "display_name": "Sen. Michael Bennet D-CO-2",
+      "chamber": "Senate",
+      "us_state_id": "CO"
+    },
+    {
+      "person_id": 75165,
+      "display_name": "Rep. Mike Quigley D-IL-5",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 80750,
+      "display_name": "Rep. Judy Chu D-CA-28",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 81211,
+      "display_name": "Rep. Nick LaLota R-NY-1",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 107102,
+      "display_name": "Rep. Sean Casten D-IL-6",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 125942,
+      "display_name": "Rep. John Garamendi D-CA-8",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 127669,
+      "display_name": "Rep. Cleo Fields D-LA-6",
+      "chamber": "House",
+      "us_state_id": "LA"
+    },
+    {
+      "person_id": 128188,
+      "display_name": "Rep. Kweisi Mfume D-MD-7",
+      "chamber": "House",
+      "us_state_id": "MD"
+    },
+    {
+      "person_id": 134505,
+      "display_name": "Rep. Glenn Ivey D-MD-4",
+      "chamber": "House",
+      "us_state_id": "MD"
+    },
+    {
+      "person_id": 140963,
+      "display_name": "Sen. Elizabeth Warren D-MA-1",
+      "chamber": "Senate",
+      "us_state_id": "MA"
+    },
+    {
+      "person_id": 148088,
+      "display_name": "Rep. Rick Crawford R-AR-1",
+      "chamber": "House",
+      "us_state_id": "AR"
+    },
+    {
+      "person_id": 151731,
+      "display_name": "Rep. Terri Sewell D-AL-7",
+      "chamber": "House",
+      "us_state_id": "AL"
+    },
+    {
+      "person_id": 151733,
+      "display_name": "Rep. Paul Gosar R-AZ-9",
+      "chamber": "House",
+      "us_state_id": "AZ"
+    },
+    {
+      "person_id": 151736,
+      "display_name": "Rep. David Schweikert R-AZ-1",
+      "chamber": "House",
+      "us_state_id": "AZ"
+    },
+    {
+      "person_id": 151739,
+      "display_name": "Rep. Steve Womack R-AR-3",
+      "chamber": "House",
+      "us_state_id": "AR"
+    },
+    {
+      "person_id": 151747,
+      "display_name": "Rep. Daniel Webster R-FL-11",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 151749,
+      "display_name": "Rep. Frederica Wilson D-FL-24",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 151753,
+      "display_name": "Rep. Austin Scott R-GA-8",
+      "chamber": "House",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 151768,
+      "display_name": "Rep. Andy Harris R-MD-1",
+      "chamber": "House",
+      "us_state_id": "MD"
+    },
+    {
+      "person_id": 151793,
+      "display_name": "Sen. James Lankford R-OK-1",
+      "chamber": "Senate",
+      "us_state_id": "OK"
+    },
+    {
+      "person_id": 151794,
+      "display_name": "Rep. Mike Kelly R-PA-16",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 151800,
+      "display_name": "Sen. Tim Scott R-SC-1",
+      "chamber": "Senate",
+      "us_state_id": "SC"
+    },
+    {
+      "person_id": 151805,
+      "display_name": "Rep. Chuck Fleischmann R-TN-3",
+      "chamber": "House",
+      "us_state_id": "TN"
+    },
+    {
+      "person_id": 151806,
+      "display_name": "Rep. Scott DesJarlais R-TN-4",
+      "chamber": "House",
+      "us_state_id": "TN"
+    },
+    {
+      "person_id": 151813,
+      "display_name": "Rep. Morgan Griffith R-VA-9",
+      "chamber": "House",
+      "us_state_id": "VA"
+    },
+    {
+      "person_id": 151820,
+      "display_name": "Sen. Marco Rubio R-FL-1",
+      "chamber": "Senate",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 151822,
+      "display_name": "Sen. Ron Johnson R-WI-1",
+      "chamber": "Senate",
+      "us_state_id": "WI"
+    },
+    {
+      "person_id": 151823,
+      "display_name": "Sen. Chris Coons D-DE",
+      "chamber": "Senate",
+      "us_state_id": "DE"
+    },
+    {
+      "person_id": 151824,
+      "display_name": "Sen. Richard Blumenthal D-CT-1",
+      "chamber": "Senate",
+      "us_state_id": "CT"
+    },
+    {
+      "person_id": 151827,
+      "display_name": "Sen. Mike Lee R-UT-1",
+      "chamber": "Senate",
+      "us_state_id": "UT"
+    },
+    {
+      "person_id": 151828,
+      "display_name": "Sen. Rand Paul R-KY-1",
+      "chamber": "Senate",
+      "us_state_id": "KY"
+    },
+    {
+      "person_id": 151837,
+      "display_name": "Sen. John Hoeven R-ND",
+      "chamber": "Senate",
+      "us_state_id": "ND"
+    },
+    {
+      "person_id": 152934,
+      "display_name": "Rep. Debbie Dingell D-MI-6",
+      "chamber": "House",
+      "us_state_id": "MI"
+    },
+    {
+      "person_id": 158349,
+      "display_name": "Rep. Bill Keating D-MA-9",
+      "chamber": "House",
+      "us_state_id": "MA"
+    },
+    {
+      "person_id": 159021,
+      "display_name": "Rep. David Valadao R-CA-22",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 163882,
+      "display_name": "Sen. Mark Kelly D-AZ-2",
+      "chamber": "Senate",
+      "us_state_id": "AZ"
+    },
+    {
+      "person_id": 173107,
+      "display_name": "Rep. Erin Houchin R-IN-9",
+      "chamber": "House",
+      "us_state_id": "IN"
+    },
+    {
+      "person_id": 175490,
+      "display_name": "Sen. Tim Kaine D-VA-1",
+      "chamber": "Senate",
+      "us_state_id": "VA"
+    },
+    {
+      "person_id": 175583,
+      "display_name": "Sen. John Hickenlooper D-CO-1",
+      "chamber": "Senate",
+      "us_state_id": "CO"
+    },
+    {
+      "person_id": 175586,
+      "display_name": "Sen. Rick Scott R-FL-2",
+      "chamber": "Senate",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 175665,
+      "display_name": "Sen. Ted Cruz R-TX-2",
+      "chamber": "Senate",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 177013,
+      "display_name": "Rep. Mark Amodei R-NV-2",
+      "chamber": "House",
+      "us_state_id": "NV"
+    },
+    {
+      "person_id": 179757,
+      "display_name": "Rep. Jared Golden D-ME-2",
+      "chamber": "House",
+      "us_state_id": "ME"
+    },
+    {
+      "person_id": 182891,
+      "display_name": "Rep. Suzanne Bonamici D-OR-1",
+      "chamber": "House",
+      "us_state_id": "OR"
+    },
+    {
+      "person_id": 189075,
+      "display_name": "Rep. Bruce Westerman R-AR-4",
+      "chamber": "House",
+      "us_state_id": "AR"
+    },
+    {
+      "person_id": 189136,
+      "display_name": "Sen. Ruben Gallego D-AZ-1",
+      "chamber": "House",
+      "us_state_id": "AZ"
+    },
+    {
+      "person_id": 189136,
+      "display_name": "Sen. Ruben Gallego D-AZ-1",
+      "chamber": "Senate",
+      "us_state_id": "AZ"
+    },
+    {
+      "person_id": 189182,
+      "display_name": "Rep. Andy Biggs R-AZ-5",
+      "chamber": "House",
+      "us_state_id": "AZ"
+    },
+    {
+      "person_id": 189511,
+      "display_name": "Rep. Julia Brownley D-CA-26",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 189546,
+      "display_name": "Rep. Jared Huffman D-CA-2",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 189574,
+      "display_name": "Rep. Norma Torres D-CA-35",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 189588,
+      "display_name": "Rep. Lou Correa D-CA-46",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 189590,
+      "display_name": "Rep. Mark DeSaulnier D-CA-10",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 189602,
+      "display_name": "Rep. Doug LaMalfa R-CA-1",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 189606,
+      "display_name": "Rep. Ted Lieu D-CA-36",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 189610,
+      "display_name": "Sen. Alex Padilla D-CA-1",
+      "chamber": "Senate",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 189620,
+      "display_name": "Rep. Juan Vargas D-CA-52",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 189828,
+      "display_name": "Rep. Darren Soto D-FL-9",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 189831,
+      "display_name": "Rep. Greg Steube R-FL-17",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 190067,
+      "display_name": "Rep. Buddy Carter R-GA-1",
+      "chamber": "House",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 190094,
+      "display_name": "Rep. Barry Loudermilk R-GA-11",
+      "chamber": "House",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 190192,
+      "display_name": "Rep. Barry Moore R-AL-1",
+      "chamber": "House",
+      "us_state_id": "AL"
+    },
+    {
+      "person_id": 190296,
+      "display_name": "Rep. Jill Tokuda D-HI-2",
+      "chamber": "House",
+      "us_state_id": "HI"
+    },
+    {
+      "person_id": 190391,
+      "display_name": "Rep. Jim Baird R-IN-4",
+      "chamber": "House",
+      "us_state_id": "IN"
+    },
+    {
+      "person_id": 190465,
+      "display_name": "Sen. Jim Banks R-IN-2",
+      "chamber": "House",
+      "us_state_id": "IN"
+    },
+    {
+      "person_id": 190465,
+      "display_name": "Sen. Jim Banks R-IN-2",
+      "chamber": "Senate",
+      "us_state_id": "IN"
+    },
+    {
+      "person_id": 190615,
+      "display_name": "Sen. Joni Ernst R-IA-2",
+      "chamber": "Senate",
+      "us_state_id": "IA"
+    },
+    {
+      "person_id": 190616,
+      "display_name": "Rep. Randy Feenstra R-IA-4",
+      "chamber": "House",
+      "us_state_id": "IA"
+    },
+    {
+      "person_id": 190655,
+      "display_name": "Rep. Mike Bost R-IL-12",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 190794,
+      "display_name": "Rep. Darin LaHood R-IL-16",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 191010,
+      "display_name": "Rep. Russ Fulcher R-ID-1",
+      "chamber": "House",
+      "us_state_id": "ID"
+    },
+    {
+      "person_id": 191669,
+      "display_name": "Rep. Katherine Clark D-MA-5",
+      "chamber": "House",
+      "us_state_id": "MA"
+    },
+    {
+      "person_id": 192069,
+      "display_name": "Rep. Jamie Raskin D-MD-8",
+      "chamber": "House",
+      "us_state_id": "MD"
+    },
+    {
+      "person_id": 192181,
+      "display_name": "Rep. Rashida Tlaib D-MI-12",
+      "chamber": "House",
+      "us_state_id": "MI"
+    },
+    {
+      "person_id": 192213,
+      "display_name": "Rep. John Moolenaar R-MI-2",
+      "chamber": "House",
+      "us_state_id": "MI"
+    },
+    {
+      "person_id": 192276,
+      "display_name": "Rep. Ryan Zinke R-MT",
+      "chamber": "House",
+      "us_state_id": "MT"
+    },
+    {
+      "person_id": 192565,
+      "display_name": "Rep. Eric Burlison R-MO-7",
+      "chamber": "House",
+      "us_state_id": "MO"
+    },
+    {
+      "person_id": 192689,
+      "display_name": "Rep. Jason Smith R-MO-8",
+      "chamber": "House",
+      "us_state_id": "MO"
+    },
+    {
+      "person_id": 192743,
+      "display_name": "Sen. Eric Schmitt R-MO-2",
+      "chamber": "Senate",
+      "us_state_id": "MO"
+    },
+    {
+      "person_id": 192800,
+      "display_name": "Rep. Alma Adams D-NC-12",
+      "chamber": "House",
+      "us_state_id": "NC"
+    },
+    {
+      "person_id": 192894,
+      "display_name": "Rep. Deborah Ross D-NC-2",
+      "chamber": "House",
+      "us_state_id": "NC"
+    },
+    {
+      "person_id": 192907,
+      "display_name": "Sen. Thom Tillis R-NC-2",
+      "chamber": "Senate",
+      "us_state_id": "NC"
+    },
+    {
+      "person_id": 193043,
+      "display_name": "Rep. Adriano Espaillat D-NY-13",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 193559,
+      "display_name": "Rep. Steven Horsford D-NV-4",
+      "chamber": "House",
+      "us_state_id": "NV"
+    },
+    {
+      "person_id": 193813,
+      "display_name": "Rep. Troy Balderson R-OH-12",
+      "chamber": "House",
+      "us_state_id": "OH"
+    },
+    {
+      "person_id": 194024,
+      "display_name": "Rep. Cliff Bentz R-OR-2",
+      "chamber": "House",
+      "us_state_id": "OR"
+    },
+    {
+      "person_id": 194048,
+      "display_name": "Rep. Val Hoyle D-OR-4",
+      "chamber": "House",
+      "us_state_id": "OR"
+    },
+    {
+      "person_id": 194115,
+      "display_name": "Rep. Madeleine Dean D-PA-4",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 194129,
+      "display_name": "Rep. Dwight Evans D-PA-3",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 194221,
+      "display_name": "Rep. Scott Perry R-PA-10",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 194287,
+      "display_name": "Rep. Lloyd Smucker R-PA-11",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 194760,
+      "display_name": "Rep. Lance Gooden R-TX-5",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 194785,
+      "display_name": "Rep. Randy Weber R-TX-14",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 194881,
+      "display_name": "Rep. Joaquin Castro D-TX-20",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 195099,
+      "display_name": "Rep. Jennifer McClellan D-VA-4",
+      "chamber": "House",
+      "us_state_id": "VA"
+    },
+    {
+      "person_id": 195239,
+      "display_name": "Rep. Carol Miller R-WV-1",
+      "chamber": "House",
+      "us_state_id": "WV"
+    },
+    {
+      "person_id": 195469,
+      "display_name": "Rep. Scott Fitzgerald R-WI-5",
+      "chamber": "House",
+      "us_state_id": "WI"
+    },
+    {
+      "person_id": 195470,
+      "display_name": "Rep. Glenn Grothman R-WI-6",
+      "chamber": "House",
+      "us_state_id": "WI"
+    },
+    {
+      "person_id": 195556,
+      "display_name": "Rep. Mark Pocan D-WI-2",
+      "chamber": "House",
+      "us_state_id": "WI"
+    },
+    {
+      "person_id": 195579,
+      "display_name": "Rep. Tom Tiffany R-WI-7",
+      "chamber": "House",
+      "us_state_id": "WI"
+    },
+    {
+      "person_id": 195970,
+      "display_name": "Rep. Ralph Norman R-SC-5",
+      "chamber": "House",
+      "us_state_id": "SC"
+    },
+    {
+      "person_id": 196030,
+      "display_name": "Rep. Mike Flood R-NE-1",
+      "chamber": "House",
+      "us_state_id": "NE"
+    },
+    {
+      "person_id": 196054,
+      "display_name": "Sen. Deb Fischer R-NE-2",
+      "chamber": "Senate",
+      "us_state_id": "NE"
+    },
+    {
+      "person_id": 196208,
+      "display_name": "Rep. Michelle Fischbach R-MN-7",
+      "chamber": "House",
+      "us_state_id": "MN"
+    },
+    {
+      "person_id": 196272,
+      "display_name": "Rep. Grace Meng D-NY-6",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 196306,
+      "display_name": "Rep. Hakeem Jeffries D-NY-8",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 196354,
+      "display_name": "Rep. Joe Morelle D-NY-25",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 196377,
+      "display_name": "Rep. Nicole Malliotakis R-NY-11",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 196391,
+      "display_name": "Rep. Claudia Tenney R-NY-24",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 196429,
+      "display_name": "Rep. Tom Kean R-NJ-7",
+      "chamber": "House",
+      "us_state_id": "NJ"
+    },
+    {
+      "person_id": 196433,
+      "display_name": "Rep. Donald Norcross D-NJ-1",
+      "chamber": "House",
+      "us_state_id": "NJ"
+    },
+    {
+      "person_id": 196450,
+      "display_name": "Rep. Jeff Van Drew D-NJ-2",
+      "chamber": "House",
+      "us_state_id": "NJ"
+    },
+    {
+      "person_id": 196528,
+      "display_name": "Rep. Bonnie Watson Coleman D-NJ-12",
+      "chamber": "House",
+      "us_state_id": "NJ"
+    },
+    {
+      "person_id": 197755,
+      "display_name": "Sen. Angus King I-ME-2",
+      "chamber": "Senate",
+      "us_state_id": "ME"
+    },
+    {
+      "person_id": 198762,
+      "display_name": "Rep. Lois Frankel D-FL-22",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 198766,
+      "display_name": "Sen. Tom Cotton R-AR-2",
+      "chamber": "Senate",
+      "us_state_id": "AR"
+    },
+    {
+      "person_id": 198768,
+      "display_name": "Sen. Tammy Duckworth D-IL-2",
+      "chamber": "Senate",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 198769,
+      "display_name": "Rep. Brad Schneider D-IL-10",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 198778,
+      "display_name": "Rep. Roger Williams R-TX-25",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 198788,
+      "display_name": "Rep. Andy Barr R-KY-6",
+      "chamber": "House",
+      "us_state_id": "KY"
+    },
+    {
+      "person_id": 198807,
+      "display_name": "Rep. Ann Wagner R-MO-2",
+      "chamber": "House",
+      "us_state_id": "MO"
+    },
+    {
+      "person_id": 198810,
+      "display_name": "Sen. Steve Daines R-MT",
+      "chamber": "Senate",
+      "us_state_id": "MT"
+    },
+    {
+      "person_id": 198811,
+      "display_name": "Rep. Suzan DelBene D-WA-1",
+      "chamber": "House",
+      "us_state_id": "WA"
+    },
+    {
+      "person_id": 198816,
+      "display_name": "Sen. Kevin Cramer R-ND",
+      "chamber": "Senate",
+      "us_state_id": "ND"
+    },
+    {
+      "person_id": 198817,
+      "display_name": "Sen. Markwayne Mullin R-OK-2",
+      "chamber": "Senate",
+      "us_state_id": "OK"
+    },
+    {
+      "person_id": 198819,
+      "display_name": "Rep. Dave Joyce R-OH-14",
+      "chamber": "House",
+      "us_state_id": "OH"
+    },
+    {
+      "person_id": 198820,
+      "display_name": "Rep. Joyce Beatty D-OH-3",
+      "chamber": "House",
+      "us_state_id": "OH"
+    },
+    {
+      "person_id": 198825,
+      "display_name": "Rep. Eric Swalwell D-CA-14",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 198829,
+      "display_name": "Rep. Mark Takano D-CA-39",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 198832,
+      "display_name": "Rep. Raul Ruiz D-CA-25",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 198835,
+      "display_name": "Rep. Thomas Massie R-KY-4",
+      "chamber": "House",
+      "us_state_id": "KY"
+    },
+    {
+      "person_id": 198960,
+      "display_name": "Rep. Kat Cammack R-FL-3",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 199004,
+      "display_name": "Rep. Ami Bera D-CA-6",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 199009,
+      "display_name": "Rep. Scott Peters D-CA-50",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 201768,
+      "display_name": "Sen. Brian Schatz D-HI-2",
+      "chamber": "Senate",
+      "us_state_id": "HI"
+    },
+    {
+      "person_id": 204795,
+      "display_name": "Rep. Robin Kelly D-IL-2",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 210451,
+      "display_name": "Rep. Melanie Stansbury D-NM-1",
+      "chamber": "House",
+      "us_state_id": "NM"
+    },
+    {
+      "person_id": 211545,
+      "display_name": "Sen. Cory Booker D-NJ-2",
+      "chamber": "Senate",
+      "us_state_id": "NJ"
+    },
+    {
+      "person_id": 218327,
+      "display_name": "Rep. Ro Khanna D-CA-17",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 219431,
+      "display_name": "Rep. Gabe Vasquez D-NM-2",
+      "chamber": "House",
+      "us_state_id": "NM"
+    },
+    {
+      "person_id": 221840,
+      "display_name": "Sen. Dan Sullivan R-AK",
+      "chamber": "Senate",
+      "us_state_id": "AK"
+    },
+    {
+      "person_id": 221844,
+      "display_name": "Sen. Mike Rounds R-SD",
+      "chamber": "Senate",
+      "us_state_id": "SD"
+    },
+    {
+      "person_id": 226960,
+      "display_name": "Rep. Pete Aguilar D-CA-33",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 227109,
+      "display_name": "Rep. Don Bacon R-NE-2",
+      "chamber": "House",
+      "us_state_id": "NE"
+    },
+    {
+      "person_id": 227127,
+      "display_name": "Rep. Seth Moulton D-MA-6",
+      "chamber": "House",
+      "us_state_id": "MA"
+    },
+    {
+      "person_id": 227391,
+      "display_name": "Rep. Brendan Boyle D-PA-2",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 227421,
+      "display_name": "Rep. Don Beyer D-VA-8",
+      "chamber": "House",
+      "us_state_id": "VA"
+    },
+    {
+      "person_id": 227472,
+      "display_name": "Rep. French Hill R-AR-2",
+      "chamber": "House",
+      "us_state_id": "AR"
+    },
+    {
+      "person_id": 227481,
+      "display_name": "Rep. Elise Stefanik R-NY-21",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 227499,
+      "display_name": "Rep. Gary Palmer R-AL-6",
+      "chamber": "House",
+      "us_state_id": "AL"
+    },
+    {
+      "person_id": 227527,
+      "display_name": "Rep. Brian Babin R-TX-36",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 227641,
+      "display_name": "Rep. Rick Allen R-GA-12",
+      "chamber": "House",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 227706,
+      "display_name": "Rep. Dan Newhouse R-WA-4",
+      "chamber": "House",
+      "us_state_id": "WA"
+    },
+    {
+      "person_id": 230851,
+      "display_name": "Sen. Pete Ricketts R-NE-1",
+      "chamber": "Senate",
+      "us_state_id": "NE"
+    },
+    {
+      "person_id": 232351,
+      "display_name": "Sen. Maggie Hassan D-NH-1",
+      "chamber": "Senate",
+      "us_state_id": "NH"
+    },
+    {
+      "person_id": 234711,
+      "display_name": "Rep. Trent Kelly R-MS-1",
+      "chamber": "House",
+      "us_state_id": "MS"
+    },
+    {
+      "person_id": 239019,
+      "display_name": "Rep. Becca Balint D-VT",
+      "chamber": "House",
+      "us_state_id": "VT"
+    },
+    {
+      "person_id": 239242,
+      "display_name": "Rep. Pramila Jayapal D-WA-7",
+      "chamber": "House",
+      "us_state_id": "WA"
+    },
+    {
+      "person_id": 239406,
+      "display_name": "Rep. Jay Obernolte R-CA-23",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 240035,
+      "display_name": "Rep. Jared Moskowitz D-FL-23",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 240045,
+      "display_name": "Rep. Aaron Bean R-FL-4",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 240947,
+      "display_name": "Rep. Andrew Garbarino R-NY-2",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 241000,
+      "display_name": "Rep. Valerie Foushee D-NC-4",
+      "chamber": "House",
+      "us_state_id": "NC"
+    },
+    {
+      "person_id": 241090,
+      "display_name": "Rep. Stephanie Bice R-OK-5",
+      "chamber": "House",
+      "us_state_id": "OK"
+    },
+    {
+      "person_id": 241372,
+      "display_name": "Rep. Pat Fallon R-TX-4",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 242346,
+      "display_name": "Rep. Kevin Mullin D-CA-15",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 242375,
+      "display_name": "Rep. Brittany Pettersen D-CO-7",
+      "chamber": "House",
+      "us_state_id": "CO"
+    },
+    {
+      "person_id": 242806,
+      "display_name": "Rep. Don Davis D-NC-1",
+      "chamber": "House",
+      "us_state_id": "NC"
+    },
+    {
+      "person_id": 242954,
+      "display_name": "Rep. Mark Green R-TN-7",
+      "chamber": "House",
+      "us_state_id": "TN"
+    },
+    {
+      "person_id": 242980,
+      "display_name": "Rep. Sylvia Garcia D-TX-29",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 243182,
+      "display_name": "Rep. Emilia Sykes D-OH-13",
+      "chamber": "House",
+      "us_state_id": "OH"
+    },
+    {
+      "person_id": 250861,
+      "display_name": "Rep. Greg Murphy R-NC-3",
+      "chamber": "House",
+      "us_state_id": "NC"
+    },
+    {
+      "person_id": 250883,
+      "display_name": "Rep. Guy Reschenthaler R-PA-14",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 250906,
+      "display_name": "Rep. Russell Fry R-SC-7",
+      "chamber": "House",
+      "us_state_id": "SC"
+    },
+    {
+      "person_id": 251521,
+      "display_name": "Rep. Troy Carter D-LA-2",
+      "chamber": "House",
+      "us_state_id": "LA"
+    },
+    {
+      "person_id": 253419,
+      "display_name": "Rep. Warren Davidson R-OH-8",
+      "chamber": "House",
+      "us_state_id": "OH"
+    },
+    {
+      "person_id": 254452,
+      "display_name": "Rep. Brian Fitzpatrick R-PA-1",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 254656,
+      "display_name": "Rep. Raja Krishnamoorthi D-IL-8",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 258012,
+      "display_name": "Rep. Chuck Edwards R-NC-11",
+      "chamber": "House",
+      "us_state_id": "NC"
+    },
+    {
+      "person_id": 259485,
+      "display_name": "Rep. Salud Carbajal D-CA-24",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 259488,
+      "display_name": "Rep. Angie Craig D-MN-2",
+      "chamber": "House",
+      "us_state_id": "MN"
+    },
+    {
+      "person_id": 259494,
+      "display_name": "Sen. Jacky Rosen D-NV-1",
+      "chamber": "Senate",
+      "us_state_id": "NV"
+    },
+    {
+      "person_id": 259496,
+      "display_name": "Rep. Brian Mast R-FL-21",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 259504,
+      "display_name": "Rep. Jack Bergman R-MI-1",
+      "chamber": "House",
+      "us_state_id": "MI"
+    },
+    {
+      "person_id": 259506,
+      "display_name": "Rep. Neal Dunn R-FL-2",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 259527,
+      "display_name": "Rep. Vicente Gonzalez D-TX-34",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 259537,
+      "display_name": "Rep. John Rutherford R-FL-5",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 259547,
+      "display_name": "Sen. Ted Budd R-NC-1",
+      "chamber": "Senate",
+      "us_state_id": "NC"
+    },
+    {
+      "person_id": 259548,
+      "display_name": "Rep. David Kustoff R-TN-8",
+      "chamber": "House",
+      "us_state_id": "TN"
+    },
+    {
+      "person_id": 259549,
+      "display_name": "Rep. Jodey Arrington R-TX-19",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 259552,
+      "display_name": "Sen. Catherine Cortez Masto D-NV-2",
+      "chamber": "Senate",
+      "us_state_id": "NV"
+    },
+    {
+      "person_id": 259997,
+      "display_name": "Rep. Jimmy Panetta D-CA-19",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 260060,
+      "display_name": "Sen. Lisa Blunt Rochester D-DE",
+      "chamber": "House",
+      "us_state_id": "DE"
+    },
+    {
+      "person_id": 260060,
+      "display_name": "Sen. Lisa Blunt Rochester D-DE",
+      "chamber": "Senate",
+      "us_state_id": "DE"
+    },
+    {
+      "person_id": 260072,
+      "display_name": "Rep. James Comer R-KY-1",
+      "chamber": "House",
+      "us_state_id": "KY"
+    },
+    {
+      "person_id": 260075,
+      "display_name": "Sen. John Neely Kennedy R-LA-1",
+      "chamber": "Senate",
+      "us_state_id": "LA"
+    },
+    {
+      "person_id": 260077,
+      "display_name": "Rep. Josh Gottheimer D-NJ-5",
+      "chamber": "House",
+      "us_state_id": "NJ"
+    },
+    {
+      "person_id": 260128,
+      "display_name": "Rep. Nanette Barrag\u00e1n D-CA-44",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 260129,
+      "display_name": "Rep. Clay Higgins R-LA-3",
+      "chamber": "House",
+      "us_state_id": "LA"
+    },
+    {
+      "person_id": 260201,
+      "display_name": "Rep. Byron Donalds R-FL-19",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 260571,
+      "display_name": "Rep. Kevin Kiley R-CA-3",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 260811,
+      "display_name": "Rep. Ilhan Omar D-MN-5",
+      "chamber": "House",
+      "us_state_id": "MN"
+    },
+    {
+      "person_id": 263761,
+      "display_name": "Rep. Ashley Hinson R-IA-2",
+      "chamber": "House",
+      "us_state_id": "IA"
+    },
+    {
+      "person_id": 266792,
+      "display_name": "Rep. Ron Estes R-KS-4",
+      "chamber": "House",
+      "us_state_id": "KS"
+    },
+    {
+      "person_id": 276057,
+      "display_name": "Rep. Dan Crenshaw R-TX-2",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 276525,
+      "display_name": "Rep. Victoria Spartz R-IN-5",
+      "chamber": "House",
+      "us_state_id": "IN"
+    },
+    {
+      "person_id": 278770,
+      "display_name": "Sen. John Curtis R-UT-2",
+      "chamber": "House",
+      "us_state_id": "UT"
+    },
+    {
+      "person_id": 278770,
+      "display_name": "Sen. John Curtis R-UT-2",
+      "chamber": "Senate",
+      "us_state_id": "UT"
+    },
+    {
+      "person_id": 282216,
+      "display_name": "Rep. Nikema Williams D-GA-5",
+      "chamber": "House",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 282320,
+      "display_name": "Sen. Tina Smith D-MN-1",
+      "chamber": "Senate",
+      "us_state_id": "MN"
+    },
+    {
+      "person_id": 282851,
+      "display_name": "Rep. Nancy Mace R-SC-1",
+      "chamber": "House",
+      "us_state_id": "SC"
+    },
+    {
+      "person_id": 286518,
+      "display_name": "Sen. Cindy Hyde-Smith R-MS-1",
+      "chamber": "Senate",
+      "us_state_id": "MS"
+    },
+    {
+      "person_id": 286813,
+      "display_name": "Rep. Sydney Kamlager D-CA-37",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 300715,
+      "display_name": "Rep. Michael Cloud R-TX-27",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 304452,
+      "display_name": "Rep. Alexandria Ocasio-Cortez D-NY-14",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 304453,
+      "display_name": "Rep. Mary Gay Scanlon D-PA-5",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 304454,
+      "display_name": "Rep. Greg Stanton D-AZ-4",
+      "chamber": "House",
+      "us_state_id": "AZ"
+    },
+    {
+      "person_id": 304455,
+      "display_name": "Rep. Joe Neguse D-CO-2",
+      "chamber": "House",
+      "us_state_id": "CO"
+    },
+    {
+      "person_id": 304456,
+      "display_name": "Rep. Jahana Hayes D-CT-5",
+      "chamber": "House",
+      "us_state_id": "CT"
+    },
+    {
+      "person_id": 304652,
+      "display_name": "Rep. Chuy Garc\u00eda D-IL-4",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 304660,
+      "display_name": "Rep. Veronica Escobar D-TX-16",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 306829,
+      "display_name": "Rep. John Rose R-TN-6",
+      "chamber": "House",
+      "us_state_id": "TN"
+    },
+    {
+      "person_id": 306837,
+      "display_name": "Rep. Tim Burchett R-TN-2",
+      "chamber": "House",
+      "us_state_id": "TN"
+    },
+    {
+      "person_id": 306838,
+      "display_name": "Rep. Dusty Johnson R-SD",
+      "chamber": "House",
+      "us_state_id": "SD"
+    },
+    {
+      "person_id": 306847,
+      "display_name": "Rep. Michael Guest R-MS-3",
+      "chamber": "House",
+      "us_state_id": "MS"
+    },
+    {
+      "person_id": 306850,
+      "display_name": "Rep. Kevin Hern R-OK-1",
+      "chamber": "House",
+      "us_state_id": "OK"
+    },
+    {
+      "person_id": 306851,
+      "display_name": "Rep. John Joyce R-PA-13",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 306852,
+      "display_name": "Rep. Dan Meuser R-PA-9",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 306854,
+      "display_name": "Rep. Michael Waltz R-FL-6",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 306855,
+      "display_name": "Rep. Chris Pappas D-NH-1",
+      "chamber": "House",
+      "us_state_id": "NH"
+    },
+    {
+      "person_id": 306860,
+      "display_name": "Rep. Chrissy Houlahan D-PA-6",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 306877,
+      "display_name": "Rep. Lucy McBath D-GA-6",
+      "chamber": "House",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 307305,
+      "display_name": "Rep. Lauren Underwood D-IL-14",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 307328,
+      "display_name": "Rep. Jason Crow D-CO-6",
+      "chamber": "House",
+      "us_state_id": "CO"
+    },
+    {
+      "person_id": 307336,
+      "display_name": "Rep. Mike Levin D-CA-49",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 307338,
+      "display_name": "Rep. Mikie Sherrill D-NJ-11",
+      "chamber": "House",
+      "us_state_id": "NJ"
+    },
+    {
+      "person_id": 307341,
+      "display_name": "Rep. Susie Lee D-NV-3",
+      "chamber": "House",
+      "us_state_id": "NV"
+    },
+    {
+      "person_id": 307520,
+      "display_name": "Rep. Tracey Mann R-KS-1",
+      "chamber": "House",
+      "us_state_id": "KS"
+    },
+    {
+      "person_id": 307571,
+      "display_name": "Rep. Josh Harder D-CA-9",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 307586,
+      "display_name": "Rep. Sharice Davids D-KS-3",
+      "chamber": "House",
+      "us_state_id": "KS"
+    },
+    {
+      "person_id": 307589,
+      "display_name": "Sen. Elissa Slotkin D-MI-1",
+      "chamber": "House",
+      "us_state_id": "MI"
+    },
+    {
+      "person_id": 307589,
+      "display_name": "Sen. Elissa Slotkin D-MI-1",
+      "chamber": "Senate",
+      "us_state_id": "MI"
+    },
+    {
+      "person_id": 307598,
+      "display_name": "Rep. Lizzie Fletcher D-TX-7",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 307604,
+      "display_name": "Rep. Mar\u00eda Salazar R-FL-27",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 307607,
+      "display_name": "Rep. Haley Stevens D-MI-11",
+      "chamber": "House",
+      "us_state_id": "MI"
+    },
+    {
+      "person_id": 307622,
+      "display_name": "Rep. Pete Stauber R-MN-8",
+      "chamber": "House",
+      "us_state_id": "MN"
+    },
+    {
+      "person_id": 307627,
+      "display_name": "Rep. Kim Schrier D-WA-8",
+      "chamber": "House",
+      "us_state_id": "WA"
+    },
+    {
+      "person_id": 307631,
+      "display_name": "Sen. Josh Hawley R-MO-1",
+      "chamber": "Senate",
+      "us_state_id": "MO"
+    },
+    {
+      "person_id": 308116,
+      "display_name": "Rep. John James R-MI-10",
+      "chamber": "House",
+      "us_state_id": "MI"
+    },
+    {
+      "person_id": 308492,
+      "display_name": "Rep. Summer Lee D-PA-12",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 312750,
+      "display_name": "Rep. Delia Ramirez D-IL-3",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 313246,
+      "display_name": "Rep. Mariannette Miller-Meeks R-IA-1",
+      "chamber": "House",
+      "us_state_id": "IA"
+    },
+    {
+      "person_id": 314122,
+      "display_name": "Rep. Sheila Cherfilus-McCormick D-FL-20",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 314175,
+      "display_name": "Rep. Mike Collins R-GA-10",
+      "chamber": "House",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 314425,
+      "display_name": "Rep. Jake Ellzey R-TX-6",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 317327,
+      "display_name": "Sen. John Fetterman D-PA-2",
+      "chamber": "Senate",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 320509,
+      "display_name": "Rep. Dan Goldman D-NY-10",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 324209,
+      "display_name": "Rep. Wesley Hunt R-TX-38",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 330602,
+      "display_name": "Rep. Teresa Leger Fernandez D-NM-3",
+      "chamber": "House",
+      "us_state_id": "NM"
+    },
+    {
+      "person_id": 332030,
+      "display_name": "Rep. Rich McCormick R-GA-7",
+      "chamber": "House",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 336348,
+      "display_name": "Rep. Hillary Scholten D-MI-3",
+      "chamber": "House",
+      "us_state_id": "MI"
+    },
+    {
+      "person_id": 337881,
+      "display_name": "Rep. Marjorie Taylor Greene R-GA-14",
+      "chamber": "House",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 338556,
+      "display_name": "Rep. Tony Gonzales R-TX-23",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 342886,
+      "display_name": "Rep. Beth Van Duyne R-TX-24",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 347939,
+      "display_name": "Rep. Jake Auchincloss D-MA-4",
+      "chamber": "House",
+      "us_state_id": "MA"
+    },
+    {
+      "person_id": 348387,
+      "display_name": "Rep. Jen Kiggans R-VA-2",
+      "chamber": "House",
+      "us_state_id": "VA"
+    },
+    {
+      "person_id": 355320,
+      "display_name": "Rep. August Pfluger R-TX-11",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 356414,
+      "display_name": "Rep. Burgess Owens R-UT-4",
+      "chamber": "House",
+      "us_state_id": "UT"
+    },
+    {
+      "person_id": 356900,
+      "display_name": "Rep. Lauren Boebert R-CO-4",
+      "chamber": "House",
+      "us_state_id": "CO"
+    },
+    {
+      "person_id": 356913,
+      "display_name": "Rep. Ronny Jackson R-TX-13",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 361717,
+      "display_name": "Rep. Troy Nehls R-TX-22",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 362156,
+      "display_name": "Rep. Ritchie Torres D-NY-15",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 364726,
+      "display_name": "Rep. Lisa McClain R-MI-9",
+      "chamber": "House",
+      "us_state_id": "MI"
+    },
+    {
+      "person_id": 364729,
+      "display_name": "Rep. Anna Luna R-FL-13",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 365070,
+      "display_name": "Sen. Bill Hagerty R-TN-1",
+      "chamber": "Senate",
+      "us_state_id": "TN"
+    },
+    {
+      "person_id": 366519,
+      "display_name": "Rep. Scott Franklin R-FL-18",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 367391,
+      "display_name": "Rep. Monica De La Cruz R-TX-15",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 369609,
+      "display_name": "Rep. Andrew Clyde R-GA-9",
+      "chamber": "House",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 369725,
+      "display_name": "Rep. Mary Miller R-IL-15",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 369735,
+      "display_name": "Rep. Sara Jacobs D-CA-51",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 369737,
+      "display_name": "Sen. Raphael Warnock D-GA-2",
+      "chamber": "Senate",
+      "us_state_id": "GA"
+    },
+    {
+      "person_id": 369804,
+      "display_name": "Rep. Marilyn Strickland D-WA-10",
+      "chamber": "House",
+      "us_state_id": "WA"
+    },
+    {
+      "person_id": 370297,
+      "display_name": "Rep. Diana Harshbarger R-TN-1",
+      "chamber": "House",
+      "us_state_id": "TN"
+    },
+    {
+      "person_id": 370303,
+      "display_name": "Rep. Blake Moore R-UT-1",
+      "chamber": "House",
+      "us_state_id": "UT"
+    },
+    {
+      "person_id": 374701,
+      "display_name": "Sen. Tommy Tuberville R-AL-1",
+      "chamber": "Senate",
+      "us_state_id": "AL"
+    },
+    {
+      "person_id": 375113,
+      "display_name": "Rep. Carlos Gim\u00e9nez R-FL-28",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 381227,
+      "display_name": "Rep. Frank Mrvan D-IN-1",
+      "chamber": "House",
+      "us_state_id": "IN"
+    },
+    {
+      "person_id": 385782,
+      "display_name": "Rep. Derrick Van Orden R-WI-3",
+      "chamber": "House",
+      "us_state_id": "WI"
+    },
+    {
+      "person_id": 387213,
+      "display_name": "Rep. Shri Thanedar D-MI-13",
+      "chamber": "House",
+      "us_state_id": "MI"
+    },
+    {
+      "person_id": 387499,
+      "display_name": "Rep. Jasmine Crockett D-TX-30",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 390300,
+      "display_name": "Rep. Mike Lawler R-NY-17",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 396825,
+      "display_name": "Rep. Julia Letlow R-LA-5",
+      "chamber": "House",
+      "us_state_id": "LA"
+    },
+    {
+      "person_id": 399217,
+      "display_name": "Rep. Dale Strong R-AL-5",
+      "chamber": "House",
+      "us_state_id": "AL"
+    },
+    {
+      "person_id": 404369,
+      "display_name": "Rep. Mike Carey R-OH-15",
+      "chamber": "House",
+      "us_state_id": "OH"
+    },
+    {
+      "person_id": 404684,
+      "display_name": "Rep. Mike Ezell R-MS-4",
+      "chamber": "House",
+      "us_state_id": "MS"
+    },
+    {
+      "person_id": 404824,
+      "display_name": "Rep. Shontel Brown D-OH-11",
+      "chamber": "House",
+      "us_state_id": "OH"
+    },
+    {
+      "person_id": 405104,
+      "display_name": "Sen. JD Vance R-OH-2",
+      "chamber": "Senate",
+      "us_state_id": "OH"
+    },
+    {
+      "person_id": 407516,
+      "display_name": "Rep. Eli Crane R-AZ-2",
+      "chamber": "House",
+      "us_state_id": "AZ"
+    },
+    {
+      "person_id": 410426,
+      "display_name": "Rep. Chris Deluzio D-PA-17",
+      "chamber": "House",
+      "us_state_id": "PA"
+    },
+    {
+      "person_id": 411632,
+      "display_name": "Rep. Juan Ciscomani R-AZ-6",
+      "chamber": "House",
+      "us_state_id": "AZ"
+    },
+    {
+      "person_id": 411928,
+      "display_name": "Rep. Maxwell Frost D-FL-10",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 413257,
+      "display_name": "Rep. Nikki Budzinski D-IL-13",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 413605,
+      "display_name": "Rep. Keith Self R-TX-3",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 413789,
+      "display_name": "Rep. Harriet Hageman R-WY",
+      "chamber": "House",
+      "us_state_id": "WY"
+    },
+    {
+      "person_id": 414758,
+      "display_name": "Rep. Max Miller R-OH-7",
+      "chamber": "House",
+      "us_state_id": "OH"
+    },
+    {
+      "person_id": 416993,
+      "display_name": "Rep. Mark Alford R-MO-4",
+      "chamber": "House",
+      "us_state_id": "MO"
+    },
+    {
+      "person_id": 417822,
+      "display_name": "Rep. Nathaniel Moran R-TX-1",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 418087,
+      "display_name": "Rep. Eric Sorensen D-IL-17",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 418214,
+      "display_name": "Rep. Greg Casar D-TX-35",
+      "chamber": "House",
+      "us_state_id": "TX"
+    },
+    {
+      "person_id": 420280,
+      "display_name": "Rep. Robert Garcia D-CA-42",
+      "chamber": "House",
+      "us_state_id": "CA"
+    },
+    {
+      "person_id": 422519,
+      "display_name": "Rep. Greg Landsman D-OH-1",
+      "chamber": "House",
+      "us_state_id": "OH"
+    },
+    {
+      "person_id": 424340,
+      "display_name": "Rep. Rob Menendez D-NJ-8",
+      "chamber": "House",
+      "us_state_id": "NJ"
+    },
+    {
+      "person_id": 429181,
+      "display_name": "Rep. Marie Gluesenkamp Perez D-WA-3",
+      "chamber": "House",
+      "us_state_id": "WA"
+    },
+    {
+      "person_id": 431425,
+      "display_name": "Rep. Seth Magaziner D-RI-2",
+      "chamber": "House",
+      "us_state_id": "RI"
+    },
+    {
+      "person_id": 431938,
+      "display_name": "Rep. Laurel Lee R-FL-15",
+      "chamber": "House",
+      "us_state_id": "FL"
+    },
+    {
+      "person_id": 433408,
+      "display_name": "Rep. Jonathan Jackson D-IL-1",
+      "chamber": "House",
+      "us_state_id": "IL"
+    },
+    {
+      "person_id": 433952,
+      "display_name": "Rep. Pat Ryan D-NY-18",
+      "chamber": "House",
+      "us_state_id": "NY"
+    },
+    {
+      "person_id": 438624,
+      "display_name": "Rep. Rudy Yakym R-IN-2",
+      "chamber": "House",
+      "us_state_id": "IN"
+    },
+    {
+      "person_id": 441370,
+      "display_name": "Del. Jim Moylan R-GU-1",
+      "chamber": "House",
+      "us_state_id": "GU"
+    }
+  ],
+  "generated_at": "2025-06-06T16:01:14.814458"
+}

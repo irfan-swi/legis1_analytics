@@ -816,7 +816,7 @@ function createStackedChart(ctx, bills, selectedOrgs) {
                     callbacks: {
                         title: function(context) {
                             const bill = bills[context[0].dataIndex];
-                            return `${bill.bill_number} ${bill.bill_name}`;
+                            return `${bill.bill_number_full} ${bill.bill_name}`;
                         },
                         afterTitle: function(context) {
                             const bill = bills[context[0].dataIndex];

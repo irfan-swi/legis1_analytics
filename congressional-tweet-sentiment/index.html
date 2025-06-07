@@ -95,10 +95,12 @@
             border: 1px solid var(--border-light);
             border-radius: 4px;
             font-size: 14px;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: var(--bg-secondary);
             color: var(--text-primary);
             transition: border-color 0.2s ease;
             box-sizing: border-box;
+            height: 38px;
         }
 
         select:focus, input:focus {
@@ -114,19 +116,16 @@
 
         .autocomplete-container input {
             width: 100%;
-            padding: 8px 30px 8px 12px;
+            padding: 8px 12px;
             border: 1px solid var(--border-light);
             border-radius: 4px;
             font-size: 14px;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: var(--bg-secondary);
             color: var(--text-primary);
             transition: border-color 0.2s ease;
             box-sizing: border-box;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 12px;
+            height: 38px;
         }
 
         .autocomplete-container input:focus {
@@ -532,7 +531,7 @@
                 <div class="filter-group">
                     <label class="filter-label">Member</label>
                     <div class="autocomplete-container">
-                        <input type="text" id="memberFilter" placeholder="All Members" autocomplete="off">
+                        <input type="text" id="memberFilter" placeholder="Type to search members..." autocomplete="off">
                         <div id="memberDropdown" class="autocomplete-dropdown"></div>
                     </div>
                 </div>
@@ -977,29 +976,31 @@
                 type: 'scatter',  // Changed to scatter to support mixed chart types
                 data: {
                     datasets: [
-                        // Daily average scatter plots (moderately visible)
+                        // Daily average scatter plots (moderately visible) - hidden from legend
                         {
-                            label: 'Democratic Daily Avg',
+                            label: '',
                             type: 'scatter',
                             data: [],
                             backgroundColor: 'rgba(74, 144, 226, 0.4)',
                             borderColor: 'rgba(74, 144, 226, 0.6)',
                             pointRadius: 2,
                             pointHoverRadius: 4,
-                            showLine: false
+                            showLine: false,
+                            showInLegend: false
                         },
                         {
-                            label: 'Republican Daily Avg',
+                            label: '',
                             type: 'scatter',
                             data: [],
                             backgroundColor: 'rgba(211, 47, 47, 0.4)',
                             borderColor: 'rgba(211, 47, 47, 0.6)',
                             pointRadius: 2,
                             pointHoverRadius: 4,
-                            showLine: false
+                            showLine: false,
+                            showInLegend: false
                         },
                         {
-                            label: 'Independent Daily Avg',
+                            label: '',
                             type: 'scatter',
                             data: [],
                             backgroundColor: 'rgba(117, 117, 117, 0.4)',
@@ -1007,11 +1008,12 @@
                             pointRadius: 2,
                             pointHoverRadius: 4,
                             showLine: false,
-                            hidden: true
+                            hidden: true,
+                            showInLegend: false
                         },
-                        // Rolling average lines (prominent)
+                        // Rolling average lines (prominent) - shown in legend
                         {
-                            label: 'Democratic Trend (5-day avg)',
+                            label: 'Democratic',
                             type: 'line',
                             data: [],
                             borderColor: 'rgba(74, 144, 226, 0.9)',
@@ -1023,7 +1025,7 @@
                             borderWidth: 3
                         },
                         {
-                            label: 'Republican Trend (5-day avg)',
+                            label: 'Republican',
                             type: 'line',
                             data: [],
                             borderColor: 'rgba(211, 47, 47, 0.9)',
@@ -1035,7 +1037,7 @@
                             borderWidth: 3
                         },
                         {
-                            label: 'Independent Trend (5-day avg)',
+                            label: 'Independent',
                             type: 'line',
                             data: [],
                             borderColor: 'rgba(117, 117, 117, 0.9)',
@@ -1048,7 +1050,7 @@
                             hidden: true
                         },
                         {
-                            label: 'Combined Trend (5-day avg)',
+                            label: 'Combined',
                             type: 'line',
                             data: [],
                             borderColor: '#9c27b0',
@@ -1073,7 +1075,11 @@
                             position: 'bottom',
                             labels: {
                                 usePointStyle: true,
-                                padding: 20
+                                padding: 20,
+                                filter: function(legendItem, chartData) {
+                                    // Only show datasets with non-empty labels (hides scatter plots)
+                                    return legendItem.text && legendItem.text !== '';
+                                }
                             }
                         },
                         tooltip: {
@@ -1320,16 +1326,15 @@
             });
             
             input.addEventListener('focus', function() {
-                // Always show dropdown on focus, like a real dropdown
-                if (this.value === '' || this.value === 'All Members') {
-                    showDropdown(allMembers.slice(0, 10), dropdown, input);
-                } else {
-                    // Show filtered results
+                // Only show dropdown if there's a search query
+                if (this.value && this.value !== '') {
                     const query = this.value.toLowerCase();
                     const filtered = allMembers.filter(member => 
                         member.toLowerCase().includes(query)
                     ).slice(0, 10);
-                    showDropdown(filtered, dropdown, input);
+                    if (filtered.length > 0) {
+                        showDropdown(filtered, dropdown, input);
+                    }
                 }
             });
             

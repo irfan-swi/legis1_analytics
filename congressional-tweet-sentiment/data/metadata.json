@@ -246,7 +246,7 @@
       "Senate"
     ],
     "parties": [
-      "Democrat",
+      "Democratic",
       "Democrat, Republican",
       "Independent",
       "Republican"
@@ -1865,7 +1865,7 @@
     },
     {
       "person_id": 196450,
-      "display_name": "Rep. Jeff Van Drew D-NJ-2",
+      "display_name": "Rep. Jeff Van Drew R-NJ-2",
       "chamber": "House",
       "us_state_id": "NJ"
     },

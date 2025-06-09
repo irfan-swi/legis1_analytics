@@ -192,6 +192,21 @@
             margin-bottom: 8px;
         }
 
+        .member-name a {
+            color: var(--legis-blue);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .member-name a:hover {
+            color: var(--democrat-color);
+            text-decoration: underline;
+        }
+
+        .member-name a:visited {
+            color: var(--legis-blue);
+        }
+
         .member-info {
             display: grid;
             grid-template-columns: auto auto;
@@ -454,9 +469,7 @@
                     </div>
                     <div class="chart-subtitle">Percentage of party unity votes where member voted with their party • Click bars to view member details</div>
                 </div>
-                <div class="data-summary" id="dataSummary">
-                    Loading party loyalty data...
-                </div>
+
                 <div class="chart-content">
                     <canvas id="loyaltyChart"></canvas>
                 </div>
@@ -645,7 +658,7 @@
             if (metadata) {
                 const congressList = metadata.congresses.map(c => `${c}th`).join(', ');
                 const lastUpdated = new Date(metadata.last_updated).toLocaleDateString();
-                summary.textContent = `Data includes ${metadata.total_members} member records across ${congressList} Congress • Last updated: ${lastUpdated}`;
+                //summary.textContent = `Data includes ${metadata.total_members} member records across ${congressList} Congress • Last updated: ${lastUpdated}`;
             } else {
                 summary.textContent = `Sample data with ${loyaltyData.length} member records for demonstration`;
             }
@@ -837,10 +850,13 @@
 
             const member = selectedMember;
             const shortName = member.display_name.replace(/Rep\.|Sen\./, '').trim();
+            const legis1Url = `https://app.legis1.com/lawmaker/detail?id=${member.memberPersonID}#roll-call-votes`;
 
             detailsDiv.innerHTML = `
                 <div class="member-card">
-                    <div class="member-name">${shortName}</div>
+                    <div class="member-name">
+                        <a href="${legis1Url}" target="_blank" title="View ${shortName} on Legis1">${shortName}</a>
+                    </div>
                     <div class="member-info">
                         <span class="member-info-label">Party:</span>
                         <span class="member-info-value party-${member.party_name.toLowerCase()}">

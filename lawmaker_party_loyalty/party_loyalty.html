@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congressional Party Loyalty Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        /* Legis1 Application Theme - Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 14.5px;
+            line-height: 1.4;
+            color: #333333;
+            background-color: #F3F3EC;
+            margin: 0;
+        }
+
+        :root {
+            --democrat-color: #4a90e2;
+            --republican-color: #d32f2f;
+            --independent-color: #757575;
+            --bg-primary: #F3F3EC;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #f8f8f8;
+            --text-primary: #333333;
+            --text-secondary: #555961;
+            --text-muted: #999999;
+            --border-light: #ced4da;
+            --border-medium: #ced4da;
+            --border-dark: #c0c0c0;
+            --chart-grid: #f0f0f0;
+            --hover-bg: #f8f8f8;
+            --focus-outline: #31598B;
+            --legis-blue: #31598B;
+        }
+
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px;
+            gap: 15px;
+            box-sizing: border-box;
+        }
+
+        .filter-panel {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            padding: 30px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 30px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            font-size: 14.5px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--legis-blue);
+            box-shadow: 0 0 0 2px rgba(49, 89, 139, 0.2);
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        /* Ensure side-by-side layout on larger screens */
+        @media (min-width: 901px) {
+            .main-content {
+                grid-template-columns: 2fr 1fr !important;
+                grid-template-rows: none !important;
+            }
+        }
+
+        .chart-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .chart-header {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .chart-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .chart-content {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        .detail-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .detail-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .detail-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .detail-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .member-card {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .member-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .member-info {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 5px 15px;
+            margin-bottom: 15px;
+        }
+
+        .member-info-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .member-info-value {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+
+        .party-democrat {
+            color: var(--democrat-color);
+            font-weight: 600;
+        }
+
+        .party-republican {
+            color: var(--republican-color);
+            font-weight: 600;
+        }
+
+        .party-independent {
+            color: var(--independent-color);
+            font-weight: 600;
+        }
+
+        .loyalty-score {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid var(--border-light);
+        }
+
+        .loyalty-score-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--legis-blue);
+            margin-bottom: 5px;
+        }
+
+        .loyalty-score-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .no-selection {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 50px;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .error {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: var(--republican-color);
+            background-color: rgba(211, 47, 47, 0.1);
+            border: 1px solid rgba(211, 47, 47, 0.2);
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .data-summary {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .chart-controls label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .chart-controls select {
+            padding: 4px 8px;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            min-width: 140px;
+        }
+
+        .chart-controls select:focus {
+            outline: none;
+            border-color: var(--legis-blue);
+            box-shadow: 0 0 0 2px rgba(49, 89, 139, 0.2);
+        }
+
+        .chart-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .chart-header-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .chart-controls {
+                align-self: stretch;
+                justify-content: flex-end;
+            }
+        }
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: 2fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-header-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .chart-controls {
+                align-self: stretch;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Filter Panel -->
+        <div class="filter-panel">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label">Congress</label>
+                    <select id="congressFilter">
+                        <option value="all">All Congresses</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Chamber</label>
+                    <select id="chamberFilter">
+                        <option value="all">All Chambers</option>
+                        <option value="house">House</option>
+                        <option value="senate">Senate</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Party</label>
+                    <select id="partyFilter">
+                        <option value="all">All Parties</option>
+                        <option value="Democrat">Democrat</option>
+                        <option value="Republican">Republican</option>
+                        <option value="Independent">Independent</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Display Count</label>
+                    <select id="displayCountFilter">
+                        <option value="10">Top 10</option>
+                        <option value="20">Top 20</option>
+                        <option value="50">Top 50</option>
+                        <option value="all" selected>All Members</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Member</label>
+                    <select id="memberFilter">
+                        <option value="all">All Members</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Chart Section -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-header-row">
+                        <div class="chart-title">Party Loyalty Rankings</div>
+                        <div class="chart-controls">
+                            <label>Sort:</label>
+                            <select id="sortOrder">
+                                <option value="desc">Highest to Lowest</option>
+                                <option value="asc">Lowest to Highest</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-subtitle">Percentage of party unity votes where member voted with their party • Click bars to view member details</div>
+                </div>
+                <div class="data-summary" id="dataSummary">
+                    Loading party loyalty data...
+                </div>
+                <div class="chart-content">
+                    <canvas id="loyaltyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Detail Panel -->
+            <div class="detail-panel">
+                <div class="detail-header">
+                    <div class="detail-title">Member Details</div>
+                    <div class="detail-subtitle">Click on a bar to view member information</div>
+                </div>
+                <div id="memberDetails">
+                    <div class="no-selection">
+                        Select a member from the chart to view detailed voting statistics
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chart;
+        let loyaltyData = [];
+        let filteredData = [];
+        let selectedMember = null;
+        let metadata = null;
+        let currentDisplayData = []; // Track currently displayed data for click events
+
+        // Load the party loyalty data
+        async function loadData() {
+            try {
+                // First try to load real data
+                const response = await fetch('party_loyalty_data.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    loyaltyData = data.loyalty_data;
+                    metadata = data.metadata;
+                    console.log('Loaded real party loyalty data:', loyaltyData.length, 'records');
+                } else {
+                    throw new Error('Real data not found, using sample data');
+                }
+            } catch (error) {
+                console.log('Using sample data:', error.message);
+                // Generate sample data if real data isn't available
+                loyaltyData = generateSampleData();
+                metadata = {
+                    total_members: loyaltyData.length,
+                    congresses: [...new Set(loyaltyData.map(d => d.congress))].sort(),
+                    last_updated: new Date().toISOString()
+                };
+            }
+
+            initializeFilters();
+            updateDataSummary();
+            applyFilters();
+        }
+
+        // Generate sample data for demonstration
+        function generateSampleData() {
+            const sampleMembers = [
+                { name: "Rep. Nancy Pelosi", party: "Democrat", chamber: "House" },
+                { name: "Rep. Kevin McCarthy", party: "Republican", chamber: "House" },
+                { name: "Sen. Mitch McConnell", party: "Republican", chamber: "Senate" },
+                { name: "Sen. Chuck Schumer", party: "Democrat", chamber: "Senate" },
+                { name: "Rep. Alexandria Ocasio-Cortez", party: "Democrat", chamber: "House" },
+                { name: "Rep. Matt Gaetz", party: "Republican", chamber: "House" },
+                { name: "Sen. Elizabeth Warren", party: "Democrat", chamber: "Senate" },
+                { name: "Sen. Ted Cruz", party: "Republican", chamber: "Senate" },
+                { name: "Rep. Jim Jordan", party: "Republican", chamber: "House" },
+                { name: "Sen. Bernie Sanders", party: "Independent", chamber: "Senate" },
+                { name: "Rep. Ilhan Omar", party: "Democrat", chamber: "House" },
+                { name: "Sen. Susan Collins", party: "Republican", chamber: "Senate" },
+                { name: "Rep. Lauren Boebert", party: "Republican", chamber: "House" },
+                { name: "Sen. Joe Manchin", party: "Democrat", chamber: "Senate" },
+                { name: "Rep. Rashida Tlaib", party: "Democrat", chamber: "House" }
+            ];
+
+            const sampleData = [];
+            [117, 118].forEach(congress => {
+                sampleMembers.forEach((member, i) => {
+                    const totalUnityVotes = Math.floor(Math.random() * 50) + 30;
+                    let loyaltyPct;
+                    
+                    // Generate realistic loyalty scores based on party and member type
+                    if (member.party === 'Independent') {
+                        loyaltyPct = 45 + Math.random() * 25; // 45-70%
+                    } else if (member.name.includes('Manchin') || member.name.includes('Collins')) {
+                        loyaltyPct = 75 + Math.random() * 15; // 75-90% for moderates
+                    } else {
+                        loyaltyPct = 85 + Math.random() * 12; // 85-97% for typical members
+                    }
+
+                    const votesWithParty = Math.round(totalUnityVotes * (loyaltyPct / 100));
+                    const votesAgainstParty = totalUnityVotes - votesWithParty;
+
+                    sampleData.push({
+                        memberPersonID: `person_${i}`,
+                        display_name: member.name,
+                        party_name: member.party,
+                        congress: congress,
+                        chamber: member.chamber,
+                        total_unity_votes: totalUnityVotes,
+                        votes_with_party: votesWithParty,
+                        votes_against_party: votesAgainstParty,
+                        loyalty_percentage: Math.round(loyaltyPct * 10) / 10
+                    });
+                });
+            });
+
+            return sampleData;
+        }
+
+        // Initialize filters based on loaded data
+        function initializeFilters() {
+            // Populate congress filter
+            const congressSelect = document.getElementById('congressFilter');
+            const congresses = [...new Set(loyaltyData.map(d => d.congress))].sort();
+            congresses.forEach(congress => {
+                const option = document.createElement('option');
+                option.value = congress;
+                option.textContent = `${congress}th Congress`;
+                congressSelect.appendChild(option);
+            });
+
+            // Set default to latest congress
+            if (congresses.length > 0) {
+                congressSelect.value = Math.max(...congresses);
+            }
+
+            // Add event listeners
+            ['congressFilter', 'chamberFilter', 'partyFilter', 'displayCountFilter', 'sortOrder'].forEach(id => {
+                document.getElementById(id).addEventListener('change', function() {
+                    if (['congressFilter', 'chamberFilter', 'partyFilter'].includes(id)) {
+                        updateMemberFilter();
+                    }
+                    applyFilters();
+                });
+            });
+
+            document.getElementById('memberFilter').addEventListener('change', applyFilters);
+
+            updateMemberFilter();
+        }
+
+        // Update member filter based on other filters
+        function updateMemberFilter() {
+            const memberSelect = document.getElementById('memberFilter');
+            const currentValue = memberSelect.value;
+            
+            // Clear existing options except "All Members"
+            memberSelect.innerHTML = '<option value="all">All Members</option>';
+            
+            // Get current filter values
+            const congress = document.getElementById('congressFilter').value;
+            const chamber = document.getElementById('chamberFilter').value;
+            const party = document.getElementById('partyFilter').value;
+            
+            // Filter members based on current filters
+            const filteredMembers = loyaltyData.filter(m => {
+                if (congress !== 'all' && m.congress.toString() !== congress) return false;
+                if (chamber !== 'all' && m.chamber.toLowerCase() !== chamber) return false;
+                if (party !== 'all' && m.party_name !== party) return false;
+                return true;
+            });
+
+            // Get unique members and sort by name
+            const uniqueMembers = [...new Map(filteredMembers.map(m => [m.display_name, m])).values()]
+                .sort((a, b) => a.display_name.localeCompare(b.display_name));
+
+            uniqueMembers.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.display_name;
+                option.textContent = member.display_name;
+                memberSelect.appendChild(option);
+            });
+
+            // Restore selection if still valid
+            if (currentValue !== 'all' && uniqueMembers.find(m => m.display_name === currentValue)) {
+                memberSelect.value = currentValue;
+            }
+        }
+
+        // Update data summary
+        function updateDataSummary() {
+            const summary = document.getElementById('dataSummary');
+            if (metadata) {
+                const congressList = metadata.congresses.map(c => `${c}th`).join(', ');
+                const lastUpdated = new Date(metadata.last_updated).toLocaleDateString();
+                summary.textContent = `Data includes ${metadata.total_members} member records across ${congressList} Congress • Last updated: ${lastUpdated}`;
+            } else {
+                summary.textContent = `Sample data with ${loyaltyData.length} member records for demonstration`;
+            }
+        }
+
+        // Initialize chart
+        function initChart() {
+            const ctx = document.getElementById('loyaltyChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Party Loyalty %',
+                        data: [],
+                        backgroundColor: [],
+                        borderColor: [],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    interaction: {
+                        intersect: false
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            selectedMember = currentDisplayData[index];
+                            updateMemberDetails();
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const member = currentDisplayData[context[0].dataIndex];
+                                    return member ? member.display_name : '';
+                                },
+                                label: function(context) {
+                                    const member = currentDisplayData[context.dataIndex];
+                                    if (!member) return '';
+                                    return [
+                                        `Party Loyalty: ${member.loyalty_percentage}%`,
+                                        `Unity Votes: ${member.total_unity_votes}`,
+                                        `With Party: ${member.votes_with_party}`,
+                                        `Against Party: ${member.votes_against_party}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Party Loyalty Percentage'
+                            },
+                            grid: {
+                                color: '#f0f0f0'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Get party color
+        function getPartyColor(party) {
+            switch(party) {
+                case 'Democrat': return '#4a90e2';
+                case 'Republican': return '#d32f2f';
+                case 'Independent': return '#757575';
+                default: return '#757575';
+            }
+        }
+
+        // Apply filters and update chart
+        function applyFilters() {
+            const congress = document.getElementById('congressFilter').value;
+            const chamber = document.getElementById('chamberFilter').value;
+            const party = document.getElementById('partyFilter').value;
+            const member = document.getElementById('memberFilter').value;
+
+            filteredData = loyaltyData.filter(m => {
+                if (congress !== 'all' && m.congress.toString() !== congress) return false;
+                if (chamber !== 'all' && m.chamber.toLowerCase() !== chamber) return false;
+                if (party !== 'all' && m.party_name !== party) return false;
+                if (member !== 'all' && m.display_name !== member) return false;
+                return true;
+            });
+
+            updateChart();
+            
+            // Clear selected member if they're no longer in filtered results
+            if (selectedMember && !filteredData.find(m => m.memberPersonID === selectedMember.memberPersonID)) {
+                selectedMember = null;
+                updateMemberDetails();
+            }
+            
+            // Also clear if they're not in the currently displayed data
+            if (selectedMember && !currentDisplayData.find(m => m.memberPersonID === selectedMember.memberPersonID)) {
+                selectedMember = null;
+                updateMemberDetails();
+            }
+        }
+
+        // Update chart with filtered data
+        function updateChart() {
+            const sortOrder = document.getElementById('sortOrder').value;
+            const displayCount = document.getElementById('displayCountFilter').value;
+            
+            // Sort by loyalty score based on selected order
+            if (sortOrder === 'desc') {
+                filteredData.sort((a, b) => b.loyalty_percentage - a.loyalty_percentage);
+            } else {
+                filteredData.sort((a, b) => a.loyalty_percentage - b.loyalty_percentage);
+            }
+            
+            // Limit display based on selected count
+            let displayData;
+            if (displayCount === 'all') {
+                displayData = filteredData;
+            } else {
+                const count = parseInt(displayCount);
+                displayData = filteredData.slice(0, count);
+            }
+            
+            const labels = displayData.map(member => {
+                const shortName = member.display_name.replace(/Rep\.|Sen\./, '').trim();
+                const location = member.chamber === 'Senate' ? `${shortName} (Senate)` : `${shortName} (House)`;
+                return location;
+            });
+            
+            const data = displayData.map(member => member.loyalty_percentage);
+            const colors = displayData.map(member => getPartyColor(member.party_name));
+            
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.data.datasets[0].backgroundColor = colors;
+            chart.data.datasets[0].borderColor = colors;
+            
+            // Update the currently displayed data for click events
+            currentDisplayData = displayData;
+            
+            chart.update();
+            
+            // Update chart title to show current display info
+            const titleElement = document.querySelector('.chart-title');
+            const countText = displayCount === 'all' ? 'All Members' : `Top ${displayCount}`;
+            const sortText = sortOrder === 'desc' ? 'Highest to Lowest' : 'Lowest to Highest';
+            titleElement.textContent = `Party Loyalty Rankings (${countText}, ${sortText})`;
+        }
+
+        // Update member details panel
+        function updateMemberDetails() {
+            const detailsDiv = document.getElementById('memberDetails');
+            
+            if (!selectedMember) {
+                detailsDiv.innerHTML = `
+                    <div class="no-selection">
+                        Select a member from the chart to view detailed voting statistics
+                    </div>
+                `;
+                return;
+            }
+
+            const member = selectedMember;
+            const shortName = member.display_name.replace(/Rep\.|Sen\./, '').trim();
+
+            detailsDiv.innerHTML = `
+                <div class="member-card">
+                    <div class="member-name">${shortName}</div>
+                    <div class="member-info">
+                        <span class="member-info-label">Party:</span>
+                        <span class="member-info-value party-${member.party_name.toLowerCase()}">
+                            ${member.party_name}
+                        </span>
+                        <span class="member-info-label">Chamber:</span>
+                        <span class="member-info-value">${member.chamber}</span>
+                        <span class="member-info-label">Congress:</span>
+                        <span class="member-info-value">${member.congress}th Congress</span>
+                        <span class="member-info-label">Unity Votes:</span>
+                        <span class="member-info-value">${member.total_unity_votes}</span>
+                    </div>
+                    <div class="loyalty-score">
+                        <div class="loyalty-score-value">${member.loyalty_percentage}%</div>
+                        <div class="loyalty-score-label">Party Loyalty Score</div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">${member.total_unity_votes}</div>
+                        <div class="stat-label">Party Unity Votes</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${member.votes_with_party}</div>
+                        <div class="stat-label">Voted With Party</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${member.votes_against_party}</div>
+                        <div class="stat-label">Voted Against Party</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${Math.round((member.votes_against_party / member.total_unity_votes) * 100)}%</div>
+                        <div class="stat-label">Against Party Rate</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize the dashboard
+        async function initDashboard() {
+            initChart();
+            await loadData();
+        }
+
+        // Start the application
+        initDashboard();
+    </script>
+</body>
+</html>

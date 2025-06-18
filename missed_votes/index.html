@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congressional Missed Votes Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        /* Legis1 Application Theme - Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 14.5px;
+            line-height: 1.4;
+            color: #333333;
+            background-color: #F3F3EC;
+            margin: 0;
+        }
+
+        :root {
+            --democrat-color: #4a90e2;
+            --republican-color: #d32f2f;
+            --independent-color: #757575;
+            --bg-primary: #F3F3EC;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #f8f8f8;
+            --text-primary: #333333;
+            --text-secondary: #555961;
+            --text-muted: #999999;
+            --border-light: #ced4da;
+            --border-medium: #ced4da;
+            --border-dark: #c0c0c0;
+            --chart-grid: #f0f0f0;
+            --hover-bg: #f8f8f8;
+            --focus-outline: #31598B;
+            --legis-blue: #31598B;
+            --warning-color: #ff6b35;
+            --good-color: #28a745;
+        }
+
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px;
+            gap: 15px;
+            box-sizing: border-box;
+        }
+
+        .filter-panel {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            padding: 30px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 30px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            font-size: 14.5px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--legis-blue);
+            box-shadow: 0 0 0 2px rgba(49, 89, 139, 0.2);
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        .chart-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .chart-header {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .chart-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .chart-content {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        .detail-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .detail-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .detail-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .detail-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .member-card {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .member-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--legis-blue);
+            margin-bottom: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            display: inline-block;
+        }
+
+        .member-name:hover {
+            color: var(--republican-color);
+            text-decoration: underline;
+        }
+
+        /* Scrollbar styling for member details */
+        #memberDetails::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #memberDetails::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        #memberDetails::-webkit-scrollbar-thumb {
+            background: var(--border-dark);
+            border-radius: 3px;
+        }
+
+        #memberDetails::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        .member-display-name {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .member-info {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 5px 15px;
+            margin-bottom: 15px;
+        }
+
+        .member-info-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .member-info-value {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+
+        .party-democrat {
+            color: var(--democrat-color);
+            font-weight: 600;
+        }
+
+        .party-republican {
+            color: var(--republican-color);
+            font-weight: 600;
+        }
+
+        .party-independent {
+            color: var(--independent-color);
+            font-weight: 600;
+        }
+
+        .missed-score {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid var(--border-light);
+        }
+
+        .missed-score-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .missed-score-value.high-missed {
+            color: var(--republican-color);
+        }
+
+        .missed-score-value.medium-missed {
+            color: var(--warning-color);
+        }
+
+        .missed-score-value.low-missed {
+            color: var(--good-color);
+        }
+
+        .missed-score-value.perfect {
+            color: var(--legis-blue);
+        }
+
+        .missed-score-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .no-selection {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 50px;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            border: 3px solid var(--border-light);
+            border-top: 3px solid var(--legis-blue);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        .loading-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: 2fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Filter Panel -->
+        <div class="filter-panel">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label">Congress</label>
+                    <select id="congressFilter">
+                        <!-- Will be populated from manifest -->
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Chamber</label>
+                    <select id="chamberFilter">
+                        <option value="all">All Chambers</option>
+                        <option value="house">House</option>
+                        <option value="senate">Senate</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">State</label>
+                    <select id="stateFilter">
+                        <option value="all">All States</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Show Top</label>
+                    <select id="limitFilter">
+                        <option value="5">Top 5</option>
+                        <option value="10" selected>Top 10</option>
+                        <option value="20">Top 20</option>
+                        <option value="all">Show All</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Chart Section -->
+            <div class="chart-container">
+                <div class="loading-overlay" id="loadingOverlay">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text" id="loadingText">Loading manifest...</div>
+                </div>
+                <div class="chart-header">
+                    <div class="chart-title">Congressional Missed Votes Rankings</div>
+                    <div class="chart-subtitle">Percentage of total votes missed • Click bars to view details • Ctrl+Click to open Legis1 profile</div>
+                </div>
+                <div class="chart-content">
+                    <canvas id="missedChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Detail Panel -->
+            <div class="detail-panel">
+                <div class="detail-header">
+                    <div class="detail-title">Member Details</div>
+                    <div class="detail-subtitle">Click on a bar to view member information • Click member name to open Legis1 profile</div>
+                </div>
+                <div id="memberDetails">
+                    <div class="no-selection">
+                        Select a member from the chart to view detailed attendance statistics
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let chart;
+        let memberData = [];
+        let filteredData = [];
+        let selectedMember = null;
+        let availableCongresses = [];
+        let currentCongress = null;
+
+        // Load manifest and initialize congress selector
+        async function loadManifest() {
+            try {
+                updateLoadingText('Loading manifest...');
+                const response = await fetch('data/manifest.json');
+                if (!response.ok) {
+                    throw new Error(`Failed to load manifest: ${response.status}`);
+                }
+                
+                const manifest = await response.json();
+                availableCongresses = manifest.congresses;
+                console.log('Available congresses:', availableCongresses.map(c => c.congress));
+                
+                // Initialize congress selector
+                const congressSelect = document.getElementById('congressFilter');
+                congressSelect.innerHTML = '';
+                
+                availableCongresses.forEach(congress => {
+                    const option = document.createElement('option');
+                    option.value = congress.congress;
+                    option.textContent = congress.label;
+                    congressSelect.appendChild(option);
+                });
+                
+                // Set default to 119th Congress or first available
+                const defaultCongress = availableCongresses.find(c => c.congress === 119) || availableCongresses[0];
+                if (defaultCongress) {
+                    congressSelect.value = defaultCongress.congress;
+                    currentCongress = defaultCongress.congress;
+                }
+                
+                // Load initial data
+                await loadCongressData();
+                
+            } catch (error) {
+                console.error('Error loading manifest:', error);
+                showError('Error loading data manifest. Please check that data files are available.');
+            }
+        }
+
+        // Load data for specific congress
+        async function loadCongressData() {
+            try {
+                const selectedCongress = document.getElementById('congressFilter').value;
+                updateLoadingText(`Loading Congress ${selectedCongress} data...`);
+                
+                const response = await fetch(`data/missed_votes_${selectedCongress}.json`);
+                if (!response.ok) {
+                    throw new Error(`Failed to load data for Congress ${selectedCongress}: ${response.status}`);
+                }
+                
+                memberData = await response.json();
+                currentCongress = selectedCongress;
+                
+                console.log('Data loaded:', {
+                    congress: selectedCongress,
+                    members: memberData.length
+                });
+                
+                // Initialize filters and chart
+                populateFilters();
+                applyFilters();
+                hideLoading();
+                
+            } catch (error) {
+                console.error('Error loading congress data:', error);
+                showError(`Error loading Congress data: ${error.message}`);
+            }
+        }
+
+        // Update loading text
+        function updateLoadingText(text) {
+            document.getElementById('loadingText').textContent = text;
+        }
+
+        // Hide loading overlay
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        // Show error message
+        function showError(message) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+
+        // Populate filter dropdowns
+        function populateFilters() {
+            // States
+            const states = [...new Set(memberData.map(m => m.state).filter(s => s))].sort();
+            populateSelect('stateFilter', states);
+        }
+
+        // Helper to populate select elements
+        function populateSelect(selectId, options) {
+            const select = document.getElementById(selectId);
+            const allOption = select.querySelector('option[value="all"]');
+            
+            // Clear existing options except "All"
+            select.innerHTML = '';
+            select.appendChild(allOption);
+            
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                select.appendChild(optionElement);
+            });
+        }
+
+        // Initialize chart
+        function initChart() {
+            const ctx = document.getElementById('missedChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Missed Votes %',
+                        data: [],
+                        backgroundColor: [],
+                        borderColor: [],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    interaction: {
+                        intersect: false,
+                        mode: 'point'
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const displayData = getCurrentDisplayData();
+                            const member = displayData[index];
+                            
+                            // Check if Ctrl/Cmd key is held (open in new tab) or regular click (show details)
+                            if (event.native && (event.native.ctrlKey || event.native.metaKey)) {
+                                // Open Legis1 profile in new tab
+                                if (member.person_id) {
+                                    const legis1Url = `https://app.legis1.com/lawmaker/detail?id=${member.person_id}#roll-call-votes`;
+                                    window.open(legis1Url, '_blank');
+                                }
+                            } else {
+                                // Show member details
+                                selectedMember = member;
+                                updateMemberDetails();
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            position: 'nearest',
+                            callbacks: {
+                                label: function(context) {
+                                    return `Missed Votes: ${context.parsed.x.toFixed(1)}%`;
+                                },
+                                afterLabel: function(context) {
+                                    return 'Ctrl+Click to open Legis1 profile';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Missed Votes Percentage'
+                            },
+                            grid: {
+                                color: '#f0f0f0'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Get party color
+        function getPartyColor(party) {
+            switch(party) {
+                case 'democrat': return '#4a90e2';
+                case 'republican': return '#d32f2f';
+                case 'independent': return '#757575';
+                default: return '#757575';
+            }
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const chamber = document.getElementById('chamberFilter').value;
+            const state = document.getElementById('stateFilter').value;
+
+            filteredData = memberData.filter(m => {
+                if (chamber !== 'all' && m.chamber !== chamber) return false;
+                if (state !== 'all' && m.state !== state) return false;
+                return true;
+            });
+
+            updateChart();
+            
+            // Clear selected member if they're no longer in filtered results
+            if (selectedMember && !filteredData.find(m => m.name === selectedMember.name)) {
+                selectedMember = null;
+                updateMemberDetails();
+            }
+        }
+
+        // Get currently displayed data (after limit filter)
+        function getCurrentDisplayData() {
+            const limitValue = document.getElementById('limitFilter').value;
+            const sortedData = [...filteredData].sort((a, b) => b.missedPercentage - a.missedPercentage);
+            return limitValue === 'all' ? sortedData : sortedData.slice(0, parseInt(limitValue));
+        }
+
+        // Update chart with filtered data
+        function updateChart() {
+            if (!chart) {
+                initChart();
+            }
+
+            // Sort by missed percentage descending (worst attendance first)
+            filteredData.sort((a, b) => b.missedPercentage - a.missedPercentage);
+            
+            // Get currently displayed data after limit filter
+            const displayData = getCurrentDisplayData();
+            
+            // Update chart subtitle based on what's being shown
+            const chartSubtitle = document.querySelector('.chart-subtitle');
+            const limitValue = document.getElementById('limitFilter').value;
+            const limitText = limitValue === 'all' ? 
+                `Showing all ${filteredData.length} members` : 
+                `Showing top ${Math.min(parseInt(limitValue), filteredData.length)} members`;
+            chartSubtitle.textContent = `${limitText} • Click bars to view details • Ctrl+Click to open Legis1 profile`;
+            
+            // Use display_name for chart labels, fallback to name
+            const labels = displayData.map(member => member.display_name || member.name);
+            
+            const data = displayData.map(member => member.missedPercentage);
+            const colors = displayData.map(member => getPartyColor(member.party));
+            
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.data.datasets[0].backgroundColor = colors;
+            chart.data.datasets[0].borderColor = colors;
+            
+            chart.update();
+            
+            // Clear selected member if they're no longer visible in the chart
+            if (selectedMember && !displayData.find(m => m.name === selectedMember.name)) {
+                selectedMember = null;
+                updateMemberDetails();
+            }
+        }
+
+        // Get member's ranking
+        function getMemberRanking(member) {
+            // Sort all members by missed percentage (ascending for ranking - best first)
+            const allSorted = [...memberData].sort((a, b) => a.missedPercentage - b.missedPercentage);
+            const congressRank = allSorted.findIndex(m => m.name === member.name) + 1;
+            
+            // Get party members and rank within party
+            const partyMembers = memberData.filter(m => m.party === member.party);
+            const partySorted = partyMembers.sort((a, b) => a.missedPercentage - b.missedPercentage);
+            const partyRank = partySorted.findIndex(m => m.name === member.name) + 1;
+            
+            return {
+                congressRank,
+                congressTotal: memberData.length,
+                partyRank,
+                partyTotal: partyMembers.length
+            };
+        }
+
+        // Get score color class based on missed percentage
+        function getScoreColorClass(missedPercentage) {
+            if (missedPercentage === 0) return 'perfect';
+            if (missedPercentage < 5) return 'low-missed';
+            if (missedPercentage < 20) return 'medium-missed';
+            return 'high-missed';
+        }
+
+        // Update member details panel
+        function updateMemberDetails() {
+            const detailsDiv = document.getElementById('memberDetails');
+            
+            if (!selectedMember) {
+                detailsDiv.innerHTML = `
+                    <div class="no-selection">
+                        Select a member from the chart to view detailed attendance statistics
+                    </div>
+                `;
+                return;
+            }
+
+            const member = selectedMember;
+            const ranking = getMemberRanking(member);
+            const scoreColorClass = getScoreColorClass(member.missedPercentage);
+            
+            // Create Legis1 URL if person_id exists
+            const legis1Url = member.person_id ? `https://app.legis1.com/lawmaker/detail?id=${member.person_id}#roll-call-votes` : null;
+
+            detailsDiv.innerHTML = `
+                <div class="member-card">
+                    ${legis1Url ? 
+                        `<a href="${legis1Url}" target="_blank" class="member-name">${member.name}</a>` :
+                        `<div class="member-name">${member.name}</div>`
+                    }
+                    <div class="member-display-name">${member.display_name || member.name}</div>
+                    <div class="member-info">
+                        <span class="member-info-label">Party:</span>
+                        <span class="member-info-value party-${member.party}">
+                            ${member.party.charAt(0).toUpperCase() + member.party.slice(1)}
+                        </span>
+                        <span class="member-info-label">Chamber:</span>
+                        <span class="member-info-value">${member.chamber.charAt(0).toUpperCase() + member.chamber.slice(1)}</span>
+                        <span class="member-info-label">State:</span>
+                        <span class="member-info-value">${member.state || 'Unknown'}</span>
+                    </div>
+                    <div class="missed-score">
+                        <div class="missed-score-value ${scoreColorClass}">${member.missedPercentage}%</div>
+                        <div class="missed-score-label">Missed Votes</div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">${member.totalVotes}</div>
+                        <div class="stat-label">Total Votes</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${member.votesPresent}</div>
+                        <div class="stat-label">Votes Present</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${member.missedVotes}</div>
+                        <div class="stat-label">Votes Missed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${member.attendanceRate}%</div>
+                        <div class="stat-label">Attendance Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${ranking.congressRank} of ${ranking.congressTotal}</div>
+                        <div class="stat-label">Congress Ranking</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${ranking.partyRank} of ${ranking.partyTotal}</div>
+                        <div class="stat-label">Party Ranking</div>
+                    </div>
+                </div>
+                ${member.notes ? `<div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 0.75rem; color: #555;"><strong>Notes:</strong> ${member.notes}</div>` : ''}
+            `;
+        }
+
+        // Event listeners
+        document.getElementById('congressFilter').addEventListener('change', loadCongressData);
+        
+        ['chamberFilter', 'stateFilter', 'limitFilter'].forEach(id => {
+            document.getElementById(id).addEventListener('change', applyFilters);
+        });
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadManifest();
+        });
+    </script>
+</body>
+</html>

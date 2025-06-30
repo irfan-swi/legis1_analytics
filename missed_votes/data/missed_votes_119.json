@@ -1,30 +1,5 @@
 [
-  {
-    "name": "Ra\u00fal Grijalva",
-    "display_name": "Rep. Ra\u00fal Grijalva D-AZ-7",
-    "party": "democrat",
-    "chamber": "house",
-    "state": "AZ",
-    "missedPercentage": 100.0,
-    "totalVotes": 68,
-    "missedVotes": 68,
-    "votesPresent": 0,
-    "attendanceRate": 0.0,
-    "notes": "High absence rate"
-  },
-  {
-    "name": "Michael Waltz",
-    "display_name": "Rep. Michael Waltz R-FL-6",
-    "party": "republican",
-    "chamber": "house",
-    "state": "FL",
-    "missedPercentage": 60.0,
-    "totalVotes": 15,
-    "missedVotes": 9,
-    "votesPresent": 6,
-    "attendanceRate": 40.0,
-    "notes": "High absence rate"
-  },
+
   {
     "name": "Brittany Pettersen",
     "display_name": "Rep. Brittany Pettersen D-CO-7",
@@ -38,19 +13,7 @@
     "attendanceRate": 52.0,
     "notes": ""
   },
-  {
-    "name": "Donald Norcross",
-    "display_name": "Rep. Donald Norcross D-NJ-1",
-    "party": "democrat",
-    "chamber": "house",
-    "state": "NJ",
-    "missedPercentage": 44.7,
-    "totalVotes": 150,
-    "missedVotes": 67,
-    "votesPresent": 83,
-    "attendanceRate": 55.3,
-    "notes": ""
-  },
+
   {
     "name": "Mikie Sherrill",
     "display_name": "Rep. Mikie Sherrill D-NJ-11",
@@ -77,19 +40,7 @@
     "attendanceRate": 58.0,
     "notes": ""
   },
-  {
-    "name": "Gerry Connolly",
-    "display_name": "Rep. Gerry Connolly D-VA-11",
-    "party": "democrat",
-    "chamber": "house",
-    "state": "VA",
-    "missedPercentage": 30.8,
-    "totalVotes": 130,
-    "missedVotes": 40,
-    "votesPresent": 90,
-    "attendanceRate": 69.2,
-    "notes": ""
-  },
+
   {
     "name": "Wesley Hunt",
     "display_name": "Rep. Wesley Hunt R-TX-38",

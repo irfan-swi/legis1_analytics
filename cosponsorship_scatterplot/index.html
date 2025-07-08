@@ -969,13 +969,24 @@
                 return;
             }
 
+            // Format bill type for display
+            const billTypeDisplay = selectedBill.bill_type.toUpperCase()
+                .replace('HRES', 'H.Res.')
+                .replace('HCONRES', 'H.Con.Res.')
+                .replace('HJRES', 'H.J.Res.')
+                .replace('HR', 'H.R.')
+                .replace('SRES', 'S.Res.')
+                .replace('SCONRES', 'S.Con.Res.')
+                .replace('SJRES', 'S.J.Res.')
+                .replace('S', 'S.');
+
             detailsDiv.innerHTML = `
                 <div class="detail-header">
                     <div class="detail-title">Bill Details</div>
                     <div class="detail-subtitle">${selectedBill.congress}th Congress</div>
                 </div>
                 <div class="bill-card">
-                    <div class="bill-number">${selectedBill.bill_number}</div>
+                    <div class="bill-number">${billTypeDisplay} ${selectedBill.bill_number}</div>
                     <div class="bill-title">${selectedBill.bill_name}</div>
                     <div class="bill-info">
                         <span class="bill-info-label">Sponsor:</span>
@@ -1033,15 +1044,6 @@
                 return acc;
             }, {});
             
-            // Find most bipartisan bills (closest to diagonal)
-            const bipartisanBills = filteredData
-                .map(b => ({
-                    ...b,
-                    bipartisanScore: Math.abs(b.num_dem_cosponsors - b.num_rep_cosponsors)
-                }))
-                .sort((a, b) => a.bipartisanScore - b.bipartisanScore)
-                .slice(0, 3);
-            
             statsDiv.innerHTML = `
                 <div class="stat-grid">
                     <div class="stat-item">
@@ -1064,17 +1066,6 @@
                         <div class="stat-label">Dem / Rep Sponsored</div>
                     </div>
                 </div>
-                ${bipartisanBills.length > 0 ? `
-                    <div style="margin-top: 20px;">
-                        <h4 style="font-size: 0.9rem; margin-bottom: 10px;">Most Bipartisan Bills:</h4>
-                        ${bipartisanBills.map(b => `
-                            <div style="font-size: 0.8rem; margin-bottom: 5px; cursor: pointer; color: var(--legis-blue);"
-                                 onclick="selectBill('${b.bill_id}')">
-                                ${b.bill_number} (D: ${b.num_dem_cosponsors}, R: ${b.num_rep_cosponsors})
-                            </div>
-                        `).join('')}
-                    </div>
-                ` : ''}
             `;
         }
 

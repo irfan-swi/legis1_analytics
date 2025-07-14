@@ -974,7 +974,7 @@
                             grid: {
                                 color: '#f0f0f0'
                             },
-                            min: 0
+                            min: -Math.max(dotSizes.selected * 0.5, 3)
                         },
                         y: {
                             title: {
@@ -984,7 +984,7 @@
                             grid: {
                                 color: '#f0f0f0'
                             },
-                            min: 0
+                            min: -Math.max(dotSizes.selected * 0.5, 3)
                         }
                     }
                 },
@@ -994,10 +994,12 @@
                         const xScale = chart.scales.x;
                         const yScale = chart.scales.y;
                         
-                        // Draw diagonal line
+                        // Draw diagonal line starting from (0,0) intersection
                         ctx.save();
                         ctx.beginPath();
-                        ctx.moveTo(xScale.left, yScale.bottom);
+                        const zeroX = xScale.getPixelForValue(0);
+                        const zeroY = yScale.getPixelForValue(0);
+                        ctx.moveTo(zeroX, zeroY);
                         ctx.lineTo(xScale.right, yScale.top);
                         ctx.strokeStyle = 'gray';
                         ctx.lineWidth = 1;
@@ -1040,17 +1042,17 @@
             // Optimize for 1770x1250 iframe
             if (width >= 1700 && width <= 1800 && height >= 1200 && height <= 1300) {
                 return {
-                    normal: 6,
-                    highlighted: 9,
-                    selected: 14
+                    normal: 7,
+                    highlighted: 10,
+                    selected: 15
                 };
             }
             
-            // Default sizes
+            // Default sizes (increased for better visibility when zoomed out)
             return {
-                normal: 5,
-                highlighted: 8,
-                selected: 12
+                normal: 6,
+                highlighted: 9,
+                selected: 13
             };
         }
 
@@ -1067,8 +1069,13 @@
             const xPadding = Math.max(5, Math.ceil(maxX * 0.1));
             const yPadding = Math.max(5, Math.ceil(maxY * 0.1));
             
+            // Add cushion for boundary dots (based on largest possible dot size)
+            const dotCushion = Math.max(dotSizes.selected * 0.5, 3);
+            
             chart.options.scales.x.max = Math.min(maxX + xPadding, axisLimit);
             chart.options.scales.y.max = Math.min(maxY + yPadding, axisLimit);
+            chart.options.scales.x.min = -dotCushion;
+            chart.options.scales.y.min = -dotCushion;
             
             const data = filteredData.map(bill => ({
                 x: bill.num_dem_cosponsors,

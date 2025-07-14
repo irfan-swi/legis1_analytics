@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobbying Revenue Analytics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+    <style>
+        /* Legis1 Application Theme - Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 14.5px;
+            line-height: 1.4;
+            color: #333333;
+            background-color: #F3F3EC;
+            margin: 0;
+        }
+
+        :root {
+            --bg-primary: #F3F3EC;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #f8f8f8;
+            --text-primary: #333333;
+            --text-secondary: #555961;
+            --text-muted: #999999;
+            --border-light: #ced4da;
+            --border-medium: #ced4da;
+            --border-dark: #c0c0c0;
+            --chart-grid: #f0f0f0;
+            --hover-bg: #f8f8f8;
+            --focus-outline: #31598B;
+            --legis-blue: #31598B;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px;
+            gap: 15px;
+            box-sizing: border-box;
+        }
+
+        .filter-panel {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            padding: 20px 30px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(4, 160px) 1fr;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--legis-blue);
+            box-shadow: 0 0 0 2px rgba(49, 89, 139, 0.2);
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-input {
+            padding-right: 30px;
+        }
+
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-light);
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .search-dropdown.show {
+            display: block;
+        }
+
+        .search-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .search-option:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .search-option:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-group {
+            display: flex;
+            border: 1px solid var(--border-medium);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .toggle-btn {
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .toggle-btn.active {
+            background: var(--legis-blue);
+            color: white;
+        }
+
+        .toggle-btn:not(.active):hover {
+            background: var(--hover-bg);
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 2.5fr 1fr;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        .chart-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .chart-header {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .chart-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .chart-content {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        .detail-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        .detail-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .detail-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .detail-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .firm-card {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .firm-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--legis-blue);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .clients-section {
+            margin-top: 20px;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .client-list {
+            background: white;
+            border-radius: 4px;
+            border: 1px solid var(--border-light);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .client-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f1f1f1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .client-item:last-child {
+            border-bottom: none;
+        }
+
+        .client-name {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .client-revenue {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--legis-blue);
+        }
+
+        .summary-stats {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        @media (max-width: 1400px) {
+            .filter-row {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(3, 1fr);
+                row-gap: 15px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .filter-row {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(4, 1fr);
+                row-gap: 15px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: 2fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-panel {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Filter Panel -->
+        <div class="filter-panel">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label">Number of Firms</label>
+                    <select id="limitFilter">
+                        <option value="25">Top 25</option>
+                        <option value="50" selected>Top 50</option>
+                        <option value="100">Top 100</option>
+                        <option value="200">Top 200</option>
+                        <option value="all">All Firms</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Year</label>
+                    <select id="yearFilter">
+                        <option value="all" selected>All Years</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Quarter</label>
+                    <select id="quarterFilter">
+                        <option value="all" selected>All Quarters</option>
+                        <option value="1">Q1</option>
+                        <option value="2">Q2</option>
+                        <option value="3">Q3</option>
+                        <option value="4">Q4</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">In-House Lobbying</label>
+                    <select id="inHouseFilter">
+                        <option value="include" selected>Include</option>
+                        <option value="exclude">Exclude</option>
+                        <option value="only">Only In-House</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Min Revenue</label>
+                    <select id="minRevenueFilter">
+                        <option value="0" selected>No Minimum</option>
+                        <option value="100000">$100K+</option>
+                        <option value="500000">$500K+</option>
+                        <option value="1000000">$1M+</option>
+                        <option value="5000000">$5M+</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Min Lobbyists</label>
+                    <select id="minLobbyistsFilter">
+                        <option value="1" selected>1+</option>
+                        <option value="5">5+</option>
+                        <option value="10">10+</option>
+                        <option value="25">25+</option>
+                        <option value="50">50+</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Search Firm</label>
+                    <div class="search-container">
+                        <input type="text" id="firmSearch" class="search-input" placeholder="Type to search firms...">
+                        <div class="search-dropdown" id="searchDropdown">
+                            <!-- Search results will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Chart Type</label>
+                    <div class="toggle-group">
+                        <button class="toggle-btn active" id="barBtn">Bar</button>
+                        <button class="toggle-btn" id="lineBtn">Timeline</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Chart Section -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title" id="chartTitle">Revenue per Active Lobbyist by Firm</div>
+                    <div class="chart-subtitle" id="chartSubtitle">Top 50 lobbying firms ranked by revenue per active lobbyist</div>
+                </div>
+                <div class="chart-content">
+                    <div class="loading" id="loadingIndicator">Loading data...</div>
+                    <canvas id="mainChart" style="display: none;"></canvas>
+                </div>
+            </div>
+
+            <!-- Detail Panel -->
+            <div class="detail-panel">
+                <div id="firmDetails">
+                    <div class="detail-header">
+                        <div class="detail-title">Industry Overview</div>
+                        <div class="detail-subtitle">Select a firm for detailed analysis</div>
+                    </div>
+                    <div class="summary-stats" id="summaryStats">
+                        <!-- Summary stats will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allFirms = [];
+        let filteredFirms = [];
+        let selectedFirm = null;
+        let chart = null;
+        let currentView = 'bar';
+
+        // Initialize the application
+        async function initializeApp() {
+            try {
+                await loadData();
+                setupEventListeners();
+                updateChart();
+                updateSummaryStats();
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                document.getElementById('loadingIndicator').textContent = 'Error loading data. Please refresh the page.';
+            }
+        }
+
+        // Load and process data
+        async function loadData() {
+            // Read lobbying data
+            const lobbyingResponse = await fetch('lobbying.csv');
+            const lobbyingData = await lobbyingResponse.text();
+            const parsedLobbying = Papa.parse(lobbyingData, {
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true
+            });
+
+            // Read lobbyists data
+            const lobbyistsResponse = await fetch('active_lobbyists.csv');
+            const lobbyistsData = await lobbyistsResponse.text();
+            const parsedLobbyists = Papa.parse(lobbyistsData, {
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true
+            });
+
+            // Process data
+            const validLobbying = parsedLobbying.data.filter(d => d.is_deleted === 0 && d.income > 0);
+            
+            // Create lobbyist lookup map
+            const lobbyistMap = new Map();
+            parsedLobbyists.data.forEach(l => {
+                lobbyistMap.set(l.registrant_lobby_actor_id, {
+                    firm: l.firm,
+                    lobbyists: l.lobbyists
+                });
+            });
+
+            // Aggregate by firm
+            const firmData = new Map();
+            validLobbying.forEach(record => {
+                const id = record.registrant_lobby_actor_id;
+                const lobbyistInfo = lobbyistMap.get(id);
+                
+                if (lobbyistInfo && lobbyistInfo.lobbyists > 0) {
+                    if (!firmData.has(id)) {
+                        firmData.set(id, {
+                            id,
+                            firm: record.lobby_firm,
+                            totalIncome: 0,
+                            lobbyists: lobbyistInfo.lobbyists,
+                            clients: new Map(),
+                            quarterlyData: new Map(),
+                            records: [],
+                            inHouseRevenue: 0,
+                            externalRevenue: 0
+                        });
+                    }
+                    
+                    const firm = firmData.get(id);
+                    const isInHouse = record.lobby_firm === record.client;
+                    
+                    firm.totalIncome += record.income;
+                    
+                    // Track in-house vs external revenue (pre-calculated for efficiency)
+                    if (isInHouse) {
+                        firm.inHouseRevenue += record.income;
+                    } else {
+                        firm.externalRevenue += record.income;
+                    }
+                    
+                    // Track client revenue
+                    if (!firm.clients.has(record.client)) {
+                        firm.clients.set(record.client, 0);
+                    }
+                    firm.clients.set(record.client, firm.clients.get(record.client) + record.income);
+                    
+                    // Track quarterly data
+                    const quarterKey = `${record.report_year}Q${record.report_quarter}`;
+                    if (!firm.quarterlyData.has(quarterKey)) {
+                        firm.quarterlyData.set(quarterKey, 0);
+                    }
+                    firm.quarterlyData.set(quarterKey, firm.quarterlyData.get(quarterKey) + record.income);
+                    
+                    firm.records.push(record);
+                }
+            });
+
+            // Convert to final format
+            allFirms = Array.from(firmData.values()).map(firm => {
+                const clientArray = Array.from(firm.clients.entries())
+                    .map(([name, revenue]) => ({ name, revenue }))
+                    .sort((a, b) => b.revenue - a.revenue);
+                
+                const quarterlyArray = Array.from(firm.quarterlyData.entries())
+                    .map(([quarter, revenue]) => ({ quarter, revenue }))
+                    .sort((a, b) => a.quarter.localeCompare(b.quarter));
+
+                return {
+                    id: firm.id,
+                    firm: firm.firm,
+                    totalIncome: firm.totalIncome,
+                    lobbyists: firm.lobbyists,
+                    revenuePerLobbyist: Math.round(firm.totalIncome / firm.lobbyists),
+                    clientCount: firm.clients.size,
+                    topClients: clientArray,
+                    quarterlyData: quarterlyArray,
+                    records: firm.records,
+                    inHouseRevenue: firm.inHouseRevenue,
+                    externalRevenue: firm.externalRevenue,
+                    inHousePercentage: firm.totalIncome > 0 ? Math.round((firm.inHouseRevenue / firm.totalIncome) * 100) : 0
+                };
+            }).sort((a, b) => b.revenuePerLobbyist - a.revenuePerLobbyist);
+
+            console.log('Loaded firms:', allFirms.length);
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('mainChart').style.display = 'block';
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Filter change listeners
+            ['limitFilter', 'yearFilter', 'quarterFilter', 'inHouseFilter', 'minRevenueFilter', 'minLobbyistsFilter'].forEach(id => {
+                document.getElementById(id).addEventListener('change', () => {
+                    applyFilters();
+                    updateChart();
+                });
+            });
+
+            // Search functionality
+            const searchInput = document.getElementById('firmSearch');
+            const searchDropdown = document.getElementById('searchDropdown');
+            
+            searchInput.addEventListener('input', handleSearch);
+            searchInput.addEventListener('focus', handleSearch);
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) {
+                    searchDropdown.classList.remove('show');
+                }
+            });
+
+            // Chart type toggle
+            document.getElementById('barBtn').addEventListener('click', () => switchChart('bar'));
+            document.getElementById('lineBtn').addEventListener('click', () => switchChart('line'));
+        }
+
+        // Handle search input
+        function handleSearch() {
+            const query = document.getElementById('firmSearch').value.toLowerCase();
+            const dropdown = document.getElementById('searchDropdown');
+            
+            if (query.length < 2) {
+                dropdown.classList.remove('show');
+                return;
+            }
+
+            const matches = allFirms
+                .filter(firm => firm.firm.toLowerCase().includes(query))
+                .slice(0, 10);
+
+            dropdown.innerHTML = matches.map(firm => 
+                `<div class="search-option" onclick="selectFirm(${firm.id})">
+                    ${firm.firm}
+                </div>`
+            ).join('');
+
+            dropdown.classList.add('show');
+        }
+
+        // Select a firm from search
+        function selectFirm(firmId) {
+            selectedFirm = allFirms.find(f => f.id === firmId);
+            document.getElementById('searchDropdown').classList.remove('show');
+            document.getElementById('firmSearch').value = selectedFirm ? selectedFirm.firm : '';
+            updateFirmDetails();
+            updateChart(); // Refresh to highlight selected firm
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const limit = document.getElementById('limitFilter').value;
+            const year = document.getElementById('yearFilter').value;
+            const quarter = document.getElementById('quarterFilter').value;
+            const inHouse = document.getElementById('inHouseFilter').value;
+            const minRevenue = parseInt(document.getElementById('minRevenueFilter').value);
+            const minLobbyists = parseInt(document.getElementById('minLobbyistsFilter').value);
+
+            let filtered = [...allFirms];
+
+            // Apply simple filters first (fastest)
+            filtered = filtered.filter(firm => {
+                // Minimum filters
+                if (firm.totalIncome < minRevenue || firm.lobbyists < minLobbyists) return false;
+                
+                // In-house filter using pre-calculated values
+                if (inHouse === 'exclude' && firm.externalRevenue === 0) return false;
+                if (inHouse === 'only' && firm.inHouseRevenue === 0) return false;
+                
+                return true;
+            });
+
+            // Apply year/quarter filters only if needed (most expensive operation)
+            if (year !== 'all' || quarter !== 'all') {
+                filtered = filtered.map(firm => {
+                    const relevantRecords = firm.records.filter(record => {
+                        if (year !== 'all' && record.report_year != year) return false;
+                        if (quarter !== 'all' && record.report_quarter != quarter) return false;
+                        return true;
+                    });
+
+                    if (relevantRecords.length === 0) return null;
+
+                    const totalIncome = relevantRecords.reduce((sum, r) => sum + r.income, 0);
+                    return {
+                        ...firm,
+                        totalIncome,
+                        revenuePerLobbyist: Math.round(totalIncome / firm.lobbyists)
+                    };
+                }).filter(f => f !== null);
+            }
+
+            // Sort once
+            filtered.sort((a, b) => b.revenuePerLobbyist - a.revenuePerLobbyist);
+
+            // Apply limit
+            if (limit !== 'all') {
+                filtered = filtered.slice(0, parseInt(limit));
+            }
+
+            filteredFirms = filtered;
+            updateChartSubtitle();
+        }
+
+        // Update chart subtitle
+        function updateChartSubtitle() {
+            const limit = document.getElementById('limitFilter').value;
+            const year = document.getElementById('yearFilter').value;
+            const quarter = document.getElementById('quarterFilter').value;
+            const inHouse = document.getElementById('inHouseFilter').value;
+            const minRevenue = parseInt(document.getElementById('minRevenueFilter').value);
+            const minLobbyists = parseInt(document.getElementById('minLobbyistsFilter').value);
+            
+            let subtitle = '';
+            if (limit === 'all') {
+                subtitle = `${filteredFirms.length} firms`;
+            } else {
+                subtitle = `Top ${limit} of ${filteredFirms.length} firms`;
+            }
+
+            // Add filter descriptions
+            const filters = [];
+            if (inHouse === 'exclude') filters.push('excluding in-house');
+            if (inHouse === 'only') filters.push('in-house only');
+            if (minRevenue > 0) filters.push(`${(minRevenue/1000000).toFixed(1)}M+ revenue`);
+            if (minLobbyists > 1) filters.push(`${minLobbyists}+ lobbyists`);
+            
+            if (year !== 'all') {
+                filters.push(`${year}${quarter !== 'all' ? ` Q${quarter}` : ''}`);
+            } else if (quarter !== 'all') {
+                filters.push(`Q${quarter} all years`);
+            }
+            
+            if (filters.length > 0) {
+                subtitle += ` (${filters.join(', ')})`;
+            }
+            
+            subtitle += ' ranked by revenue per active lobbyist';
+            document.getElementById('chartSubtitle').textContent = subtitle;
+        }
+
+        // Switch chart type
+        function switchChart(type) {
+            currentView = type;
+            
+            // Update toggle buttons
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`${type}Btn`).classList.add('active');
+            
+            updateChart();
+        }
+
+        // Update chart
+        function updateChart() {
+            applyFilters();
+            
+            if (chart) {
+                chart.destroy();
+            }
+
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            
+            if (currentView === 'bar') {
+                createBarChart(ctx);
+            } else {
+                createLineChart(ctx);
+            }
+        }
+
+        // Create bar chart
+        function createBarChart(ctx) {
+            const data = filteredFirms.slice(0, 50); // Limit for readability
+            
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(f => f.firm),
+                    datasets: [{
+                        label: 'Revenue per Lobbyist ($)',
+                        data: data.map(f => f.revenuePerLobbyist),
+                        backgroundColor: data.map(f => 
+                            selectedFirm && selectedFirm.id === f.id ? '#28a745' : '#31598B'
+                        ),
+                        borderColor: data.map(f => 
+                            selectedFirm && selectedFirm.id === f.id ? '#1e7e34' : '#254a7a'
+                        ),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            selectedFirm = data[index];
+                            updateFirmDetails();
+                            updateChart();
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const firm = data[context.dataIndex];
+                                    return [
+                                        `Revenue per Lobbyist: $${firm.revenuePerLobbyist.toLocaleString()}`,
+                                        `Total Revenue: $${firm.totalIncome.toLocaleString()}`,
+                                        `Active Lobbyists: ${firm.lobbyists}`,
+                                        `Clients: ${firm.clientCount}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Revenue per Lobbyist ($)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create line chart for quarterly timeline
+        function createLineChart(ctx) {
+            // Get all quarters represented in the data
+            const allQuarters = new Set();
+            filteredFirms.forEach(firm => {
+                firm.quarterlyData.forEach(q => allQuarters.add(q.quarter));
+            });
+            
+            const sortedQuarters = Array.from(allQuarters).sort();
+            const topFirms = filteredFirms.slice(0, 10); // Show top 10 for readability
+            
+            const datasets = topFirms.map((firm, index) => {
+                const colors = [
+                    '#31598B', '#d32f2f', '#28a745', '#ff9800', '#9c27b0',
+                    '#00bcd4', '#795548', '#607d8b', '#e91e63', '#3f51b5'
+                ];
+                
+                const data = sortedQuarters.map(quarter => {
+                    const quarterData = firm.quarterlyData.find(q => q.quarter === quarter);
+                    return quarterData ? Math.round(quarterData.revenue / firm.lobbyists) : 0;
+                });
+                
+                return {
+                    label: firm.firm,
+                    data: data,
+                    borderColor: colors[index % colors.length],
+                    backgroundColor: colors[index % colors.length] + '20',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    tension: 0.3
+                };
+            });
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedQuarters,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: $${context.parsed.y.toLocaleString()}/lobbyist`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Quarter'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Revenue per Lobbyist ($)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Update title for line chart
+            document.getElementById('chartTitle').textContent = 'Quarterly Revenue per Lobbyist Timeline';
+        }
+
+        // Update firm details
+        function updateFirmDetails() {
+            const detailsDiv = document.getElementById('firmDetails');
+            
+            if (!selectedFirm) {
+                detailsDiv.innerHTML = `
+                    <div class="detail-header">
+                        <div class="detail-title">Industry Overview</div>
+                        <div class="detail-subtitle">Select a firm for detailed analysis</div>
+                    </div>
+                    <div class="summary-stats" id="summaryStats">
+                        <!-- Summary stats will be populated -->
+                    </div>
+                `;
+                updateSummaryStats();
+                return;
+            }
+
+            const topClients = selectedFirm.topClients.slice(0, 5);
+            
+            detailsDiv.innerHTML = `
+                <div class="detail-header">
+                    <div class="detail-title">Firm Analysis</div>
+                    <div class="detail-subtitle">Detailed breakdown</div>
+                </div>
+                <div class="firm-card">
+                    <div class="firm-name">${selectedFirm.firm}</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">${selectedFirm.revenuePerLobbyist.toLocaleString()}</div>
+                            <div class="stat-label">Revenue per Lobbyist</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${selectedFirm.lobbyists}</div>
+                            <div class="stat-label">Active Lobbyists</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${selectedFirm.totalIncome.toLocaleString()}</div>
+                            <div class="stat-label">Total Revenue</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${selectedFirm.clientCount}</div>
+                            <div class="stat-label">Total Clients</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${selectedFirm.inHousePercentage}%</div>
+                            <div class="stat-label">In-House Revenue</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${selectedFirm.externalRevenue.toLocaleString()}</div>
+                            <div class="stat-label">External Revenue</div>
+                        </div>
+                    </div>
+                    ${topClients.length > 0 ? `
+                        <div class="clients-section">
+                            <div class="section-title">Top Clients by Revenue</div>
+                            <div class="client-list">
+                                ${topClients.map(client => `
+                                    <div class="client-item">
+                                        <div class="client-name">${client.name}</div>
+                                        <div class="client-revenue">$${client.revenue.toLocaleString()}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Update summary statistics
+        function updateSummaryStats() {
+            if (selectedFirm) return; // Don't show summary when firm is selected
+            
+            const statsDiv = document.getElementById('summaryStats');
+            if (!statsDiv) return;
+            
+            const totalFirms = allFirms.length;
+            const totalLobbyists = allFirms.reduce((sum, f) => sum + f.lobbyists, 0);
+            const totalRevenue = allFirms.reduce((sum, f) => sum + f.totalIncome, 0);
+            const avgRevenuePerLobbyist = Math.round(totalRevenue / totalLobbyists);
+            const medianRevenue = filteredFirms.length > 0 ? 
+                filteredFirms[Math.floor(filteredFirms.length / 2)].revenuePerLobbyist : 0;
+            
+            statsDiv.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">${totalFirms.toLocaleString()}</div>
+                        <div class="stat-label">Total Firms</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${totalLobbyists.toLocaleString()}</div>
+                        <div class="stat-label">Total Lobbyists</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">$${(totalRevenue / 1000000).toFixed(1)}M</div>
+                        <div class="stat-label">Total Revenue</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">$${avgRevenuePerLobbyist.toLocaleString()}</div>
+                        <div class="stat-label">Avg Revenue/Lobbyist</div>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; text-align: center; font-size: 0.85rem; color: var(--text-secondary);">
+                    Median: $${medianRevenue.toLocaleString()}/lobbyist
+                </div>
+            `;
+        }
+
+        // Initialize when page loads
+        window.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>

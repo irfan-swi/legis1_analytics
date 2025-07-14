@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congressional Cosponsorship Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
+    <style>
+        /* Legis1 Application Theme - Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 14.5px;
+            line-height: 1.4;
+            color: #333333;
+            background-color: #F3F3EC;
+            margin: 0;
+        }
+
+        :root {
+            --democrat-color: #2E598E;
+            --republican-color: #810000;
+            --independent-color: #6B56AA;
+            --bg-primary: #F3F3EC;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #f8f8f8;
+            --text-primary: #333333;
+            --text-secondary: #555961;
+            --text-muted: #999999;
+            --border-light: #ced4da;
+            --border-medium: #ced4da;
+            --border-dark: #c0c0c0;
+            --chart-grid: #f0f0f0;
+            --hover-bg: #f8f8f8;
+            --focus-outline: #31598B;
+            --legis-blue: #31598B;
+            --highlight-color: #FFD700;
+        }
+
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px;
+            gap: 15px;
+            box-sizing: border-box;
+        }
+
+        .filter-panel {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            padding: 20px 30px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            font-size: 14.5px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--legis-blue);
+            box-shadow: 0 0 0 2px rgba(49, 89, 139, 0.2);
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 2.5fr 1fr;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        .chart-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .chart-header {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .chart-header-text {
+            flex: 1;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .chart-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .chart-content {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        .detail-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        .detail-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .detail-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .detail-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .bill-card {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .bill-number {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .bill-title {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .bill-info {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 8px 20px;
+            margin-bottom: 15px;
+        }
+
+        .bill-info-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .bill-info-value {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+
+        .party-democrat {
+            color: var(--democrat-color);
+            font-weight: 600;
+        }
+
+        .party-republican {
+            color: var(--republican-color);
+            font-weight: 600;
+        }
+
+        .party-independent {
+            color: var(--independent-color);
+            font-weight: 600;
+        }
+
+        .cosponsor-counts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .count-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+        }
+
+        .count-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .count-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .summary-stats {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .stat-item {
+            padding: 12px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid var(--border-light);
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .no-selection {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 50px;
+        }
+
+        .methodology {
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .methodology a {
+            color: var(--legis-blue);
+            text-decoration: none;
+        }
+
+        .reset-button {
+            background: var(--legis-blue);
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-family: inherit;
+        }
+
+        .reset-button:hover {
+            background: #254a7a;
+        }
+
+        .loading-indicator {
+            text-align: center;
+            padding: 50px;
+            color: var(--text-secondary);
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 1400px) {
+            .filter-row {
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-rows: repeat(2, 1fr);
+                row-gap: 10px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: 2fr 1fr;
+            }
+            
+            .filter-row {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: repeat(4, 1fr);
+            }
+            
+            .filter-panel {
+                padding: 15px;
+            }
+            
+            .filter-label {
+                font-size: 12px;
+            }
+            
+            select {
+                font-size: 13px;
+                padding: 6px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Filter Panel -->
+        <div class="filter-panel">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label">Congress</label>
+                    <select id="congressFilter">
+                        <option value="119" selected>119</option>
+                        <option value="118">118</option>
+                        <option value="117">117</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Chamber</label>
+                    <select id="chamberFilter">
+                        <option value="House" selected>House</option>
+                        <option value="Senate">Senate</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Issue Area</label>
+                    <select id="issueFilter">
+                        <option value="All">All</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Committee</label>
+                    <select id="committeeFilter">
+                        <option value="All">All</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Bill Status</label>
+                    <select id="statusFilter">
+                        <option value="All">All</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Search Bills</label>
+                    <select id="billsFilter">
+                        <option value="All">All</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Search Sponsor</label>
+                    <select id="sponsorFilter">
+                        <option value="All">All</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Search Cosponsor</label>
+                    <select id="cosponsorFilter">
+                        <option value="All">All</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Chart Section -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-header-text">
+                        <div class="chart-title">Cosponsorship Scatterplot</div>
+                        <div class="chart-subtitle" id="chartSubtitle">Loading data...</div>
+                    </div>
+                    <button class="reset-button" onclick="resetFilters()">Reset Filters</button>
+                </div>
+                <div class="chart-content" id="chartContent">
+                    <div class="loading-indicator">Loading congressional data...</div>
+                    <canvas id="cosponsorshipChart" style="display: none;"></canvas>
+                </div>
+                <div class="methodology">
+                    <strong>Methodology</strong><br>
+                    Data is provided by <a href="https://www.congress.gov" target="_blank">congress.gov</a>. Cosponsor data is derived from each bill's Republican and Democratic cosponsors.
+                </div>
+            </div>
+
+            <!-- Detail Panel -->
+            <div class="detail-panel">
+                <div id="billDetails">
+                    <div class="detail-header">
+                        <div class="detail-title">Summary Statistics</div>
+                        <div class="detail-subtitle">Click on a bill for details</div>
+                    </div>
+                    <div class="summary-stats" id="summaryStats">
+                        <div class="loading-indicator">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate fake bill data (fallback)
+        function generateBillData() {
+            const bills = [];
+            const sponsors = [
+                { name: "Nancy Pelosi", party: "Democrat" },
+                { name: "Kevin McCarthy", party: "Republican" },
+                { name: "Hakeem Jeffries", party: "Democrat" },
+                { name: "Steve Scalise", party: "Republican" },
+                { name: "Alexandria Ocasio-Cortez", party: "Democrat" },
+                { name: "Matt Gaetz", party: "Republican" },
+                { name: "Katie Porter", party: "Democrat" },
+                { name: "Jim Jordan", party: "Republican" },
+                { name: "Adam Schiff", party: "Democrat" },
+                { name: "Marjorie Taylor Greene", party: "Republican" },
+                { name: "Bernie Sanders", party: "Independent" },
+                { name: "Angus King", party: "Independent" }
+            ];
+            
+            const issues = ["Healthcare", "Defense", "Tax", "Environment", "Immigration", "Education", "Transportation", "Agriculture"];
+            const committees = ["Ways and Means", "Energy and Commerce", "Judiciary", "Financial Services", "Foreign Affairs", "Armed Services", "Education and Labor", "Transportation"];
+            const statuses = ["Introduced", "Committee", "Floor", "Passed One", "Passed Both", "Veto", "Law"];
+            
+            // Generate bills with realistic cosponsorship patterns
+            for (let i = 0; i < 500; i++) {
+                const sponsor = sponsors[Math.floor(Math.random() * sponsors.length)];
+                const issue = issues[Math.floor(Math.random() * issues.length)];
+                const committee = committees[Math.floor(Math.random() * committees.length)];
+                const congress = [117, 118, 119][Math.floor(Math.random() * 3)];
+                
+                // Generate realistic status distribution
+                let status;
+                const rand = Math.random();
+                if (rand < 0.5) status = "Introduced";
+                else if (rand < 0.75) status = "Committee";
+                else if (rand < 0.85) status = "Floor";
+                else if (rand < 0.92) status = "Passed One";
+                else if (rand < 0.96) status = "Passed Both";
+                else if (rand < 0.98) status = "Law";
+                else status = "Veto";
+                const chamber = Math.random() > 0.5 ? "House" : "Senate";
+                
+                let demCosponsors, repCosponsors;
+                
+                // Create realistic cosponsorship patterns
+                if (sponsor.party === "Democrat") {
+                    // Democrat-sponsored bills tend to have more Democratic cosponsors
+                    demCosponsors = Math.floor(Math.random() * 150) + 20;
+                    repCosponsors = Math.floor(Math.random() * 30);
+                    
+                    // Some bipartisan bills
+                    if (Math.random() < 0.1) {
+                        repCosponsors = Math.floor(Math.random() * 100) + 20;
+                    }
+                } else if (sponsor.party === "Republican") {
+                    // Republican-sponsored bills tend to have more Republican cosponsors
+                    repCosponsors = Math.floor(Math.random() * 150) + 20;
+                    demCosponsors = Math.floor(Math.random() * 30);
+                    
+                    // Some bipartisan bills
+                    if (Math.random() < 0.1) {
+                        demCosponsors = Math.floor(Math.random() * 100) + 20;
+                    }
+                } else {
+                    // Independent-sponsored bills might be more balanced
+                    demCosponsors = Math.floor(Math.random() * 80) + 10;
+                    repCosponsors = Math.floor(Math.random() * 80) + 10;
+                }
+                
+                // Adjust for chamber size
+                if (chamber === "Senate") {
+                    demCosponsors = Math.min(demCosponsors, 50);
+                    repCosponsors = Math.min(repCosponsors, 50);
+                }
+                
+                const billNumber = `${chamber === "House" ? "H.R." : "S."} ${Math.floor(Math.random() * 9000) + 1000}`;
+                
+                bills.push({
+                    bill_id: `bill_${i}`,
+                    bill_number: billNumber,
+                    bill_name: `${issue} Reform Act of ${2023 + congress - 118}`,
+                    congress: congress,
+                    chamber: chamber,
+                    sponsor_name: sponsor.name,
+                    sponsor_party: sponsor.party,
+                    issue_name: issue,
+                    committee: committee,
+                    status: status,
+                    num_dem_cosponsors: demCosponsors,
+                    num_rep_cosponsors: repCosponsors,
+                    bill_url: `${billNumber.toLowerCase().replace(/\./g, '')}_${congress}_${chamber.toLowerCase()}`
+                });
+            }
+            
+            return bills;
+        }
+
+        // Load bill data from JSON
+        async function loadBillData() {
+            console.log('Starting data load process...');
+            console.log('Current URL:', window.location.href);
+            
+            try {
+                // Try to load from the same directory first
+                const dataUrl = './dashboard_data/cosponsorship_data.json';
+                console.log('Attempting to fetch:', dataUrl);
+                
+                let response = await fetch(dataUrl);
+                console.log('Response status:', response.status, response.statusText);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(`Successfully loaded ${data.length} bills from data file`);
+                    
+                    // Also try to load metadata
+                    try {
+                        const metadataResponse = await fetch('./dashboard_data/metadata.json');
+                        if (metadataResponse.ok) {
+                            const metadata = await metadataResponse.json();
+                            console.log('Loaded metadata:', metadata);
+                        }
+                    } catch (e) {
+                        console.log('Metadata not found, continuing without it');
+                    }
+                    
+                    return data;
+                }
+                
+                // If that fails, check for manifest (chunked data)
+                const manifestResponse = await fetch('./dashboard_data/manifest.json');
+                if (manifestResponse.ok) {
+                    const manifest = await manifestResponse.json();
+                    console.log('Loading chunked data from manifest:', manifest);
+                    let allBills = [];
+                    
+                    for (const chunk of manifest.chunks) {
+                        const chunkResponse = await fetch(`./dashboard_data/${chunk.file}`);
+                        if (chunkResponse.ok) {
+                            const data = await chunkResponse.json();
+                            allBills = allBills.concat(data);
+                        }
+                    }
+                    
+                    console.log(`Loaded ${allBills.length} bills from chunks`);
+                    return allBills;
+                }
+                
+                throw new Error('Data files not found. Make sure to run process_data.py first and serve files through a web server.');
+            } catch (error) {
+                console.error('Error loading data:', error);
+                
+                // Check if it's a CORS error
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    document.getElementById('chartContent').innerHTML = `
+                        <div class="error-message">
+                            <strong>Unable to load data files.</strong><br><br>
+                            This appears to be a CORS error. To fix this:<br>
+                            1. Run a local web server: <code>python -m http.server 8000</code><br>
+                            2. Open: <code>http://localhost:8000/${window.location.pathname.split('/').pop()}</code><br><br>
+                            <small>Using demo data for now.</small>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('chartContent').innerHTML = `
+                        <div class="error-message">
+                            Unable to load congressional data. Using demo data instead.
+                            <br><small>${error.message}</small>
+                        </div>
+                    `;
+                }
+                
+                // Fall back to generated data
+                return generateBillData();
+            }
+        }
+
+        let chart;
+        let billData = [];
+        let filteredData = [];
+        let selectedBill = null;
+        let dataLoaded = false;
+
+        // Initialize chart
+        function initChart() {
+            const ctx = document.getElementById('cosponsorshipChart').getContext('2d');
+            
+            chart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Bills',
+                        data: [],
+                        backgroundColor: [],
+                        borderColor: [],
+                        borderWidth: [],
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            selectedBill = filteredData[index];
+                            updateBillDetails();
+                            updateChart(); // Refresh to show selection
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const bill = filteredData[context[0].dataIndex];
+                                    return bill.bill_number;
+                                },
+                                label: function(context) {
+                                    const bill = filteredData[context.dataIndex];
+                                    return [
+                                        `Title: ${bill.bill_name}`,
+                                        `Sponsor: ${bill.sponsor_name}`,
+                                        `Issue: ${bill.issue_name}`,
+                                        `Committee: ${bill.committee}`,
+                                        `Status: ${bill.status}`,
+                                        `Democratic Cosponsors: ${bill.num_dem_cosponsors}`,
+                                        `Republican Cosponsors: ${bill.num_rep_cosponsors}`
+                                    ];
+                                }
+                            }
+                        },
+                        zoom: {
+                            zoom: {
+                                wheel: {
+                                    enabled: false,
+                                },
+                                pinch: {
+                                    enabled: false
+                                }
+                            },
+                            pan: {
+                                enabled: false
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: 'Democratic Cosponsors'
+                            },
+                            grid: {
+                                color: '#f0f0f0'
+                            },
+                            min: 0
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Republican Cosponsors'
+                            },
+                            grid: {
+                                color: '#f0f0f0'
+                            },
+                            min: 0
+                        }
+                    }
+                },
+                plugins: [{
+                    afterDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        const xScale = chart.scales.x;
+                        const yScale = chart.scales.y;
+                        
+                        // Draw diagonal line
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(xScale.left, yScale.bottom);
+                        ctx.lineTo(xScale.right, yScale.top);
+                        ctx.strokeStyle = 'gray';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([5, 5]);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }]
+            });
+        }
+
+        // Get party color
+        function getPartyColor(party, isSelected = false, isHighlighted = false, statusFilter = 'All') {
+            if (isSelected) {
+                return '#28a745'; // Green for selected
+            }
+            if (isHighlighted && statusFilter !== 'All') {
+                return '#FFD700'; // Yellow for highlighted by status
+            }
+            // Normal colors - full opacity when no status filter, reduced when filtering
+            const opacity = (statusFilter === 'All' || isHighlighted) ? '0.6' : '0.15';
+            switch(party) {
+                case 'Democrat':
+                case 'Democratic': 
+                    return `rgba(46, 89, 142, ${opacity})`;
+                case 'Republican': 
+                    return `rgba(129, 0, 0, ${opacity})`;
+                case 'Independent': 
+                    return `rgba(107, 86, 170, ${opacity})`;
+                default: 
+                    return `rgba(117, 117, 117, ${opacity})`;
+            }
+        }
+
+        // Update chart with filtered data
+        function updateChart() {
+            const maxX = Math.max(...filteredData.map(b => b.num_dem_cosponsors), 50);
+            const maxY = Math.max(...filteredData.map(b => b.num_rep_cosponsors), 50);
+            const chamber = document.getElementById('chamberFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const axisLimit = chamber === 'Senate' ? 60 : 240;
+            
+            // Add padding (10% of the max value or at least 5 units)
+            const xPadding = Math.max(5, Math.ceil(maxX * 0.1));
+            const yPadding = Math.max(5, Math.ceil(maxY * 0.1));
+            
+            chart.options.scales.x.max = Math.min(maxX + xPadding, axisLimit);
+            chart.options.scales.y.max = Math.min(maxY + yPadding, axisLimit);
+            
+            const data = filteredData.map(bill => ({
+                x: bill.num_dem_cosponsors,
+                y: bill.num_rep_cosponsors
+            }));
+            
+            const colors = filteredData.map(bill => {
+                const isSelected = selectedBill && selectedBill.bill_id === bill.bill_id;
+                const isHighlighted = bill.status === statusFilter;
+                return getPartyColor(bill.sponsor_party, isSelected, isHighlighted, statusFilter);
+            });
+            
+            const radii = filteredData.map(bill => {
+                const isSelected = selectedBill && selectedBill.bill_id === bill.bill_id;
+                const isHighlighted = bill.status === statusFilter;
+                if (isSelected) return 10;
+                if (isHighlighted && statusFilter !== 'All') return 7;
+                return 3;
+            });
+            
+            const borderWidths = filteredData.map(bill => {
+                const isSelected = selectedBill && selectedBill.bill_id === bill.bill_id;
+                const isHighlighted = bill.status === statusFilter;
+                if (isSelected || (isHighlighted && statusFilter !== 'All')) return 2;
+                return 1;
+            });
+            
+            chart.data.datasets[0].data = data;
+            chart.data.datasets[0].backgroundColor = colors;
+            chart.data.datasets[0].borderColor = colors.map(c => {
+                // Make borders slightly darker than fill
+                if (c.includes('#28a745')) return '#1e7e34'; // Darker green for selected
+                if (c.includes('#FFD700')) return '#FFA500'; // Orange border for highlighted
+                return c.replace(/0\.\d+/, '0.3'); // Slightly more opaque for others
+            });
+            chart.data.datasets[0].pointRadius = radii;
+            chart.data.datasets[0].borderWidth = borderWidths;
+            
+            chart.update();
+            updateSummaryStats();
+        }
+
+        // Populate select dropdown
+        function populateSelect(selectId, options, currentValue = 'All') {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '';
+            
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                if (option === currentValue) {
+                    optionElement.selected = true;
+                }
+                select.appendChild(optionElement);
+            });
+        }
+
+        // Initialize filters from loaded data
+        function initializeFiltersFromData() {
+            const congress = parseInt(document.getElementById('congressFilter').value);
+            const chamber = document.getElementById('chamberFilter').value;
+            
+            // Filter data for current congress and chamber
+            const relevantBills = billData.filter(b => 
+                b.congress === congress && b.chamber === chamber
+            );
+            
+            // Issue filter
+            const issues = [...new Set(relevantBills.map(b => b.issue_name))].sort();
+            populateSelect('issueFilter', ['All', ...issues]);
+            
+            // Committee filter
+            const committees = [...new Set(relevantBills.map(b => b.committee))].sort();
+            populateSelect('committeeFilter', ['All', ...committees]);
+            
+            // Status filter
+            const statuses = [...new Set(relevantBills.map(b => b.status).filter(s => s))].sort();
+            populateSelect('statusFilter', ['All', ...statuses]);
+            
+            // Bill filter
+            const bills = [...new Set(relevantBills.map(b => b.bill_number))].sort();
+            populateSelect('billsFilter', ['All', ...bills]);
+            
+            // Sponsor filter
+            const sponsors = [...new Set(relevantBills.map(b => b.sponsor_name))].sort();
+            populateSelect('sponsorFilter', ['All', ...sponsors]);
+            
+            // Note: Cosponsor filter would need actual cosponsor data
+            populateSelect('cosponsorFilter', ['All']);
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const congress = parseInt(document.getElementById('congressFilter').value);
+            const chamber = document.getElementById('chamberFilter').value;
+            const issue = document.getElementById('issueFilter').value;
+            const committee = document.getElementById('committeeFilter').value;
+            const status = document.getElementById('statusFilter').value;
+            const bill = document.getElementById('billsFilter').value;
+            const sponsor = document.getElementById('sponsorFilter').value;
+
+            // Filter data but NOT by status - status will be used for highlighting only
+            filteredData = billData.filter(b => {
+                if (b.congress !== congress) return false;
+                if (b.chamber !== chamber) return false;
+                if (issue !== 'All' && b.issue_name !== issue) return false;
+                if (committee !== 'All' && b.committee !== committee) return false;
+                // Don't filter by status - it's used for highlighting
+                if (bill !== 'All' && b.bill_number !== bill) return false;
+                if (sponsor !== 'All' && b.sponsor_name !== sponsor) return false;
+                return true;
+            });
+
+            // Update subtitle
+            let subtitle = `${filteredData.length} bills in the ${congress}th Congress (${chamber})`;
+            if (status !== 'All') {
+                const highlightedCount = filteredData.filter(b => b.status === status).length;
+                subtitle += ` • ${highlightedCount} ${status} bills highlighted`;
+            }
+            document.getElementById('chartSubtitle').textContent = subtitle;
+
+            updateChart();
+            
+            // Clear selected bill if it's no longer in filtered results
+            if (selectedBill && !filteredData.find(b => b.bill_id === selectedBill.bill_id)) {
+                selectedBill = null;
+                updateBillDetails();
+            }
+        }
+
+        // Update bill details panel
+        function updateBillDetails() {
+            const detailsDiv = document.getElementById('billDetails');
+            
+            if (!selectedBill) {
+                detailsDiv.innerHTML = `
+                    <div class="detail-header">
+                        <div class="detail-title">Summary Statistics</div>
+                        <div class="detail-subtitle">Click on a bill for details</div>
+                    </div>
+                    <div class="summary-stats" id="summaryStats">
+                        <!-- Summary stats will be populated by updateSummaryStats -->
+                    </div>
+                `;
+                updateSummaryStats();
+                return;
+            }
+
+            // Format bill type for display
+            const billTypeDisplay = selectedBill.bill_type.toUpperCase()
+                .replace('HRES', 'H.Res.')
+                .replace('HCONRES', 'H.Con.Res.')
+                .replace('HJRES', 'H.J.Res.')
+                .replace('HR', 'H.R.')
+                .replace('SRES', 'S.Res.')
+                .replace('SCONRES', 'S.Con.Res.')
+                .replace('SJRES', 'S.J.Res.')
+                .replace('S', 'S.');
+
+            detailsDiv.innerHTML = `
+                <div class="detail-header">
+                    <div class="detail-title">Bill Details</div>
+                    <div class="detail-subtitle">${selectedBill.congress}th Congress</div>
+                </div>
+                <div class="bill-card">
+                    <div class="bill-number">${billTypeDisplay} ${selectedBill.bill_number}</div>
+                    <div class="bill-title">${selectedBill.bill_name}</div>
+                    <div class="bill-info">
+                        <span class="bill-info-label">Sponsor:</span>
+                        <span class="bill-info-value">${selectedBill.sponsor_name}</span>
+                        <span class="bill-info-label">Party:</span>
+                        <span class="bill-info-value party-${selectedBill.sponsor_party.toLowerCase()}">
+                            ${selectedBill.sponsor_party}
+                        </span>
+                        <span class="bill-info-label">Issue Area:</span>
+                        <span class="bill-info-value">${selectedBill.issue_name}</span>
+                        <span class="bill-info-label">Committee:</span>
+                        <span class="bill-info-value">${selectedBill.committee}</span>
+                        <span class="bill-info-label">Status:</span>
+                        <span class="bill-info-value">${selectedBill.status}</span>
+                        <span class="bill-info-label">Chamber:</span>
+                        <span class="bill-info-value">${selectedBill.chamber}</span>
+                    </div>
+                    <div class="cosponsor-counts">
+                        <div class="count-item">
+                            <div class="count-value party-democrat">${selectedBill.num_dem_cosponsors}</div>
+                            <div class="count-label">Democratic Cosponsors</div>
+                        </div>
+                        <div class="count-item">
+                            <div class="count-value party-republican">${selectedBill.num_rep_cosponsors}</div>
+                            <div class="count-label">Republican Cosponsors</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; text-align: center;">
+                        <a href="https://app.legis1.com/bill/detail?id=${selectedBill.bill_url}#summary" 
+                           target="_blank" 
+                           style="color: var(--legis-blue); text-decoration: none; font-weight: 500;">
+                            View on Legis1 →
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update summary statistics
+        function updateSummaryStats() {
+            if (selectedBill) return; // Don't update if a bill is selected
+            
+            const statsDiv = document.getElementById('summaryStats');
+            if (!statsDiv) return;
+            
+            // Calculate statistics
+            const totalBills = filteredData.length;
+            const avgDemCosponsors = filteredData.reduce((sum, b) => sum + b.num_dem_cosponsors, 0) / totalBills || 0;
+            const avgRepCosponsors = filteredData.reduce((sum, b) => sum + b.num_rep_cosponsors, 0) / totalBills || 0;
+            
+            // Count by sponsor party
+            const partyCount = filteredData.reduce((acc, b) => {
+                const party = b.sponsor_party;
+                acc[party] = (acc[party] || 0) + 1;
+                return acc;
+            }, {});
+            
+            statsDiv.innerHTML = `
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">${totalBills.toLocaleString()}</div>
+                        <div class="stat-label">Total Bills</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${Math.round(avgDemCosponsors)}</div>
+                        <div class="stat-label">Avg Democratic Cosponsors</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${Math.round(avgRepCosponsors)}</div>
+                        <div class="stat-label">Avg Republican Cosponsors</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">
+                            <span class="party-democrat">${partyCount.Democrat || partyCount.Democratic || 0}</span> / 
+                            <span class="party-republican">${partyCount.Republican || 0}</span>
+                        </div>
+                        <div class="stat-label">Dem / Rep Sponsored</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Select a bill programmatically
+        function selectBill(billId) {
+            selectedBill = filteredData.find(b => b.bill_id === billId);
+            if (selectedBill) {
+                updateBillDetails();
+                updateChart();
+            }
+        }
+
+        // Reset all filters
+        function resetFilters() {
+            // Reset all dropdowns to their default values
+            document.getElementById('congressFilter').value = '119';
+            document.getElementById('chamberFilter').value = 'House';
+            document.getElementById('issueFilter').value = 'All';
+            document.getElementById('committeeFilter').value = 'All';
+            document.getElementById('statusFilter').value = 'All';
+            document.getElementById('billsFilter').value = 'All';
+            document.getElementById('sponsorFilter').value = 'All';
+            document.getElementById('cosponsorFilter').value = 'All';
+            
+            // Clear selected bill
+            selectedBill = null;
+            
+            // Update filter options and apply
+            initializeFiltersFromData();
+            applyFilters();
+        }
+
+        // Event listeners
+        ['congressFilter', 'chamberFilter'].forEach(id => {
+            document.getElementById(id).addEventListener('change', function() {
+                initializeFiltersFromData();
+                applyFilters();
+            });
+        });
+
+        ['issueFilter', 'committeeFilter', 'statusFilter', 'billsFilter', 'sponsorFilter', 'cosponsorFilter'].forEach(id => {
+            document.getElementById(id).addEventListener('change', applyFilters);
+        });
+
+        // Initialize the dashboard
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Initialize empty chart first
+            initChart();
+            
+            // Load data
+            billData = await loadBillData();
+            filteredData = [...billData];
+            dataLoaded = true;
+            
+            // Hide loading indicator and show chart
+            document.querySelector('.loading-indicator').style.display = 'none';
+            document.getElementById('cosponsorshipChart').style.display = 'block';
+            
+            // Initialize filters and display
+            initializeFiltersFromData();
+            applyFilters();
+        });
+    </script>
+</body>
+</html>

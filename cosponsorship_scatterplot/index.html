@@ -100,6 +100,66 @@
             box-shadow: 0 0 0 2px rgba(49, 89, 139, 0.2);
         }
 
+        /* Autocomplete container */
+        .autocomplete-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .autocomplete-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            font-size: 14.5px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .autocomplete-input:focus {
+            outline: none;
+            border-color: var(--legis-blue);
+            box-shadow: 0 0 0 2px rgba(49, 89, 139, 0.2);
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid var(--border-light);
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .autocomplete-option:hover,
+        .autocomplete-option.selected {
+            background-color: var(--hover-bg);
+        }
+
+        .autocomplete-option.highlighted {
+            background-color: var(--legis-blue);
+            color: white;
+        }
+
         .main-content {
             flex: 1;
             display: grid;
@@ -437,15 +497,17 @@
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">Search Sponsor</label>
-                    <select id="sponsorFilter">
-                        <option value="All">All</option>
-                    </select>
+                    <div class="autocomplete-container">
+                        <input type="text" class="autocomplete-input" id="sponsorFilter" placeholder="Type to search sponsors...">
+                        <div class="autocomplete-dropdown" id="sponsorDropdown"></div>
+                    </div>
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">Search Cosponsor</label>
-                    <select id="cosponsorFilter">
-                        <option value="All">All</option>
-                    </select>
+                    <div class="autocomplete-container">
+                        <input type="text" class="autocomplete-input" id="cosponsorFilter" placeholder="Type to search cosponsors...">
+                        <div class="autocomplete-dropdown" id="cosponsorDropdown"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -593,7 +655,7 @@
                 const dataUrl = './dashboard_data/cosponsorship_data.json';
                 console.log('Attempting to fetch:', dataUrl);
                 
-                let response = await fetch(dataUrl);
+                let response = await fetch(dataUrl, { cache: 'no-cache' });
                 console.log('Response status:', response.status, response.statusText);
                 
                 if (response.ok) {
@@ -604,11 +666,22 @@
                     try {
                         const metadataResponse = await fetch('./dashboard_data/metadata.json');
                         if (metadataResponse.ok) {
-                            const metadata = await metadataResponse.json();
+                            metadata = await metadataResponse.json();
                             console.log('Loaded metadata:', metadata);
                         }
                     } catch (e) {
-                        console.log('Metadata not found, continuing without it');
+                        console.log('Metadata not found.');
+                    }
+
+                    // Load bill-cosponsor mapping
+                    try {
+                        const mappingResponse = await fetch('./dashboard_data/bill_cosponsor_mapping.json');
+                        if (mappingResponse.ok) {
+                            cosponsorData = await mappingResponse.json();
+                            console.log('Loaded bill-cosponsor mapping');
+                        }
+                    } catch (e) {
+                        console.log('Bill-cosponsor mapping not found, cosponsor filtering will be limited');
                     }
                     
                     return data;
@@ -667,6 +740,116 @@
         let filteredData = [];
         let selectedBill = null;
         let dataLoaded = false;
+        let metadata = null;
+        let cosponsorData = {}; // Store bill-cosponsor relationships
+
+        // Autocomplete functionality
+        function setupAutocomplete(inputId, dropdownId, options) {
+            const input = document.getElementById(inputId);
+            const dropdown = document.getElementById(dropdownId);
+            let currentFocus = -1;
+            
+            // Store the full list of options
+            input.allOptions = options;
+            
+            input.addEventListener('input', function() {
+                const value = this.value.toLowerCase();
+                currentFocus = -1;
+                
+                if (!value) {
+                    dropdown.classList.remove('show');
+                    return;
+                }
+                
+                // Filter options
+                const filtered = options.filter(option => 
+                    option.toLowerCase().includes(value)
+                ).slice(0, 50); // Limit to 50 results
+                
+                // Clear dropdown
+                dropdown.innerHTML = '';
+                
+                if (filtered.length === 0) {
+                    dropdown.classList.remove('show');
+                    return;
+                }
+                
+                // Add filtered options
+                filtered.forEach((option, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-option';
+                    div.textContent = option;
+                    div.addEventListener('click', function() {
+                        input.value = option;
+                        dropdown.classList.remove('show');
+                        applyFilters();
+                    });
+                    dropdown.appendChild(div);
+                });
+                
+                dropdown.classList.add('show');
+            });
+            
+            // Keyboard navigation
+            input.addEventListener('keydown', function(e) {
+                const items = dropdown.getElementsByClassName('autocomplete-option');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    currentFocus++;
+                    addActive(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    currentFocus--;
+                    addActive(items);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (currentFocus > -1 && items[currentFocus]) {
+                        items[currentFocus].click();
+                    }
+                } else if (e.key === 'Escape') {
+                    dropdown.classList.remove('show');
+                }
+            });
+            
+            // Add active class to current item
+            function addActive(items) {
+                if (!items) return;
+                removeActive(items);
+                if (currentFocus >= items.length) currentFocus = 0;
+                if (currentFocus < 0) currentFocus = items.length - 1;
+                items[currentFocus].classList.add('highlighted');
+            }
+            
+            // Remove active class from all items
+            function removeActive(items) {
+                for (let item of items) {
+                    item.classList.remove('highlighted');
+                }
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target !== input && e.target.parentNode !== dropdown) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        }
+
+        // Format bill number for display
+        function formatBillNumber(bill) {
+            if (!bill || !bill.bill_type || !bill.bill_number) return '';
+            return bill.bill_type.toUpperCase()
+                .replace('HRES', 'H.Res.')
+                .replace('HCONRES', 'H.Con.Res.')
+                .replace('HJRES', 'H.J.Res.')
+                .replace('HR', 'H.R.')
+                .replace('SRES', 'S.Res.')
+                .replace('SCONRES', 'S.Con.Res.')
+                .replace('SJRES', 'S.J.Res.')
+                .replace('S', 'S.') + ` ${bill.bill_number}`;
+        }
+
 
         // Initialize chart
         function initChart() {
@@ -707,7 +890,7 @@
                             callbacks: {
                                 title: function(context) {
                                     const bill = filteredData[context[0].dataIndex];
-                                    return bill.bill_number;
+                                    return formatBillNumber(bill);
                                 },
                                 label: function(context) {
                                     const bill = filteredData[context.dataIndex];
@@ -880,36 +1063,102 @@
 
         // Initialize filters from loaded data
         function initializeFiltersFromData() {
+            const startTime = performance.now();
             const congress = parseInt(document.getElementById('congressFilter').value);
             const chamber = document.getElementById('chamberFilter').value;
-            
-            // Filter data for current congress and chamber
-            const relevantBills = billData.filter(b => 
-                b.congress === congress && b.chamber === chamber
-            );
-            
+
+            // Filter data for current congress and chamber, ensuring bills are valid objects
+            const baseBills = billData.filter(b => b && b.congress === congress && b.chamber === chamber);
+
             // Issue filter
-            const issues = [...new Set(relevantBills.map(b => b.issue_name))].sort();
-            populateSelect('issueFilter', ['All', ...issues]);
-            
+            const issues = [...new Set(baseBills.map(b => b.issue_name))].filter(Boolean).sort();
+            const currentIssue = document.getElementById('issueFilter').value;
+            populateSelect('issueFilter', ['All', ...issues], currentIssue);
+
             // Committee filter
-            const committees = [...new Set(relevantBills.map(b => b.committee))].sort();
-            populateSelect('committeeFilter', ['All', ...committees]);
-            
+            const committees = [...new Set(baseBills.map(b => b.committee))].filter(Boolean).sort();
+            const currentCommittee = document.getElementById('committeeFilter').value;
+            populateSelect('committeeFilter', ['All', ...committees], currentCommittee);
+
             // Status filter
-            const statuses = [...new Set(relevantBills.map(b => b.status).filter(s => s))].sort();
-            populateSelect('statusFilter', ['All', ...statuses]);
+            const statuses = [...new Set(baseBills.map(b => b.status))].filter(Boolean).sort();
+            const currentStatus = document.getElementById('statusFilter').value;
+            populateSelect('statusFilter', ['All', ...statuses], currentStatus);
+
+            // Apply current filters to get bills for the bills dropdown
+            const issue = document.getElementById('issueFilter').value;
+            const committee = document.getElementById('committeeFilter').value;
             
-            // Bill filter
-            const bills = [...new Set(relevantBills.map(b => b.bill_number))].sort();
-            populateSelect('billsFilter', ['All', ...bills]);
+            let billsForDropdown = baseBills;
+            if (issue !== 'All') {
+                billsForDropdown = billsForDropdown.filter(b => b.issue_name === issue);
+            }
+            if (committee !== 'All') {
+                billsForDropdown = billsForDropdown.filter(b => b.committee === committee);
+            }
             
-            // Sponsor filter
-            const sponsors = [...new Set(relevantBills.map(b => b.sponsor_name))].sort();
-            populateSelect('sponsorFilter', ['All', ...sponsors]);
+            // Bill filter - use full bill number, only from bills matching other filters
+            const bills = [...new Set(billsForDropdown.map(b => formatBillNumber(b)))].filter(Boolean).sort();
+            const currentBill = document.getElementById('billsFilter').value;
+            populateSelect('billsFilter', ['All', ...bills], currentBill);
+
+            // Now apply additional filters to narrow down the sponsor/cosponsor lists
+            const bill = document.getElementById('billsFilter').value;
             
-            // Note: Cosponsor filter would need actual cosponsor data
-            populateSelect('cosponsorFilter', ['All']);
+            let relevantBills = billsForDropdown;
+            if (bill !== 'All') {
+                relevantBills = relevantBills.filter(b => formatBillNumber(b) === bill);
+            }
+
+            // Sponsor autocomplete - only sponsors from bills matching current filters
+            const sponsors = [...new Set(relevantBills.map(b => b.sponsor_name))].filter(Boolean).sort();
+            const currentSponsor = document.getElementById('sponsorFilter').value;
+            setupAutocomplete('sponsorFilter', 'sponsorDropdown', sponsors);
+            // Preserve sponsor value if it's still valid
+            if (currentSponsor && sponsors.includes(currentSponsor)) {
+                document.getElementById('sponsorFilter').value = currentSponsor;
+            } else if (currentSponsor && !sponsors.includes(currentSponsor)) {
+                document.getElementById('sponsorFilter').value = '';
+            }
+
+            // Cosponsor autocomplete - only cosponsors from bills matching current filters
+            const cosponsors = extractCosponsorsFromBills(relevantBills);
+            const currentCosponsor = document.getElementById('cosponsorFilter').value;
+            setupAutocomplete('cosponsorFilter', 'cosponsorDropdown', cosponsors);
+            // Preserve cosponsor value if it's still valid
+            if (currentCosponsor && cosponsors.includes(currentCosponsor)) {
+                document.getElementById('cosponsorFilter').value = currentCosponsor;
+            } else if (currentCosponsor && !cosponsors.includes(currentCosponsor)) {
+                document.getElementById('cosponsorFilter').value = '';
+            }
+            
+            const endTime = performance.now();
+            console.log(`Filter initialization took ${(endTime - startTime).toFixed(2)}ms`);
+            console.log(`Base bills: ${baseBills.length}, Bills dropdown: ${bills.length}, Sponsor/cosponsor context: ${relevantBills.length} bills`);
+            console.log(`Available options: ${sponsors.length} sponsors, ${cosponsors.length} cosponsors`);
+        }
+
+        // Extract cosponsors from bill data
+        function extractCosponsorsFromBills(billsToCheck = null) {
+            if (Object.keys(cosponsorData).length > 0) {
+                let allCosponsors = [];
+                
+                if (billsToCheck) {
+                    // Only get cosponsors from the specified bills
+                    billsToCheck.forEach(bill => {
+                        if (cosponsorData[bill.bill_id]) {
+                            allCosponsors = allCosponsors.concat(cosponsorData[bill.bill_id]);
+                        }
+                    });
+                } else {
+                    // Get all cosponsors
+                    allCosponsors = Object.values(cosponsorData).flat();
+                }
+                
+                const uniqueCosponsors = [...new Set(allCosponsors)];
+                return uniqueCosponsors.sort();
+            }
+            return [];
         }
 
         // Apply filters
@@ -921,6 +1170,7 @@
             const status = document.getElementById('statusFilter').value;
             const bill = document.getElementById('billsFilter').value;
             const sponsor = document.getElementById('sponsorFilter').value;
+            const cosponsor = document.getElementById('cosponsorFilter').value;
 
             // Filter data but NOT by status - status will be used for highlighting only
             filteredData = billData.filter(b => {
@@ -929,8 +1179,13 @@
                 if (issue !== 'All' && b.issue_name !== issue) return false;
                 if (committee !== 'All' && b.committee !== committee) return false;
                 // Don't filter by status - it's used for highlighting
-                if (bill !== 'All' && b.bill_number !== bill) return false;
-                if (sponsor !== 'All' && b.sponsor_name !== sponsor) return false;
+                if (bill !== 'All' && formatBillNumber(b) !== bill) return false;
+                if (sponsor && sponsor !== '' && b.sponsor_name !== sponsor) return false;
+                if (cosponsor && cosponsor !== '') {
+                    // Check if this bill has this cosponsor
+                    const billCosponsors = cosponsorData[b.bill_id] || b.cosponsors_list || [];
+                    if (!billCosponsors.includes(cosponsor)) return false;
+                }
                 return true;
             });
 
@@ -969,16 +1224,7 @@
                 return;
             }
 
-            // Format bill type for display
-            const billTypeDisplay = selectedBill.bill_type.toUpperCase()
-                .replace('HRES', 'H.Res.')
-                .replace('HCONRES', 'H.Con.Res.')
-                .replace('HJRES', 'H.J.Res.')
-                .replace('HR', 'H.R.')
-                .replace('SRES', 'S.Res.')
-                .replace('SCONRES', 'S.Con.Res.')
-                .replace('SJRES', 'S.J.Res.')
-                .replace('S', 'S.');
+            const billTypeDisplay = formatBillNumber(selectedBill);
 
             detailsDiv.innerHTML = `
                 <div class="detail-header">
@@ -986,7 +1232,7 @@
                     <div class="detail-subtitle">${selectedBill.congress}th Congress</div>
                 </div>
                 <div class="bill-card">
-                    <div class="bill-number">${billTypeDisplay} ${selectedBill.bill_number}</div>
+                    <div class="bill-number">${billTypeDisplay}</div>
                     <div class="bill-title">${selectedBill.bill_name}</div>
                     <div class="bill-info">
                         <span class="bill-info-label">Sponsor:</span>
@@ -1087,8 +1333,8 @@
             document.getElementById('committeeFilter').value = 'All';
             document.getElementById('statusFilter').value = 'All';
             document.getElementById('billsFilter').value = 'All';
-            document.getElementById('sponsorFilter').value = 'All';
-            document.getElementById('cosponsorFilter').value = 'All';
+            document.getElementById('sponsorFilter').value = '';
+            document.getElementById('cosponsorFilter').value = '';
             
             // Clear selected bill
             selectedBill = null;
@@ -1106,8 +1352,29 @@
             });
         });
 
-        ['issueFilter', 'committeeFilter', 'statusFilter', 'billsFilter', 'sponsorFilter', 'cosponsorFilter'].forEach(id => {
-            document.getElementById(id).addEventListener('change', applyFilters);
+        ['issueFilter', 'committeeFilter', 'statusFilter', 'billsFilter'].forEach(id => {
+            document.getElementById(id).addEventListener('change', function() {
+                // Update dependent dropdowns when filters that affect them change
+                if (id === 'issueFilter' || id === 'committeeFilter') {
+                    // These affect the bills dropdown and sponsor/cosponsor lists
+                    initializeFiltersFromData();
+                } else if (id === 'billsFilter') {
+                    // This only affects sponsor/cosponsor lists
+                    initializeFiltersFromData();
+                }
+                applyFilters();
+            });
+        });
+
+        // Handle sponsor/cosponsor autocomplete inputs separately
+        ['sponsorFilter', 'cosponsorFilter'].forEach(id => {
+            document.getElementById(id).addEventListener('input', function() {
+                // Only apply filters if the input is empty or matches a valid option
+                const input = this;
+                if (input.value === '' || (input.allOptions && input.allOptions.includes(input.value))) {
+                    applyFilters();
+                }
+            });
         });
 
         // Initialize the dashboard
@@ -1116,7 +1383,8 @@
             initChart();
             
             // Load data
-            billData = await loadBillData();
+            let rawData = await loadBillData();
+            billData = rawData.filter(Boolean); // Filter out null/undefined entries
             filteredData = [...billData];
             dataLoaded = true;
             

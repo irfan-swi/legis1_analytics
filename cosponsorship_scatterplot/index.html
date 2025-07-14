@@ -931,10 +931,10 @@
                         },
                         tooltip: {
                             titleFont: {
-                                size: 14
+                                size: 16
                             },
                             bodyFont: {
-                                size: 13
+                                size: 15
                             },
                             callbacks: {
                                 title: function(context) {
@@ -980,7 +980,7 @@
                             grid: {
                                 color: '#f0f0f0'
                             },
-                            min: -Math.max(dotSizes.selected * 0.3, 2)
+                            min: -Math.max(dotSizes.selected * 0.2, 1.5)
                         },
                         y: {
                             title: {
@@ -990,7 +990,7 @@
                             grid: {
                                 color: '#f0f0f0'
                             },
-                            min: -Math.max(dotSizes.selected * 0.3, 2)
+                            min: -Math.max(dotSizes.selected * 0.2, 1.5)
                         }
                     }
                 },
@@ -1075,8 +1075,8 @@
             const xPadding = Math.max(5, Math.ceil(maxX * 0.1));
             const yPadding = Math.max(5, Math.ceil(maxY * 0.1));
             
-            // Add cushion for boundary dots (reduced for less spacing)
-            const dotCushion = Math.max(dotSizes.selected * 0.3, 2);
+            // Add cushion for boundary dots (minimal spacing)
+            const dotCushion = Math.max(dotSizes.selected * 0.2, 1.5);
             
             chart.options.scales.x.max = Math.min(maxX + xPadding, axisLimit);
             chart.options.scales.y.max = Math.min(maxY + yPadding, axisLimit);

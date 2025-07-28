@@ -712,16 +712,14 @@
             }
 
             const member = selectedMember;
-            const location = member.chamber === 'senate' ? 
-                `${member.state} Senate` : 
-                member.district ? `${member.state}-${member.district}` : `${member.state} House`;
+            const location = member.state;
             
             const percentile = calculatePercentile(member.total_staff_experience, totalExperiences);
 
             detailsDiv.innerHTML = `
                 <div class="office-header">
-                    <div class="office-title">${member.full_name}'s Office</div>
-                    <div class="office-subtitle">${params.congress}th Congress • ${location}</div>
+                    <div class="office-title">${member.full_name}</div>
+                    <div class="office-subtitle">${params.congress}th Congress</div>
                 </div>
                 
                 <div class="percentile-rank">
@@ -737,6 +735,12 @@
                         </span>
                         <span class="member-info-label">Chamber:</span>
                         <span class="member-info-value">${member.chamber.charAt(0).toUpperCase() + member.chamber.slice(1)}</span>
+                        <span class="member-info-label">State:</span>
+                        <span class="member-info-value">${member.state}</span>
+                        ${member.district ? `
+                        <span class="member-info-label">District:</span>
+                        <span class="member-info-value">${member.district}</span>
+                        ` : ''}
                     </div>
                     
                     <div class="experience-highlight">

@@ -798,9 +798,41 @@
         // Update bar chart
         function updateBarChart() {
             const topN = document.getElementById('topNFilter').value;
-            const displayData = topN === 'all' ? filteredData : filteredData.slice(0, parseInt(topN));
+            const limit = topN === 'all' ? filteredData.length : parseInt(topN);
+            let displayData;
+            let startIndex = 0;
             
-            const labels = displayData.map(firm => firm.name);
+            // Check if we have a selected firm from search
+            if (selectedFirm) {
+                // Find the index of the selected firm in filtered data
+                const selectedIndex = filteredData.findIndex(f => f.name === selectedFirm.name);
+                
+                if (selectedIndex !== -1) {
+                    // Calculate the range to show centered around selected firm
+                    const halfRange = Math.floor(limit / 2);
+                    startIndex = Math.max(0, selectedIndex - halfRange);
+                    
+                    // Adjust if we're too close to the end
+                    if (startIndex + limit > filteredData.length) {
+                        startIndex = Math.max(0, filteredData.length - limit);
+                    }
+                    
+                    displayData = filteredData.slice(startIndex, startIndex + limit);
+                } else {
+                    // Selected firm not in filtered data, show top N
+                    displayData = filteredData.slice(0, limit);
+                }
+            } else {
+                // No selection, show top N
+                displayData = filteredData.slice(0, limit);
+            }
+            
+            // Create labels with rankings
+            const labels = displayData.map((firm, index) => {
+                const actualRank = startIndex + index + 1;
+                return `${actualRank}. ${firm.name}`;
+            });
+            
             const data = displayData.map(firm => firm.revenuePerLobbyist);
             const colors = displayData.map(firm => {
                 if (selectedFirm && selectedFirm.name === firm.name) {
@@ -817,7 +849,13 @@
             chart.update();
             
             // Update subtitle
-            const subtitle = `Top ${displayData.length} lobbying firms by revenue efficiency`;
+            let subtitle;
+            if (selectedFirm && displayData.find(f => f.name === selectedFirm.name)) {
+                const selectedRank = filteredData.findIndex(f => f.name === selectedFirm.name) + 1;
+                subtitle = `Showing ${displayData.length} firms centered around #${selectedRank} ${selectedFirm.name}`;
+            } else {
+                subtitle = `Top ${displayData.length} lobbying firms by revenue efficiency`;
+            }
             document.getElementById('chartSubtitle').textContent = subtitle;
         }
 
@@ -892,7 +930,8 @@
                 
                 if (revenue < minRevenue) return false;
                 if (firm.lobbyists < minLobbyists) return false;
-                if (searchTerm && !firm.name.toLowerCase().includes(searchTerm)) return false;
+                
+                // Don't filter by search term - we use it for focusing instead
                 
                 return true;
             });
@@ -1000,6 +1039,11 @@
                 
                 if (searchTerm.length < 2) {
                     autocompleteDiv.style.display = 'none';
+                    // Clear selection when search is cleared
+                    if (searchTerm.length === 0) {
+                        selectedFirm = null;
+                        updateFirmDetails();
+                    }
                     applyFilters();
                     return;
                 }
@@ -1021,7 +1065,7 @@
                     autocompleteDiv.style.display = 'none';
                 }
                 
-                applyFilters();
+                // Don't apply filters while typing - wait for selection
             });
             
             // Handle keyboard navigation
@@ -1069,7 +1113,11 @@
                 searchInput.value = firmName;
                 autocompleteDiv.style.display = 'none';
                 selectedFirm = firmData.find(f => f.name === firmName && f.year === year);
+                
+                // Apply filters first to ensure proper ranking
                 applyFilters();
+                
+                // Update the view with the selected firm
                 updateFirmDetails();
                 updateChart();
             }

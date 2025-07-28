@@ -1,4 +1,4 @@
-// Lobbying Revenue Dashboard - Full Version with In-House Filter Fix
+// Lobbying Revenue Dashboard - Updated with stakeholder requirements
 
 // Global variables
 let chart = null;
@@ -290,14 +290,16 @@ function updateBarChart() {
     
     chart.update();
     
-    // Update subtitle
+    // Update subtitle with total count
+    const displayCount = displayData.length;
+    const totalCount = filteredData.length;
     let subtitle;
-    if (selectedFirm && displayData.find(f => f.firm_id === selectedFirm.firm_id)) {
-        const selectedRank = filteredData.findIndex(f => f.firm_id === selectedFirm.firm_id) + 1;
-        subtitle = `Showing ${displayData.length} firms centered around #${selectedRank} ${selectedFirm.name}`;
-    } else {
-        subtitle = `Top ${displayData.length} lobbying firms by revenue per active lobbyist`;
-    }
+    
+
+    subtitle = topN === 'all' 
+        ? `Showing all ${totalCount} firms that meet filter criteria`
+        : `Showing ${displayCount} of ${totalCount} firms`;
+
     document.getElementById('chartSubtitle').textContent = subtitle;
 }
 
@@ -351,7 +353,9 @@ function updateLineChart() {
     chart.data.datasets = datasets;
     chart.update();
     
-    const subtitle = `Quarterly revenue comparison for top ${displayFirms.length} firms (${year})`;
+    // Update subtitle with total count
+    const totalCount = filteredData.length;
+    const subtitle = `Quarterly revenue comparison for top ${displayFirms.length} of ${totalCount} firms (${year})`;
     document.getElementById('chartSubtitle').textContent = subtitle;
 }
 
@@ -359,17 +363,18 @@ function updateLineChart() {
 async function applyFilters() {
     const year = parseInt(document.getElementById('yearFilter').value);
     const minRevenue = parseFloat(document.getElementById('minRevenueFilter').value) || 0;
+    const maxRevenue = parseFloat(document.getElementById('maxRevenueFilter').value) || Infinity;
     const minLobbyists = parseInt(document.getElementById('minLobbyistsFilter').value) || 0;
+    const maxLobbyists = parseInt(document.getElementById('maxLobbyistsFilter').value) || Infinity;
     const lobbyingType = document.getElementById('lobbyingTypeFilter').value;
     
-    console.log('Filter values:', { year, minRevenue, minLobbyists, lobbyingType });
+    console.log('Filter values:', { year, minRevenue, maxRevenue, minLobbyists, maxLobbyists, lobbyingType });
     
     try {
         firmData = await loadYearData(year);
         
         filteredData = firmData.filter(firm => {
             // Check if this is an in-house firm
-            // Try multiple ways to identify in-house firms
             const isInHouse = 
                 firm.lobbyingType === "In-House" ||
                 firm.inHouseOnly === true ||
@@ -390,8 +395,11 @@ async function applyFilters() {
                 revenue = firm.externalRevenue;
             }
             
-            if (revenue < minRevenue) return false;
-            if (firm.lobbyists < minLobbyists) return false;
+            // Apply revenue range filter
+            if (revenue < minRevenue || revenue > maxRevenue) return false;
+            
+            // Apply lobbyist range filter
+            if (firm.lobbyists < minLobbyists || firm.lobbyists > maxLobbyists) return false;
             
             return true;
         });
@@ -610,7 +618,9 @@ function setupEventListeners() {
     document.getElementById('yearFilter').addEventListener('change', applyFilters);
     document.getElementById('topNFilter').addEventListener('change', () => updateChart());
     document.getElementById('minRevenueFilter').addEventListener('input', applyFilters);
+    document.getElementById('maxRevenueFilter').addEventListener('input', applyFilters);
     document.getElementById('minLobbyistsFilter').addEventListener('input', applyFilters);
+    document.getElementById('maxLobbyistsFilter').addEventListener('input', applyFilters);
     document.getElementById('lobbyingTypeFilter').addEventListener('change', applyFilters);
     
     document.getElementById('barBtn').addEventListener('click', () => switchView('bar'));
@@ -633,6 +643,10 @@ async function initializeApp() {
             if (index === 0) option.selected = true;
             yearSelect.appendChild(option);
         });
+        
+        // Set default values
+        document.getElementById('minLobbyistsFilter').value = '10';
+        document.getElementById('lobbyingTypeFilter').value = 'exclude-in-house';
 
         hideLoading();
         

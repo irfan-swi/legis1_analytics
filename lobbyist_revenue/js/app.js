@@ -296,7 +296,7 @@ function updateBarChart() {
         const selectedRank = filteredData.findIndex(f => f.firm_id === selectedFirm.firm_id) + 1;
         subtitle = `Showing ${displayData.length} firms centered around #${selectedRank} ${selectedFirm.name}`;
     } else {
-        subtitle = `Top ${displayData.length} lobbying firms by revenue efficiency`;
+        subtitle = `Top ${displayData.length} lobbying firms by revenue per active lobbyist`;
     }
     document.getElementById('chartSubtitle').textContent = subtitle;
 }

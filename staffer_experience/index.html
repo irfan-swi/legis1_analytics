@@ -502,9 +502,10 @@
                                     return `${context[0].label} total years of experience`;
                                 },
                                 label: function(context) {
-                                    const memberNote = selectedMember && context.dataIndex === chart.data.datasets[0].backgroundColor.findIndex(color => color === '#FFD700') ? 
-                                        ` (${selectedMember.full_name} is in this range)` : '';
-                                    return `${context.parsed.y} congressional offices${memberNote}`;
+                                    if (selectedMember && context.dataIndex === chart.data.datasets[0].backgroundColor.findIndex(color => color === '#FFD700')) {
+                                        return `${selectedMember.full_name}: ${Math.round(selectedMember.total_staff_experience * 10) / 10} years`;
+                                    }
+                                    return `${context.parsed.y} congressional offices`;
                                 }
                             }
                         }
@@ -631,9 +632,8 @@
             chart.update();
             
             // Update subtitle
-            const chamberText = chamber === 'all' ? 'All Chambers' : chamber.charAt(0).toUpperCase() + chamber.slice(1);
             document.getElementById('chartSubtitle').textContent = 
-                `Total years of experience across congressional offices • ${params.congress}th Congress • ${chamberText} • ${filteredData.length} offices`;
+                `Total years of experience across congressional offices • ${params.congress}th Congress`;
         }
 
         // Update office details panel
@@ -737,14 +737,10 @@
                         </span>
                         <span class="member-info-label">Chamber:</span>
                         <span class="member-info-value">${member.chamber.charAt(0).toUpperCase() + member.chamber.slice(1)}</span>
-                        <span class="member-info-label">Person ID:</span>
-                        <span class="member-info-value">${member.person_id}</span>
-                        <span class="member-info-label">Member ID:</span>
-                        <span class="member-info-value">${member.member_id}</span>
                     </div>
                     
                     <div class="experience-highlight">
-                        <div class="experience-value">${member.total_staff_experience}</div>
+                        <div class="experience-value">${Math.round(member.total_staff_experience * 10) / 10}</div>
                         <div class="experience-label">Total Years of Staff Experience</div>
                     </div>
                 </div>

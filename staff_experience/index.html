@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congressional Staff Experience Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        /* Legis1 Application Theme - Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 14.5px;
+            line-height: 1.4;
+            color: #333333;
+            background-color: #F3F3EC;
+            margin: 0;
+        }
+
+        :root {
+            --democrat-color: #4a90e2;
+            --republican-color: #d32f2f;
+            --independent-color: #757575;
+            --bg-primary: #F3F3EC;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #f8f8f8;
+            --text-primary: #333333;
+            --text-secondary: #555961;
+            --text-muted: #999999;
+            --border-light: #ced4da;
+            --border-medium: #ced4da;
+            --border-dark: #c0c0c0;
+            --chart-grid: #f0f0f0;
+            --hover-bg: #f8f8f8;
+            --focus-outline: #31598B;
+            --legis-blue: #31598B;
+            --highlight-color: #FFD700;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+        }
+
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            gap: 15px;
+            overflow: hidden;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .main-content {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .chart-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            flex: 1;
+        }
+
+        .chart-header {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .chart-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .chart-content {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        .office-panel {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        .office-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .office-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .office-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .member-card {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .member-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .member-info {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 8px 15px;
+            margin-bottom: 15px;
+        }
+
+        .member-info-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .member-info-value {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+
+        .party-democrat {
+            color: var(--democrat-color);
+            font-weight: 600;
+        }
+
+        .party-republican {
+            color: var(--republican-color);
+            font-weight: 600;
+        }
+
+        .party-independent {
+            color: var(--independent-color);
+            font-weight: 600;
+        }
+
+        .experience-highlight {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            border: 3px solid var(--legis-blue);
+            margin-bottom: 20px;
+        }
+
+        .experience-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--legis-blue);
+            margin-bottom: 5px;
+        }
+
+        .experience-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .percentile-rank {
+            background: linear-gradient(135deg, var(--success-color), #20c997);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .distribution-stats {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .distribution-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .distribution-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+
+        .distribution-label {
+            color: var(--text-secondary);
+        }
+
+        .distribution-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .url-info {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+        }
+
+        .url-info-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .url-info code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .error {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: var(--error-color);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .error-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .retry-button {
+            background: var(--legis-blue);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        @media (max-width: 1024px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .main-content {
+                flex: 2;
+            }
+            
+            .office-panel {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Chart Section -->
+        <div class="main-content">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">Congressional Staff Experience Distribution</div>
+                    <div class="chart-subtitle" id="chartSubtitle">Loading data...</div>
+                </div>
+                <div class="chart-content">
+                    <div class="loading" id="loadingIndicator">Loading staff experience data...</div>
+                    <canvas id="experienceHistogram" style="display: none;"></canvas>
+                    <div class="error" id="errorDisplay" style="display: none;">
+                        <div class="error-title">Error Loading Data</div>
+                        <div class="error-message" id="errorMessage"></div>
+                        <button class="retry-button" onclick="loadData()">Retry</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Office Panel -->
+        <div class="office-panel">
+            <div id="officeDetails">
+                <div class="loading">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL Parameter Management
+        class URLParams {
+            static getParams() {
+                const params = new URLSearchParams(window.location.search);
+                return {
+                    congress: params.get('congress') || '119',
+                    chamber: params.get('chamber') || 'all',
+                    person_id: params.get('person_id') || ''
+                };
+            }
+        }
+
+        // Global variables
+        let chart;
+        let staffData = null;
+        let selectedMember = null;
+        let isLoading = false;
+
+        // Load data from JSON file
+        async function loadData() {
+            if (isLoading) return;
+            
+            isLoading = true;
+            const params = URLParams.getParams();
+            
+            try {
+                console.log(`Loading data for Congress ${params.congress}...`);
+                
+                // Show loading state
+                document.getElementById('loadingIndicator').style.display = 'flex';
+                document.getElementById('experienceHistogram').style.display = 'none';
+                document.getElementById('errorDisplay').style.display = 'none';
+                
+                // Load the data file
+                const response = await fetch(`congress-${params.congress}-staff-experience.json`);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load data: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data || !data.members || !Array.isArray(data.members)) {
+                    throw new Error('Invalid data format: missing members array');
+                }
+                
+                console.log(`Loaded ${data.members.length} members from Congress ${data.congress}`);
+                
+                staffData = data;
+                
+                // Initialize the dashboard
+                await initializeDashboard();
+                
+                // Hide loading, show chart
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('experienceHistogram').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                
+                // Show error state
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('experienceHistogram').style.display = 'none';
+                document.getElementById('errorDisplay').style.display = 'flex';
+                document.getElementById('errorMessage').textContent = error.message;
+                
+                // Update office panel with error
+                document.getElementById('officeDetails').innerHTML = `
+                    <div class="error" style="height: auto; margin-top: 50px;">
+                        <div class="error-title">Cannot Load Office Data</div>
+                        <div class="error-message">Data file could not be loaded</div>
+                    </div>
+                `;
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        // Initialize histogram chart
+        function initChart() {
+            const ctx = document.getElementById('experienceHistogram').getContext('2d');
+            
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Number of Offices',
+                        data: [],
+                        backgroundColor: 'rgba(49, 89, 139, 0.7)',
+                        borderColor: 'rgba(49, 89, 139, 1)',
+                        borderWidth: 1,
+                        barPercentage: 1.0,
+                        categoryPercentage: 1.0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const binIndex = context[0].dataIndex;
+                                    const bins = chart.data.datasets[0].binInfo;
+                                    if (bins && bins[binIndex]) {
+                                        const bin = bins[binIndex];
+                                        return `${Math.round(bin.start)} - ${Math.round(bin.end)} total years of experience`;
+                                    }
+                                    return `${context[0].label} total years of experience`;
+                                },
+                                label: function(context) {
+                                    const memberNote = selectedMember && context.dataIndex === chart.data.datasets[0].backgroundColor.findIndex(color => color === '#FFD700') ? 
+                                        ` (${selectedMember.full_name} is in this range)` : '';
+                                    return `${context.parsed.y} congressional offices${memberNote}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Total Years of Staff Experience'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Offices'
+                            },
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create histogram bins
+        function createHistogram(data) {
+            const values = data.map(d => d.total_staff_experience);
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const binCount = 25;
+            const binWidth = (max - min) / binCount;
+            
+            const bins = [];
+            for (let i = 0; i < binCount; i++) {
+                const binStart = min + i * binWidth;
+                const binEnd = min + (i + 1) * binWidth;
+                const binCenter = (binStart + binEnd) / 2;
+                const count = values.filter(v => v >= binStart && (i === binCount - 1 ? v <= binEnd : v < binEnd)).length;
+                
+                bins.push({
+                    center: Math.round(binCenter),
+                    start: binStart,
+                    end: binEnd,
+                    count: count
+                });
+            }
+            
+            return bins;
+        }
+
+        // Find member by person_id
+        function findMemberByPersonId(personId) {
+            if (!personId || !staffData) return null;
+            return staffData.members.find(m => m.person_id && m.person_id.toString() === personId.toString());
+        }
+
+        // Calculate percentile rank
+        function calculatePercentile(memberExperience, allExperiences) {
+            const sorted = allExperiences.sort((a, b) => a - b);
+            const rank = sorted.filter(exp => exp <= memberExperience).length;
+            return Math.round((rank / sorted.length) * 100);
+        }
+
+        // Update chart with filtered data
+        function updateChart() {
+            if (!staffData || !chart) return;
+            
+            const params = URLParams.getParams();
+            const chamber = params.chamber;
+            
+            // Filter data
+            let filteredData = staffData.members.filter(d => {
+                if (chamber !== 'all' && d.chamber !== chamber) return false;
+                return true;
+            });
+            
+            // Create histogram
+            const bins = createHistogram(filteredData);
+            const labels = bins.map(bin => bin.center);
+            const data = bins.map(bin => bin.count);
+            
+            // Create background colors array - highlight the bar containing the selected member
+            let backgroundColors = [];
+            let borderColors = [];
+            let memberBinIndex = -1;
+            
+            if (selectedMember) {
+                const memberExperience = selectedMember.total_staff_experience;
+                // Find which bin contains the member's experience
+                memberBinIndex = bins.findIndex(bin => 
+                    memberExperience >= bin.start && memberExperience < bin.end
+                );
+                // Handle edge case where member is at the maximum value
+                if (memberBinIndex === -1 && memberExperience === bins[bins.length - 1].end) {
+                    memberBinIndex = bins.length - 1;
+                }
+            }
+            
+            // Set colors for each bar
+            for (let i = 0; i < bins.length; i++) {
+                if (i === memberBinIndex) {
+                    backgroundColors.push('#FFD700'); // Gold for highlighted bar
+                    borderColors.push('#FFA500'); // Orange border for highlighted bar
+                } else {
+                    backgroundColors.push('rgba(49, 89, 139, 0.7)'); // Default blue
+                    borderColors.push('rgba(49, 89, 139, 1)'); // Default blue border
+                }
+            }
+            
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.data.datasets[0].backgroundColor = backgroundColors;
+            chart.data.datasets[0].borderColor = borderColors;
+            chart.data.datasets[0].borderWidth = 2;
+            
+            // Store bin information for tooltips
+            chart.data.datasets[0].binInfo = bins;
+            
+            chart.update();
+            
+            // Update subtitle
+            const chamberText = chamber === 'all' ? 'All Chambers' : chamber.charAt(0).toUpperCase() + chamber.slice(1);
+            document.getElementById('chartSubtitle').textContent = 
+                `Total years of experience across congressional offices • ${params.congress}th Congress • ${chamberText} • ${filteredData.length} offices`;
+        }
+
+        // Update office details panel
+        function updateOfficeDetails() {
+            if (!staffData) return;
+            
+            const params = URLParams.getParams();
+            const detailsDiv = document.getElementById('officeDetails');
+            const chamber = params.chamber;
+            
+            // Filter data for distribution stats
+            let filteredData = staffData.members.filter(d => {
+                if (chamber !== 'all' && d.chamber !== chamber) return false;
+                return true;
+            });
+            
+            const totalExperiences = filteredData.map(d => d.total_staff_experience);
+            const avgExperiences = filteredData.map(d => d.average_staff_experience);
+            
+            const distributionStats = {
+                totalOffices: filteredData.length,
+                avgTotal: Math.round((totalExperiences.reduce((a, b) => a + b, 0) / totalExperiences.length) * 10) / 10,
+                medianTotal: totalExperiences.sort((a, b) => a - b)[Math.floor(totalExperiences.length / 2)],
+                avgAverage: Math.round((avgExperiences.reduce((a, b) => a + b, 0) / avgExperiences.length) * 10) / 10,
+                minTotal: Math.min(...totalExperiences),
+                maxTotal: Math.max(...totalExperiences)
+            };
+            
+            if (!selectedMember) {
+                // Get some sample person_ids for the URL examples
+                const sampleMembers = filteredData.slice(0, 6);
+                
+                detailsDiv.innerHTML = `
+                    <div class="office-header">
+                        <div class="office-title">Staff Experience Analysis</div>
+                        <div class="office-subtitle">Use URL parameters to view a specific member's office</div>
+                    </div>
+                    
+                    <div class="url-info">
+                        <div class="url-info-title">Sample URLs to Try:</div>
+                        ${sampleMembers.map(member => `
+                            <div style="margin-bottom: 8px;">
+                                <strong>${member.full_name}:</strong><br>
+                                <code>?person_id=${member.person_id}</code>
+                            </div>
+                        `).join('')}
+                        <div style="margin-bottom: 8px;"><strong>House only:</strong><br><code>?chamber=house</code></div>
+                        <div><strong>Senate only:</strong><br><code>?chamber=senate</code></div>
+                    </div>
+                    
+                    <div class="distribution-stats">
+                        <div class="distribution-title">Distribution Statistics</div>
+                        <div class="distribution-item">
+                            <span class="distribution-label">Total Offices:</span>
+                            <span class="distribution-value">${distributionStats.totalOffices}</span>
+                        </div>
+                        <div class="distribution-item">
+                            <span class="distribution-label">Average Total Experience:</span>
+                            <span class="distribution-value">${distributionStats.avgTotal} years</span>
+                        </div>
+                        <div class="distribution-item">
+                            <span class="distribution-label">Median Total Experience:</span>
+                            <span class="distribution-value">${distributionStats.medianTotal} years</span>
+                        </div>
+                        <div class="distribution-item">
+                            <span class="distribution-label">Average Staff Experience:</span>
+                            <span class="distribution-value">${distributionStats.avgAverage} years</span>
+                        </div>
+                        <div class="distribution-item">
+                            <span class="distribution-label">Range:</span>
+                            <span class="distribution-value">${distributionStats.minTotal} - ${distributionStats.maxTotal} years</span>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const member = selectedMember;
+            const location = member.chamber === 'senate' ? 
+                `${member.state} Senate` : 
+                member.district ? `${member.state}-${member.district}` : `${member.state} House`;
+            
+            const percentile = calculatePercentile(member.total_staff_experience, totalExperiences);
+
+            detailsDiv.innerHTML = `
+                <div class="office-header">
+                    <div class="office-title">${member.full_name}'s Office</div>
+                    <div class="office-subtitle">${params.congress}th Congress • ${location}</div>
+                </div>
+                
+                <div class="percentile-rank">
+                    ${percentile}th Percentile
+                </div>
+                
+                <div class="member-card">
+                    <div class="member-name">${member.full_name}</div>
+                    <div class="member-info">
+                        <span class="member-info-label">Party:</span>
+                        <span class="member-info-value party-${member.party.toLowerCase()}">
+                            ${member.party}
+                        </span>
+                        <span class="member-info-label">Chamber:</span>
+                        <span class="member-info-value">${member.chamber.charAt(0).toUpperCase() + member.chamber.slice(1)}</span>
+                        <span class="member-info-label">Person ID:</span>
+                        <span class="member-info-value">${member.person_id}</span>
+                        <span class="member-info-label">Member ID:</span>
+                        <span class="member-info-value">${member.member_id}</span>
+                    </div>
+                    
+                    <div class="experience-highlight">
+                        <div class="experience-value">${member.total_staff_experience}</div>
+                        <div class="experience-label">Total Years of Staff Experience</div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">${member.average_staff_experience}</div>
+                        <div class="stat-label">Average Years per Staffer</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${member.staff_count}</div>
+                        <div class="stat-label">Total Staff Members</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${member.chief_of_staff_experience || 'N/A'}</div>
+                        <div class="stat-label">Chief of Staff Experience</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${Math.round((member.total_staff_experience - distributionStats.avgTotal) * 10) / 10}</div>
+                        <div class="stat-label">Above/Below Average</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Apply filters and update visualizations
+        function applyFilters() {
+            const params = URLParams.getParams();
+            
+            // Find selected member by person_id
+            if (params.person_id) {
+                selectedMember = findMemberByPersonId(params.person_id);
+                if (!selectedMember) {
+                    console.warn(`Member with person_id ${params.person_id} not found`);
+                }
+            } else {
+                selectedMember = null;
+            }
+            
+            updateChart();
+            updateOfficeDetails();
+        }
+
+        // Initialize the dashboard
+        async function initializeDashboard() {
+            // Initialize chart
+            if (!chart) {
+                initChart();
+            }
+            
+            // Apply initial filters from URL
+            applyFilters();
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+        });
+
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', function() {
+            if (staffData) {
+                applyFilters();
+            }
+        });
+    </script>
+</body>
+</html>

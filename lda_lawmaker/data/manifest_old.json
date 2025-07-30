@@ -1,0 +1,24 @@
+{
+  "congresses": [
+    {
+      "congress": 119,
+      "filename": "lda_orgs_119.json",
+      "records": 8175,
+      "sizeMB": 4.4
+    },
+    {
+      "congress": 118,
+      "filename": "lda_orgs_118.json",
+      "records": 92508,
+      "sizeMB": 57.2
+    },
+    {
+      "congress": 117,
+      "filename": "lda_orgs_117.json",
+      "records": 51749,
+      "sizeMB": 22.7
+    }
+  ],
+  "totalRecords": 152432,
+  "splitDate": "2025-06-05T19:02:14.773Z"
+}

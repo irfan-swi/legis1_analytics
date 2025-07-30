@@ -2,23 +2,27 @@
   "congresses": [
     {
       "congress": 119,
-      "filename": "lda_orgs_119.json",
-      "records": 8175,
-      "sizeMB": 4.4
+      "record_count": 33109,
+      "bill_count": 2667,
+      "file": "lda_orgs_119.json"
     },
     {
       "congress": 118,
-      "filename": "lda_orgs_118.json",
-      "records": 92508,
-      "sizeMB": 57.2
+      "record_count": 20199,
+      "bill_count": 1729,
+      "file": "lda_orgs_118.json"
     },
     {
       "congress": 117,
-      "filename": "lda_orgs_117.json",
-      "records": 51749,
-      "sizeMB": 22.7
+      "record_count": 49742,
+      "bill_count": 6700,
+      "file": "lda_orgs_117.json"
+    },
+    {
+      "congress": 116,
+      "record_count": 72246,
+      "bill_count": 9303,
+      "file": "lda_orgs_116.json"
     }
-  ],
-  "totalRecords": 152432,
-  "splitDate": "2025-06-05T19:02:14.773Z"
+  ]
 }

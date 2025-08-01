@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lawmaker Twitter Activity</title>
+    <style>
+        /* Legis1 Theme Styles */
+        :root {
+            --primary-blue: #2E598E;
+            --republican-red: #810000;
+            --independent-purple: #B19CD9;
+            --background: #F3F3EC;
+            --white: #FFFFFF;
+            --text-primary: #333333;
+            --text-secondary: #555961;
+            --border: #ced4da;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text-primary);
+            background-color: var(--background);
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Filter Panel */
+        .filter-panel {
+            background-color: var(--white);
+            padding: 20px 30px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px var(--shadow);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        /* Visualization Panel */
+        .viz-panel {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px var(--shadow);
+            min-height: 600px;
+        }
+
+        .viz-header {
+            margin-bottom: 20px;
+        }
+
+        .viz-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .viz-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        /* Chart Container */
+        #chart-container {
+            width: 100%;
+            height: 500px;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 400px;
+        }
+
+        .spinner {
+            border: 3px solid var(--background);
+            border-top: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Chart Layout */
+        .chart-area {
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+
+        .bars-container {
+            display: flex;
+            flex-direction: column;
+            padding-left: 280px;
+            position: relative;
+        }
+
+        /* Bar Chart Styles */
+        .bar-container {
+            display: flex;
+            align-items: center;
+            height: 30px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .bar-container:hover .bar {
+            opacity: 0.8;
+        }
+
+        .lawmaker-name {
+            position: absolute;
+            left: -280px;
+            width: 270px;
+            font-size: 12px;
+            padding-right: 10px;
+            text-align: right;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bar-wrapper {
+            flex: 1;
+            position: relative;
+            height: 25px;
+            background-color: transparent;
+        }
+
+        .bar {
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .bar.democrat {
+            background-color: var(--primary-blue);
+        }
+
+        .bar.republican {
+            background-color: var(--republican-red);
+        }
+
+        .bar.independent {
+            background-color: var(--independent-purple);
+        }
+
+        /* X-axis */
+        .x-axis {
+            position: relative;
+            height: 40px;
+            padding-left: 280px;
+            border-top: 1px solid #ddd;
+        }
+
+        .x-axis-labels {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            height: 100%;
+        }
+
+        .x-axis-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .x-axis-label::before {
+            content: '';
+            width: 1px;
+            height: 5px;
+            background-color: #ddd;
+            position: absolute;
+            top: -5px;
+        }
+
+        /* Grid lines */
+        .grid-lines {
+            position: absolute;
+            top: 0;
+            left: 280px;
+            right: 0;
+            bottom: 40px;
+            pointer-events: none;
+        }
+
+        .grid-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background-color: #f0f0f0;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid rgba(0, 0, 0, 0.9);
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 2px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .bars-container {
+                padding-left: 150px;
+            }
+            
+            .lawmaker-name {
+                left: -150px;
+                width: 140px;
+                font-size: 11px;
+            }
+            
+            .x-axis {
+                padding-left: 150px;
+            }
+            
+            .grid-lines {
+                left: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <!-- Filter Panel -->
+            <div class="filter-panel">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label for="issue-filter">Issue Area</label>
+                        <select id="issue-filter">
+                            <option value="All">All</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="chamber-filter">Chamber</label>
+                        <select id="chamber-filter">
+                            <option value="Both Chambers">Both Chambers</option>
+                            <option value="House">House</option>
+                            <option value="Senate">Senate</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="party-filter">Party</label>
+                        <select id="party-filter">
+                            <option value="All Parties">All Parties</option>
+                            <option value="Democrat">Democrat</option>
+                            <option value="Republican">Republican</option>
+                            <option value="Independent">Independent</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="num-lawmakers">Number of lawmakers</label>
+                        <select id="num-lawmakers">
+                            <option value="10">10</option>
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="start-date">Start Date</label>
+                        <select id="start-date"></select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="end-date">End Date</label>
+                        <select id="end-date"></select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Visualization Panel -->
+            <div class="viz-panel">
+                <div class="viz-header">
+                    <h2 class="viz-title" id="chart-title">Lawmaker Twitter Activity: All Issues</h2>
+                    <p class="viz-subtitle" id="chart-subtitle">Loading...</p>
+                </div>
+                
+                <div id="chart-container">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+                
+                <div class="tooltip" id="tooltip"></div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: var(--primary-blue);"></div>
+                        <span>Democrat</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: var(--republican-red);"></div>
+                        <span>Republican</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: var(--independent-purple);"></div>
+                        <span>Independent</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="data-loader.js"></script>
+    <script>
+        // Global data and state
+        let dataLoader;
+        let filteredData = [];
+        
+        // Initialize the app
+        const init = async () => {
+            try {
+                // Show loading state
+                document.getElementById('chart-container').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+                
+                // Initialize data loader
+                dataLoader = new DataLoader();
+                await dataLoader.init();
+                
+                // Populate filters
+                populateFilters();
+                
+                // Set up event listeners
+                setupEventListeners();
+                
+                // Initial render
+                await updateVisualization();
+            } catch (error) {
+                console.error('Failed to initialize app:', error);
+                document.getElementById('chart-container').innerHTML = 
+                    '<div class="loading">Error loading data. Please check console for details.</div>';
+            }
+        };
+        
+        // Populate filter dropdowns
+        const populateFilters = () => {
+            // Issues from index
+            const issueSelect = document.getElementById('issue-filter');
+            if (dataLoader.issues && dataLoader.issues.length > 0) {
+                dataLoader.issues.forEach(issue => {
+                    const option = document.createElement('option');
+                    option.value = issue;
+                    option.textContent = issue;
+                    issueSelect.appendChild(option);
+                });
+            }
+            
+            // Dates from data loader
+            const dateRange = dataLoader.getDateRange();
+            const startSelect = document.getElementById('start-date');
+            const endSelect = document.getElementById('end-date');
+            
+            // Clear existing options except "All"
+            startSelect.innerHTML = '';
+            endSelect.innerHTML = '';
+            
+            // Generate month options
+            const current = new Date(dateRange.start);
+            const dates = [];
+            
+            while (current <= dateRange.end) {
+                dates.push(new Date(current));
+                current.setMonth(current.getMonth() + 1);
+            }
+            
+            dates.forEach((date, index) => {
+                const dateLabel = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+                // Ensure proper date format: YYYY-MM-DD
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const dateValue = `${year}-${month}-01`;
+                
+                const startOption = document.createElement('option');
+                startOption.value = dateValue;
+                startOption.textContent = dateLabel;
+                startSelect.appendChild(startOption);
+                
+                const endOption = document.createElement('option');
+                endOption.value = dateValue;
+                endOption.textContent = dateLabel;
+                endSelect.appendChild(endOption);
+            });
+            
+            // Set default date range (last 3 months)
+            if (dates.length > 0) {
+                const defaultStart = Math.max(0, dates.length - 3);
+                startSelect.selectedIndex = defaultStart;
+                endSelect.selectedIndex = dates.length - 1;
+            }
+        };
+        
+        // Set up event listeners
+        const setupEventListeners = () => {
+            const filters = ['issue-filter', 'chamber-filter', 'party-filter', 
+                           'num-lawmakers', 'start-date', 'end-date'];
+            
+            filters.forEach(id => {
+                document.getElementById(id).addEventListener('change', async () => {
+                    await updateVisualization();
+                });
+            });
+        };
+        
+        // Filter and aggregate data
+        const filterAndAggregateData = async () => {
+            const issue = document.getElementById('issue-filter').value;
+            const chamber = document.getElementById('chamber-filter').value;
+            const party = document.getElementById('party-filter').value;
+            const startDate = new Date(document.getElementById('start-date').value);
+            const endDate = new Date(document.getElementById('end-date').value);
+            
+            // Show loading state while fetching data
+            const container = document.getElementById('chart-container');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            
+            try {
+                // Get filtered data from loader
+                const filters = {
+                    issue,
+                    chamber,
+                    party,
+                    startDate,
+                    endDate
+                };
+                
+                let result = await dataLoader.getFilteredData(filters);
+                
+                // Sort by posts
+                result.sort((a, b) => b.posts - a.posts);
+                
+                // Limit number of lawmakers
+                const numLawmakers = parseInt(document.getElementById('num-lawmakers').value);
+                result = result.slice(0, numLawmakers);
+                
+                return result;
+            } catch (error) {
+                console.error('Error filtering data:', error);
+                return [];
+            }
+        };
+        
+        // Update visualization
+        const updateVisualization = async () => {
+            try {
+                filteredData = await filterAndAggregateData();
+                
+                // Update title
+                updateTitle();
+                
+                // Update subtitle
+                updateSubtitle();
+                
+                // Render chart
+                renderChart();
+            } catch (error) {
+                console.error('Error updating visualization:', error);
+            }
+        };
+        
+        // Update title
+        const updateTitle = () => {
+            const chamber = document.getElementById('chamber-filter').value;
+            const party = document.getElementById('party-filter').value;
+            const issue = document.getElementById('issue-filter').value;
+            
+            let parts = [];
+            if (chamber !== 'Both Chambers') parts.push(chamber);
+            if (party !== 'All Parties') parts.push(party);
+            
+            const prefix = parts.length > 0 ? parts.join(' ') + ' ' : '';
+            const issuePart = issue === 'All' ? 'All Issues' : issue;
+            
+            document.getElementById('chart-title').textContent = 
+                `${prefix}Lawmaker Twitter Activity: ${issuePart}`;
+        };
+        
+        // Update subtitle
+        const updateSubtitle = () => {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            
+            if (!startDate || !endDate) {
+                document.getElementById('chart-subtitle').textContent = 'Select date range';
+                return;
+            }
+            
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            
+            // Check for valid dates
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                document.getElementById('chart-subtitle').textContent = 'Invalid date range';
+                return;
+            }
+            
+            const startLabel = start.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+            const endLabel = end.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+            
+            document.getElementById('chart-subtitle').textContent = `${startLabel} - ${endLabel}`;
+        };
+        
+        // Render bar chart
+        const renderChart = () => {
+            const container = document.getElementById('chart-container');
+            
+            if (filteredData.length === 0) {
+                container.innerHTML = '<div class="loading">No data available for the selected filters</div>';
+                return;
+            }
+            
+            // Calculate max value for scaling
+            const maxPosts = Math.max(...filteredData.map(d => d.posts));
+            const chartWidth = container.clientWidth - 300; // Account for labels and padding
+            
+            // Create chart structure
+            let html = '<div class="chart-area">';
+            
+            // Add grid lines
+            html += '<div class="grid-lines">';
+            const numGridLines = 5;
+            for (let i = 0; i <= numGridLines; i++) {
+                const xPos = (i / numGridLines) * 100;
+                html += `<div class="grid-line" style="left: ${xPos}%"></div>`;
+            }
+            html += '</div>';
+            
+            // Add bars
+            html += '<div class="bars-container">';
+            filteredData.forEach(d => {
+                const partyClass = d.party_clean.toLowerCase();
+                const barWidth = (d.posts / maxPosts) * 100;
+                
+                html += `
+                    <div class="bar-container" data-person-id="${d.person_id}" data-posts="${d.posts}">
+                        <div class="lawmaker-name">${d.display_name}</div>
+                        <div class="bar-wrapper">
+                            <div class="bar ${partyClass}" style="width: ${barWidth}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            // Add x-axis
+            html += '<div class="x-axis"><div class="x-axis-labels">';
+            for (let i = 0; i <= numGridLines; i++) {
+                const value = Math.round((i / numGridLines) * maxPosts);
+                html += `<div class="x-axis-label" style="left: ${(i / numGridLines) * 100}%">${value}</div>`;
+            }
+            html += '</div></div>';
+            
+            html += '</div>';
+            
+            container.innerHTML = html;
+            
+            // Adjust container height based on number of bars
+            container.style.height = Math.max(500, filteredData.length * 38 + 100) + 'px';
+            
+            // Add event handlers
+            const tooltip = document.getElementById('tooltip');
+            
+            container.querySelectorAll('.bar-container').forEach(bar => {
+                bar.addEventListener('mouseenter', (e) => {
+                    const posts = e.currentTarget.dataset.posts;
+                    tooltip.textContent = `${posts} posts`;
+                    tooltip.classList.add('show');
+                });
+                
+                bar.addEventListener('mousemove', (e) => {
+                    tooltip.style.left = e.pageX + 'px';
+                    tooltip.style.top = (e.pageY - 40) + 'px';
+                });
+                
+                bar.addEventListener('mouseleave', () => {
+                    tooltip.classList.remove('show');
+                });
+                
+                bar.addEventListener('click', () => {
+                    const personId = bar.dataset.personId;
+                    window.open(`https://app.legis1.com/lawmaker/detail?id=${personId}#communications`, '_blank');
+                });
+            });
+        };
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

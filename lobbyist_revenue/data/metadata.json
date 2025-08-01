@@ -1,14 +1,14 @@
 {
-  "last_updated": "2025-07-28T13:48:37.903562",
+  "last_updated": "2025-07-31T14:37:00.937953",
   "years": [
     2024,
     2025
   ],
-  "total_records": 72493,
+  "total_records": 140552,
   "total_firms": 5354,
   "data_version": "1.0",
   "firm_counts_by_year": {
-    "2024": 4369,
-    "2025": 4218
+    "2024": 5174,
+    "2025": 5122
   }
 }

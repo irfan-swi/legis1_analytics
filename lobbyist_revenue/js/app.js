@@ -1,4 +1,4 @@
-// Lobbying Revenue Dashboard - Updated with stakeholder requirements
+// Lobbying Revenue Dashboard - Full Version with Rolling 4-Quarter View
 
 // Global variables
 let chart = null;
@@ -6,6 +6,7 @@ let firmData = [];
 let filteredData = [];
 let selectedFirm = null;
 let currentView = 'bar';
+let allFirmData = null; // Store multi-year data for line charts
 
 // Format currency
 function formatCurrency(value) {
@@ -38,6 +39,102 @@ async function loadYearData(year) {
     }
 }
 
+// Load multiple years of data for line charts
+// Load multiple years of data for line charts
+// Load multiple years of data for line charts
+async function loadAllData() {
+    try {
+        const [data2024, data2025] = await Promise.all([
+            loadYearData(2024),
+            loadYearData(2025)
+        ]);
+        
+        // Create a map to store firms by their ID
+        const firmMap = new Map();
+        
+        // Process 2024 data first
+        data2024.forEach(firm => {
+            const firmData = {
+                ...firm,
+                year: 2024,
+                quarterlyRevenue: { ...firm.quarterlyRevenue },
+                allYearData: {
+                    2024: firm,
+                    2025: null
+                }
+            };
+            firmMap.set(firm.firm_id, firmData);
+        });
+        
+        // Process 2025 data - carefully merge without overwriting valid 2024 data
+        data2025.forEach(firm => {
+            const existingFirm = firmMap.get(firm.firm_id);
+            
+            if (existingFirm) {
+                // Start with the existing quarterly revenue (which has 2024 data)
+                const mergedQuarterlyRevenue = { ...existingFirm.quarterlyRevenue };
+                
+                // Only add/update quarters from 2025 data if they have real values
+                if (firm.quarterlyRevenue) {
+                    Object.entries(firm.quarterlyRevenue).forEach(([quarter, value]) => {
+                        // Only update if the quarter is 2025 OR if we don't have data for this quarter yet
+                        // Never overwrite existing 2024 data with zeros from 2025 file
+                        if (quarter.startsWith('2025-') || 
+                            (value > 0 && !mergedQuarterlyRevenue[quarter])) {
+                            mergedQuarterlyRevenue[quarter] = value;
+                        }
+                    });
+                }
+                
+                // Update the firm with most recent non-quarterly data
+                existingFirm.totalRevenue = firm.totalRevenue;
+                existingFirm.externalRevenue = firm.externalRevenue;
+                existingFirm.inHouseRevenue = firm.inHouseRevenue;
+                existingFirm.lobbyists = firm.lobbyists;
+                existingFirm.numClients = firm.numClients;
+                existingFirm.year = 2025;
+                existingFirm.quarterlyRevenue = mergedQuarterlyRevenue;
+                existingFirm.allYearData[2025] = firm;
+                
+                // Debug logging
+                if (firm.name.includes('Miller Strategies')) {
+                    console.log('Miller Strategies merge process:');
+                    console.log('2024 quarterly data:', data2024.find(f => f.firm_id === firm.firm_id)?.quarterlyRevenue);
+                    console.log('2025 quarterly data:', firm.quarterlyRevenue);
+                    console.log('Merged quarterly data:', mergedQuarterlyRevenue);
+                }
+            } else {
+                // Firm only exists in 2025
+                firmMap.set(firm.firm_id, {
+                    ...firm,
+                    year: 2025,
+                    quarterlyRevenue: { ...firm.quarterlyRevenue },
+                    allYearData: {
+                        2024: null,
+                        2025: firm
+                    }
+                });
+            }
+        });
+        
+        const mergedData = Array.from(firmMap.values());
+        console.log(`Loaded ${mergedData.length} unique firms across both years`);
+        
+        // Find and log Miller Strategies data specifically
+        const millerFirm = mergedData.find(f => f.name.includes('Miller Strategies LLC'));
+        if (millerFirm) {
+            console.log('Miller Strategies final merged data:', {
+                name: millerFirm.name,
+                quarterlyRevenue: millerFirm.quarterlyRevenue
+            });
+        }
+        
+        return mergedData;
+    } catch (error) {
+        console.error('Error loading multi-year data:', error);
+        throw error;
+    }
+}
 // Show loading state
 function showLoading() {
     document.getElementById('chartSubtitle').textContent = 'Loading data...';
@@ -87,7 +184,16 @@ function switchView(view) {
         chart.destroy();
     }
     initCharts();
-    updateChart();
+    
+    // If switching to line view, ensure we have multi-year data
+    if (view === 'line' && !allFirmData) {
+        loadAllData().then(data => {
+            allFirmData = data;
+            updateChart();
+        });
+    } else {
+        updateChart();
+    }
 }
 
 // Initialize charts
@@ -172,7 +278,7 @@ function initCharts() {
         const config = {
             type: 'line',
             data: {
-                labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                labels: ['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024', 'Q1 2025'],
                 datasets: []
             },
             options: {
@@ -200,6 +306,7 @@ function initCharts() {
                         }
                     }
                 },
+                
                 scales: {
                     y: {
                         title: {
@@ -295,47 +402,118 @@ function updateBarChart() {
     const totalCount = filteredData.length;
     let subtitle;
     
-
-    subtitle = topN === 'all' 
-        ? `Showing all ${totalCount} firms that meet filter criteria`
-        : `Showing ${displayCount} of ${totalCount} firms`;
-
+    if (selectedFirm && displayData.find(f => f.firm_id === selectedFirm.firm_id)) {
+        const selectedRank = filteredData.findIndex(f => f.firm_id === selectedFirm.firm_id) + 1;
+        subtitle = `Showing ${displayCount} firms centered around #${selectedRank} ${selectedFirm.name}`;
+    } else {
+        subtitle = topN === 'all' 
+            ? `Showing all ${totalCount} firms that meet filter criteria`
+            : `Showing top ${displayCount} of ${totalCount} firms that meet filter criteria`;
+    }
+    
     document.getElementById('chartSubtitle').textContent = subtitle;
 }
 
 // Update line chart
 function updateLineChart() {
-    const year = document.getElementById('yearFilter').value;
     const topN = document.getElementById('topNFilter').value;
     const searchTerm = document.getElementById('firmSearch').value.toLowerCase();
+    const lobbyingType = document.getElementById('lobbyingTypeFilter').value;
     let displayFirms = [];
     
+    // Use multi-year data for line chart if available
+    const dataSource = allFirmData || filteredData;
+    
     if (searchTerm) {
-        displayFirms = filteredData.filter(firm => 
+        displayFirms = dataSource.filter(firm => 
             firm.name.toLowerCase().includes(searchTerm)
-        ).slice(0, 25);
+        );
     } else {
-        const limit = topN === 'all' ? filteredData.length : parseInt(topN);
-        displayFirms = filteredData.slice(0, Math.min(limit, 25));
+        // Apply filters to multi-year data if using allFirmData
+        let filterableData = dataSource;
+        if (allFirmData) {
+            const minRevenue = parseFloat(document.getElementById('minRevenueFilter').value) || 0;
+            const maxRevenue = parseFloat(document.getElementById('maxRevenueFilter').value) || Infinity;
+            const minLobbyists = parseInt(document.getElementById('minLobbyistsFilter').value) || 0;
+            const maxLobbyists = parseInt(document.getElementById('maxLobbyistsFilter').value) || Infinity;
+            
+            filterableData = allFirmData.filter(firm => {
+                const isInHouse = 
+                    firm.lobbyingType === "In-House" ||
+                    firm.inHouseOnly === true ||
+                    firm.isInHouse === true ||
+                    (firm.name && firm.name.toLowerCase().includes("in-house")) ||
+                    (firm.inHousePercentage && firm.inHousePercentage === 1) ||
+                    (firm.inHousePercentage && firm.inHousePercentage === 100);
+                
+                if (lobbyingType === 'exclude-in-house' && isInHouse) {
+                    return false;
+                }
+                
+                let revenue = firm.totalRevenue;
+                if (lobbyingType === 'exclude-in-house' && firm.externalRevenue !== undefined) {
+                    revenue = firm.externalRevenue;
+                }
+                
+                if (revenue < minRevenue || revenue > maxRevenue) return false;
+                if (firm.lobbyists < minLobbyists || firm.lobbyists > maxLobbyists) return false;
+                
+                return true;
+            });
+            
+            // Calculate revenue per lobbyist for sorting
+            filterableData.forEach(firm => {
+                let revenue = firm.totalRevenue;
+                if (lobbyingType === 'exclude-in-house' && firm.externalRevenue !== undefined) {
+                    revenue = firm.externalRevenue;
+                }
+                firm.revenuePerLobbyist = firm.lobbyists > 0 ? revenue / firm.lobbyists : 0;
+            });
+            
+            // Sort by revenue per lobbyist
+            filterableData.sort((a, b) => b.revenuePerLobbyist - a.revenuePerLobbyist);
+        }
+        
+        // Now apply the topN filter
+        const limit = topN === 'all' ? filterableData.length : parseInt(topN);
+        displayFirms = filterableData.slice(0, limit);
+    }
+    
+    // Define the quarters based on available data
+    const quarterLabels = ['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024', 'Q1 2025', 'Q2 2025'];
+    const quarterKeys = ['2024-Q1', '2024-Q2', '2024-Q3', '2024-Q4', '2025-Q1', '2025-Q2'];
+    
+    // Debug logging
+    console.log('Displaying firms:', displayFirms.length);
+    if (displayFirms.length > 0) {
+        console.log('First firm quarterly data:', displayFirms[0].name, displayFirms[0].quarterlyRevenue);
     }
     
     const datasets = displayFirms.map((firm, index) => {
-        // Generate quarterly data if not present
-        const quarterlyData = firm.quarterlyRevenue ? [
-            firm.quarterlyRevenue[`${year}-Q1`] || firm.totalRevenue * 0.25,
-            firm.quarterlyRevenue[`${year}-Q2`] || firm.totalRevenue * 0.25,
-            firm.quarterlyRevenue[`${year}-Q3`] || firm.totalRevenue * 0.25,
-            firm.quarterlyRevenue[`${year}-Q4`] || firm.totalRevenue * 0.25
-        ] : [
-            firm.totalRevenue * 0.25,
-            firm.totalRevenue * 0.25,
-            firm.totalRevenue * 0.25,
-            firm.totalRevenue * 0.25
-        ];
+        let quarterlyData = [];
         
+        if (firm.quarterlyRevenue) {
+            // Use actual quarterly data if available
+            quarterlyData = quarterKeys.map(key => {
+                const value = firm.quarterlyRevenue[key];
+                // Log if we find Miller Strategies data
+                if (firm.name.includes('Miller Strategies') && key === '2024-Q1') {
+                    console.log(`${firm.name} Q1 2024 value:`, value);
+                }
+                return value !== undefined ? value : 0;
+            });
+        } else {
+            // If no quarterly data, show zeros
+            quarterlyData = [0, 0, 0, 0, 0, 0];
+        }
+        
+        // Use a color palette that can handle more lines
         const colors = [
             '#31598B', '#28a745', '#dc3545', '#ffc107', '#17a2b8',
-            '#6c757d', '#343a40', '#007bff', '#6f42c1', '#e83e8c'
+            '#6c757d', '#343a40', '#007bff', '#6f42c1', '#e83e8c',
+            '#fd7e14', '#20c997', '#375a7f', '#444', '#6610f2',
+            '#e74c3c', '#3498db', '#9b59b6', '#2ecc71', '#f39c12',
+            '#1abc9c', '#34495e', '#16a085', '#27ae60', '#2980b9'
         ];
         
         return {
@@ -343,22 +521,40 @@ function updateLineChart() {
             data: quarterlyData,
             borderColor: colors[index % colors.length],
             backgroundColor: colors[index % colors.length] + '20',
-            tension: 0.4,
-            pointRadius: 4,
-            pointHoverRadius: 6
+            tension: 0.1, // Slight curve for better visibility
+            pointRadius: displayFirms.length > 50 ? 0 : 4,
+            pointHoverRadius: 6,
+            borderWidth: displayFirms.length > 50 ? 1 : 2
         };
     });
     
-    chart.data.labels = [`Q1 ${year}`, `Q2 ${year}`, `Q3 ${year}`, `Q4 ${year}`];
+    chart.data.labels = quarterLabels;
     chart.data.datasets = datasets;
+    
+    // Update legend visibility based on number of firms
+    chart.options.plugins.legend.display = displayFirms.length <= 25;
+    
     chart.update();
     
-    // Update subtitle with total count
-    const totalCount = filteredData.length;
-    const subtitle = `Quarterly revenue comparison for top ${displayFirms.length} of ${totalCount} firms (${year})`;
+    // Update subtitle
+    const totalCount = allFirmData ? 
+        allFirmData.filter(firm => {
+            const isInHouse = 
+                firm.lobbyingType === "In-House" ||
+                firm.inHouseOnly === true ||
+                firm.isInHouse === true ||
+                (firm.name && firm.name.toLowerCase().includes("in-house")) ||
+                (firm.inHousePercentage && firm.inHousePercentage === 1) ||
+                (firm.inHousePercentage && firm.inHousePercentage === 100);
+            return !(lobbyingType === 'exclude-in-house' && isInHouse);
+        }).length : 
+        filteredData.length;
+        
+    const subtitle = topN === 'all' 
+        ? `Quarterly revenue trends for all ${displayFirms.length} firms (last 6 quarters)`
+        : `Quarterly revenue trends for top ${displayFirms.length} of ${totalCount} firms (last 6 quarters)`;
     document.getElementById('chartSubtitle').textContent = subtitle;
 }
-
 // Apply filters
 async function applyFilters() {
     const year = parseInt(document.getElementById('yearFilter').value);
@@ -371,6 +567,12 @@ async function applyFilters() {
     console.log('Filter values:', { year, minRevenue, maxRevenue, minLobbyists, maxLobbyists, lobbyingType });
     
     try {
+        // For line chart, we need all data; for bar chart, just the selected year
+        if (currentView === 'line' && !allFirmData) {
+            allFirmData = await loadAllData();
+        }
+        
+        // Load specific year data for bar chart
         firmData = await loadYearData(year);
         
         filteredData = firmData.filter(firm => {

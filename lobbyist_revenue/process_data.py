@@ -64,7 +64,7 @@ def process_lobbying_data(lobbying_csv, lobbyists_csv, output_dir):
             'income': 'sum'
         }).reset_index()
         
-        # Pivot quarterly data
+        # Pivot quarterly data with explicit column names
         quarterly_pivot = quarterly.pivot_table(
             index='lobby_firm',
             columns='report_quarter',
@@ -72,8 +72,19 @@ def process_lobbying_data(lobbying_csv, lobbyists_csv, output_dir):
             fill_value=0
         )
         
+        # Rename columns to be more explicit
+        quarterly_pivot.columns = [f'quarter_{int(col)}_revenue' for col in quarterly_pivot.columns]
+        
         # Merge quarterly data
         firm_totals = firm_totals.merge(quarterly_pivot, left_on='lobby_firm', right_index=True, how='left')
+        
+        # Fill any missing quarterly values with 0
+        for q in range(1, 5):
+            col_name = f'quarter_{q}_revenue'
+            if col_name not in firm_totals.columns:
+                firm_totals[col_name] = 0
+            else:
+                firm_totals[col_name] = firm_totals[col_name].fillna(0)
         
         # Calculate derived metrics
         firm_totals['total_revenue'] = firm_totals['income']
@@ -121,10 +132,10 @@ def process_lobbying_data(lobbying_csv, lobbyists_csv, output_dir):
                 'revenuePerLobbyist': int(firm['revenue_per_lobbyist']),
                 'numClients': int(firm['client']),
                 'quarterlyRevenue': {
-                    f'{year}-Q1': int(firm.get(1, 0)),
-                    f'{year}-Q2': int(firm.get(2, 0)),
-                    f'{year}-Q3': int(firm.get(3, 0)),
-                    f'{year}-Q4': int(firm.get(4, 0))
+                    f'{year}-Q1': int(firm.get('quarter_1_revenue', 0)),
+                    f'{year}-Q2': int(firm.get('quarter_2_revenue', 0)),
+                    f'{year}-Q3': int(firm.get('quarter_3_revenue', 0)),
+                    f'{year}-Q4': int(firm.get('quarter_4_revenue', 0))
                 },
                 'clients': clients_data.get(firm['lobby_firm'], [])
             }
@@ -174,6 +185,22 @@ def process_lobbying_data(lobbying_csv, lobbyists_csv, output_dir):
             print(f"  Top 5 firms by revenue per lobbyist:")
             for i, firm in enumerate(top_5, 1):
                 print(f"    {i}. {firm['name']}: ${firm['revenuePerLobbyist']:,}/lobbyist")
+    
+    # Add validation check
+    print("\n=== Data Validation ===")
+    for year in years:
+        if year in all_firms_data:
+            sample_firm = all_firms_data[year][0]
+            print(f"\nSample firm from {year}:")
+            print(f"  Name: {sample_firm['name']}")
+            print(f"  Total Revenue: ${sample_firm['totalRevenue']:,}")
+            print(f"  Quarterly Revenue:")
+            quarterly_sum = 0
+            for quarter, revenue in sample_firm['quarterlyRevenue'].items():
+                print(f"    {quarter}: ${revenue:,}")
+                quarterly_sum += revenue
+            print(f"  Sum of Quarters: ${quarterly_sum:,}")
+            print(f"  Match: {'Yes' if quarterly_sum == sample_firm['totalRevenue'] else 'No'}")
     
     return metadata
 

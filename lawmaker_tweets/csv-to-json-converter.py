@@ -220,9 +220,11 @@ class DataLoader {
         // Store issues list
         this.issues = this.index.issues || [];
         
-        // Load last 3 months by default
-        const recentMonths = this.index.months.slice(-3);
-        await this.loadMonths(recentMonths);
+        // Load last 2 months by default
+        const lastTwoMonths = this.index.months.slice(-2);
+        if (lastTwoMonths.length > 0) {
+            await this.loadMonths(lastTwoMonths);
+        }
     }
     
     async loadMonths(months) {
@@ -354,6 +356,7 @@ window.DataLoader = DataLoader;
 
 if __name__ == "__main__":
 
+    
     csv_file = '1_tweets_df.csv'
     output_dir = './'
     

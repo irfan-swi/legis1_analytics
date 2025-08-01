@@ -369,7 +369,7 @@
                         <label for="party-filter">Party</label>
                         <select id="party-filter">
                             <option value="All Parties">All Parties</option>
-                            <option value="Democrat">Democrat</option>
+                            <option value="Democrat">Democratic</option>
                             <option value="Republican">Republican</option>
                             <option value="Independent">Independent</option>
                         </select>
@@ -414,7 +414,7 @@
                 <div class="legend">
                     <div class="legend-item">
                         <div class="legend-color" style="background-color: var(--primary-blue);"></div>
-                        <span>Democrat</span>
+                        <span>Democratic</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background-color: var(--republican-red);"></div>
@@ -509,11 +509,13 @@
                 endSelect.appendChild(endOption);
             });
             
-            // Set default date range (last 3 months)
-            if (dates.length > 0) {
-                const defaultStart = Math.max(0, dates.length - 3);
-                startSelect.selectedIndex = defaultStart;
-                endSelect.selectedIndex = dates.length - 1;
+            // Set default date range (second-to-last month to last month)
+            if (dates.length > 1) {
+                startSelect.selectedIndex = dates.length - 2;  // Second-to-last month
+                endSelect.selectedIndex = dates.length - 1;    // Last month
+            } else if (dates.length === 1) {
+                startSelect.selectedIndex = 0;
+                endSelect.selectedIndex = 0;
             }
         };
         
@@ -604,25 +606,17 @@
         
         // Update subtitle
         const updateSubtitle = () => {
-            const startDate = document.getElementById('start-date').value;
-            const endDate = document.getElementById('end-date').value;
+            const startSelect = document.getElementById('start-date');
+            const endSelect = document.getElementById('end-date');
             
-            if (!startDate || !endDate) {
+            if (!startSelect.value || !endSelect.value) {
                 document.getElementById('chart-subtitle').textContent = 'Select date range';
                 return;
             }
             
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            
-            // Check for valid dates
-            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-                document.getElementById('chart-subtitle').textContent = 'Invalid date range';
-                return;
-            }
-            
-            const startLabel = start.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
-            const endLabel = end.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+            // Use the selected option's text (which is already formatted as "May 2025")
+            const startLabel = startSelect.options[startSelect.selectedIndex].text;
+            const endLabel = endSelect.options[endSelect.selectedIndex].text;
             
             document.getElementById('chart-subtitle').textContent = `${startLabel} - ${endLabel}`;
         };

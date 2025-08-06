@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congressional Staff Turnover Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        /* Legis1 Application Theme - Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 14.5px;
+            line-height: 1.4;
+            color: #333333;
+            background-color: #F3F3EC;
+            margin: 0;
+        }
+
+        :root {
+            --democrat-color: #4a90e2;
+            --republican-color: #d32f2f;
+            --independent-color: #757575;
+            --bg-primary: #F3F3EC;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #f8f8f8;
+            --text-primary: #333333;
+            --text-secondary: #555961;
+            --text-muted: #999999;
+            --border-light: #ced4da;
+            --border-medium: #ced4da;
+            --border-dark: #c0c0c0;
+            --chart-grid: #f0f0f0;
+            --hover-bg: #f8f8f8;
+            --focus-outline: #31598B;
+            --legis-blue: #31598B;
+            --warning-color: #ff6b35;
+            --good-color: #28a745;
+        }
+
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px;
+            gap: 15px;
+            box-sizing: border-box;
+        }
+
+        .filter-panel {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            padding: 30px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 30px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            font-size: 14.5px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--legis-blue);
+            box-shadow: 0 0 0 2px rgba(49, 89, 139, 0.2);
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        .chart-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .chart-header {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .chart-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .chart-content {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        .detail-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        .detail-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .detail-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .detail-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .member-card {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .member-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--legis-blue);
+            margin-bottom: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            display: inline-block;
+        }
+
+        .member-name:hover {
+            color: var(--republican-color);
+            text-decoration: underline;
+        }
+
+        .member-display-name {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .member-info {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 5px 15px;
+            margin-bottom: 15px;
+        }
+
+        .member-info-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .member-info-value {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+
+        .party-democrat {
+            color: var(--democrat-color);
+            font-weight: 600;
+        }
+
+        .party-republican {
+            color: var(--republican-color);
+            font-weight: 600;
+        }
+
+        .party-independent {
+            color: var(--independent-color);
+            font-weight: 600;
+        }
+
+        .turnover-score {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid var(--border-light);
+        }
+
+        .turnover-score-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .turnover-score-value.high-turnover {
+            color: var(--republican-color);
+        }
+
+        .turnover-score-value.medium-turnover {
+            color: var(--warning-color);
+        }
+
+        .turnover-score-value.low-turnover {
+            color: var(--good-color);
+        }
+
+        .turnover-score-value.no-turnover {
+            color: var(--legis-blue);
+        }
+
+        .turnover-score-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .no-selection {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 50px;
+        }
+
+        /* Search and autocomplete styles */
+        .search-container {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding-right: 30px;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            margin-top: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .autocomplete-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .autocomplete-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: var(--text-secondary);
+        }
+
+        /* Scrollbar styling */
+        .detail-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .detail-panel::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        .detail-panel::-webkit-scrollbar-thumb {
+            background: var(--border-dark);
+            border-radius: 3px;
+        }
+
+        .detail-panel::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: 2fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Filter Panel -->
+        <div class="filter-panel">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label">Congress</label>
+                    <select id="congressFilter">
+                        <option value="119">119</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Chamber</label>
+                    <select id="chamberFilter">
+                        <option value="all">All Chambers</option>
+                        <option value="House">House</option>
+                        <option value="Senate">Senate</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">State</label>
+                    <select id="stateFilter">
+                        <option value="all">All States</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Show Top</label>
+                    <select id="limitFilter">
+                        <option value="5">Top 5</option>
+                        <option value="10" selected>Top 10</option>
+                        <option value="20">Top 20</option>
+                        <option value="all">Show All</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-row" style="margin-top: 15px;">
+                <div class="filter-group" style="grid-column: span 2;">
+                    <label class="filter-label">Search Member</label>
+                    <div class="search-container">
+                        <input type="text" id="memberSearch" placeholder="Search by member name..." class="search-input">
+                        <button class="search-clear" onclick="clearSearch()" style="display: none;">×</button>
+                        <div id="autocomplete" class="autocomplete-dropdown" style="display: none;"></div>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Party</label>
+                    <select id="partyFilter">
+                        <option value="all">All Parties</option>
+                        <option value="Democrat">Democrat</option>
+                        <option value="Republican">Republican</option>
+                        <option value="Independent">Independent</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Chart Section -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">Congressional Staff Turnover Rankings</div>
+                    <div class="chart-subtitle" id="chartSubtitle">Loading data...</div>
+                </div>
+                <div class="chart-content">
+                    <canvas id="turnoverChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Detail Panel -->
+            <div class="detail-panel">
+                <div class="detail-header">
+                    <div class="detail-title">Member Details</div>
+                    <div class="detail-subtitle">Click on a bar to view member information</div>
+                </div>
+                <div id="memberDetails">
+                    <div class="loading">Loading data...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let data = [];
+        let chart;
+        let currentChamber = 'all';
+        let selectedMember = null;
+        let filteredData = [];
+
+        // Load CSV data
+        async function loadData() {
+            try {
+                const response = await fetch('119turnover.csv');
+                const csvText = await response.text();
+                
+                // Parse CSV using PapaParse
+                const parsed = Papa.parse(csvText, {
+                    header: true,
+                    dynamicTyping: true,
+                    skipEmptyLines: true
+                });
+                
+                data = parsed.data;
+                console.log(`Loaded ${data.length} members`);
+                
+                // Initialize the app
+                initializeStateSelect();
+                initChart();
+                applyFilters();
+                
+                // Update UI to show loaded state
+                document.getElementById('chartSubtitle').textContent = 'Showing top 10 members • Click bars to view details';
+                updateMemberDetails();
+                
+            } catch (error) {
+                console.error('Error loading CSV:', error);
+                document.getElementById('chartSubtitle').textContent = 'Error loading data';
+                document.getElementById('memberDetails').innerHTML = '<div class="error">Error loading data. Please ensure 119turnover.csv is in the same directory.</div>';
+            }
+        }
+
+        // Initialize state select with unique states
+        function initializeStateSelect() {
+            const states = [...new Set(data.map(d => d.us_state_id))].sort();
+            const stateSelect = document.getElementById('stateFilter');
+            states.forEach(state => {
+                const option = document.createElement('option');
+                option.value = state;
+                option.textContent = state;
+                stateSelect.appendChild(option);
+            });
+        }
+
+        // Initialize chart
+        function initChart() {
+            const ctx = document.getElementById('turnoverChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Turnover Rate %',
+                        data: [],
+                        backgroundColor: [],
+                        borderColor: [],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    interaction: {
+                        intersect: false,
+                        mode: 'point'
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const displayData = getCurrentDisplayData();
+                            selectMember(displayData[index]);
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            position: 'nearest',
+                            callbacks: {
+                                label: function(context) {
+                                    return `Turnover Rate: ${(context.parsed.x * 100).toFixed(1)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Staff Turnover Percentage'
+                            },
+                            grid: {
+                                color: '#f0f0f0'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return (value * 100).toFixed(0) + '%';
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Apply all filters
+        function applyFilters() {
+            const chamber = document.getElementById('chamberFilter').value;
+            const party = document.getElementById('partyFilter').value;
+            const state = document.getElementById('stateFilter').value;
+            const searchTerm = document.getElementById('memberSearch').value.toLowerCase();
+            
+            currentChamber = chamber;
+            
+            filteredData = data.filter(d => {
+                if (chamber !== 'all' && d.Chamber !== chamber) return false;
+                if (party !== 'all' && d.party_name !== party) return false;
+                if (state !== 'all' && d.us_state_id !== state) return false;
+                if (searchTerm && !d.display_name.toLowerCase().includes(searchTerm) && 
+                    !d.first_name.toLowerCase().includes(searchTerm) &&
+                    !d.last_name.toLowerCase().includes(searchTerm)) return false;
+                return true;
+            });
+
+            updateChart();
+            
+            // Clear selected member if they're no longer in filtered results
+            if (selectedMember && !filteredData.find(m => m.person_id === selectedMember.person_id)) {
+                selectedMember = null;
+                updateMemberDetails();
+            }
+        }
+
+        // Get currently displayed data (after limit filter)
+        function getCurrentDisplayData() {
+            const limitValue = document.getElementById('limitFilter').value;
+            const sortedData = [...filteredData].sort((a, b) => b.turnover_rate - a.turnover_rate);
+            return limitValue === 'all' ? sortedData : sortedData.slice(0, parseInt(limitValue));
+        }
+
+        // Update chart
+        function updateChart() {
+            const displayData = getCurrentDisplayData();
+            const limitValue = document.getElementById('limitFilter').value;
+            
+            // Update subtitle
+            const subtitle = document.getElementById('chartSubtitle');
+            const limitText = limitValue === 'all' ? 
+                `Showing all ${filteredData.length} members` : 
+                `Showing top ${Math.min(parseInt(limitValue), filteredData.length)} members`;
+            subtitle.textContent = `${limitText} • Click bars to view details`;
+            
+            // Update chart data
+            const labels = displayData.map(m => m.display_name);
+            const values = displayData.map(m => m.turnover_rate);
+            const colors = displayData.map(m => getPartyColor(m.party_name));
+            
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = values;
+            chart.data.datasets[0].backgroundColor = colors;
+            chart.data.datasets[0].borderColor = colors;
+            
+            chart.update();
+        }
+
+        // Get party color
+        function getPartyColor(party) {
+            switch(party.toLowerCase()) {
+                case 'democrat': return '#4a90e2';
+                case 'republican': return '#d32f2f';
+                case 'independent': return '#757575';
+                default: return '#757575';
+            }
+        }
+
+        // Select member
+        function selectMember(member) {
+            selectedMember = member;
+            updateMemberDetails();
+        }
+
+        // Get member ranking
+        function getMemberRanking(member) {
+            const allSorted = [...data].sort((a, b) => b.turnover_rate - a.turnover_rate);
+            const congressRank = allSorted.findIndex(m => m.person_id === member.person_id) + 1;
+            
+            const partyMembers = data.filter(m => m.party_name === member.party_name);
+            const partySorted = partyMembers.sort((a, b) => b.turnover_rate - a.turnover_rate);
+            const partyRank = partySorted.findIndex(m => m.person_id === member.person_id) + 1;
+            
+            return {
+                congressRank,
+                congressTotal: data.length,
+                partyRank,
+                partyTotal: partyMembers.length
+            };
+        }
+
+        // Get turnover score color class
+        function getTurnoverScoreColorClass(turnoverRate) {
+            if (turnoverRate === 0) return 'no-turnover';
+            if (turnoverRate < 0.2) return 'low-turnover';
+            if (turnoverRate < 0.5) return 'medium-turnover';
+            return 'high-turnover';
+        }
+
+        // Update member details
+        function updateMemberDetails() {
+            const detailsDiv = document.getElementById('memberDetails');
+            
+            if (!data.length) {
+                return; // Keep loading state if no data
+            }
+            
+            if (!selectedMember) {
+                // Show aggregate statistics
+                const chamberData = currentChamber === 'all' ? data : data.filter(d => d.Chamber === currentChamber);
+                const avgTurnover = chamberData.reduce((sum, d) => sum + d.turnover_rate, 0) / chamberData.length;
+                const totalStaff = chamberData.reduce((sum, d) => sum + d.current_staff_count, 0);
+                const totalDeparted = chamberData.reduce((sum, d) => sum + d.staff_departed, 0);
+                
+                const demData = chamberData.filter(d => d.party_name === 'Democrat');
+                const repData = chamberData.filter(d => d.party_name === 'Republican');
+                const demAvg = demData.length ? demData.reduce((sum, d) => sum + d.turnover_rate, 0) / demData.length : 0;
+                const repAvg = repData.length ? repData.reduce((sum, d) => sum + d.turnover_rate, 0) / repData.length : 0;
+                
+                const chamberLabel = currentChamber === 'all' ? 'All Chambers' : currentChamber;
+                
+                detailsDiv.innerHTML = `
+                    <div class="member-card">
+                        <div class="member-name" style="cursor: default;">119th Congress Overview</div>
+                        <div class="member-display-name">${chamberLabel}</div>
+                        
+                        <div class="turnover-score">
+                            <div class="turnover-score-value medium-turnover">${(avgTurnover * 100).toFixed(1)}%</div>
+                            <div class="turnover-score-label">Average Turnover Rate</div>
+                        </div>
+                        
+                        <div class="stats-grid" style="margin-top: 15px;">
+                            <div class="stat-item">
+                                <div class="stat-value party-democrat">${(demAvg * 100).toFixed(1)}%</div>
+                                <div class="stat-label">Democrat Average</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value party-republican">${(repAvg * 100).toFixed(1)}%</div>
+                                <div class="stat-label">Republican Average</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${totalStaff}</div>
+                                <div class="stat-label">Total Current Staff</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${totalDeparted}</div>
+                                <div class="stat-label">Total Departed</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const member = selectedMember;
+            const ranking = getMemberRanking(member);
+            const scoreColorClass = getTurnoverScoreColorClass(member.turnover_rate);
+            const partyClass = `party-${member.party_name.toLowerCase()}`;
+            
+            // Create Legis1 URL if person_id exists
+            const legis1Url = member.person_id ? `https://app.legis1.com/lawmaker/detail?id=${member.person_id}` : null;
+            
+            detailsDiv.innerHTML = `
+                <div class="member-card">
+                    ${legis1Url ? 
+                        `<a href="${legis1Url}" target="_blank" class="member-name">${member.first_name} ${member.last_name}</a>` :
+                        `<div class="member-name">${member.first_name} ${member.last_name}</div>`
+                    }
+                    <div class="member-display-name">${member.display_name}</div>
+                    <div class="member-info">
+                        <span class="member-info-label">Party:</span>
+                        <span class="member-info-value ${partyClass}">${member.party_name}</span>
+                        <span class="member-info-label">Chamber:</span>
+                        <span class="member-info-value">${member.Chamber}</span>
+                        <span class="member-info-label">State:</span>
+                        <span class="member-info-value">${member.us_state_id}${member.district_no ? '-' + member.district_no : ''}</span>
+                    </div>
+                    <div class="turnover-score">
+                        <div class="turnover-score-value ${scoreColorClass}">${(member.turnover_rate * 100).toFixed(0)}%</div>
+                        <div class="turnover-score-label">Turnover Rate</div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">${member.current_staff_count}</div>
+                        <div class="stat-label">Current Staff</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${member.staff_departed}</div>
+                        <div class="stat-label">Staff Departed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${ranking.congressRank} of ${ranking.congressTotal}</div>
+                        <div class="stat-label">Congress Ranking</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${ranking.partyRank} of ${ranking.partyTotal}</div>
+                        <div class="stat-label">Party Ranking</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Search functionality
+        const searchInput = document.getElementById('memberSearch');
+        const autocompleteDiv = document.getElementById('autocomplete');
+        const searchClearBtn = document.querySelector('.search-clear');
+        
+        searchInput.addEventListener('input', function(e) {
+            const value = e.target.value;
+            searchClearBtn.style.display = value ? 'block' : 'none';
+            
+            if (value.length > 1) {
+                showAutocomplete(value);
+            } else {
+                hideAutocomplete();
+            }
+            
+            applyFilters();
+        });
+        
+        function showAutocomplete(searchTerm) {
+            const matches = data
+                .filter(d => 
+                    d.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    d.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    d.last_name.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+                .slice(0, 8);
+            
+            if (matches.length > 0) {
+                autocompleteDiv.innerHTML = matches.map(m => `
+                    <div class="autocomplete-item" onclick="selectFromAutocomplete(${m.person_id})">
+                        ${m.display_name}
+                    </div>
+                `).join('');
+                autocompleteDiv.style.display = 'block';
+            } else {
+                hideAutocomplete();
+            }
+        }
+        
+        function hideAutocomplete() {
+            autocompleteDiv.style.display = 'none';
+        }
+        
+        function selectFromAutocomplete(personId) {
+            const member = data.find(d => d.person_id === personId);
+            searchInput.value = member.display_name;
+            searchClearBtn.style.display = 'block';
+            hideAutocomplete();
+            selectMember(member);
+            applyFilters();
+        }
+        
+        function clearSearch() {
+            searchInput.value = '';
+            searchClearBtn.style.display = 'none';
+            hideAutocomplete();
+            selectedMember = null;
+            applyFilters();
+            updateMemberDetails();
+        }
+        
+        // Click outside to close autocomplete
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-container')) {
+                hideAutocomplete();
+            }
+        });
+        
+        // Event listeners for filters
+        document.getElementById('chamberFilter').addEventListener('change', applyFilters);
+        document.getElementById('partyFilter').addEventListener('change', applyFilters);
+        document.getElementById('stateFilter').addEventListener('change', applyFilters);
+        document.getElementById('limitFilter').addEventListener('change', applyFilters);
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>

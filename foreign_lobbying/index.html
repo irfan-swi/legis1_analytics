@@ -1,0 +1,426 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Foreign Country Lobbying — Overview</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 14.5px; line-height: 1.4;
+      color: #333333; background-color: #F3F3EC;
+    }
+    :root {
+      --bg-primary: #F3F3EC;
+      --bg-secondary: #FFFFFF;
+      --bg-tertiary: #f8f8f8;
+      --text-primary: #333333;
+      --text-secondary: #555961;
+      --text-muted: #999999;
+      --border-light: #d8dcdc;
+      --chart-grid: #f0f0f0;
+      --hover-bg: #f8f8f8;
+      --pill-bg: #f5f0ff;
+      --pill-border: #e8ddff;
+
+      /* Purple palette */
+      --bar-purple: #d7c6f7;
+      --bar-purple-strong: #5b3cc4;
+      --line-muted: #cbb8f3;
+      --line-strong: #5b3cc4;
+
+      --good-color: #28a745;
+      --warn-color: #ff6b35;
+    }
+    .app-container { width: 100vw; height: 100vh; display: flex; flex-direction: column; overflow: hidden; padding: 20px; gap: 15px; }
+    .filter-panel { background: var(--bg-secondary); border-radius: 6px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); border: 1px solid var(--border-light); }
+    .filter-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; align-items: end; }
+    .filter-group { display: flex; flex-direction: column; }
+    .filter-label { font-weight: 700; font-size: 15px; color: var(--text-primary); margin-bottom: 6px; }
+    select, input[type="text"] { width: 100%; padding: 8px 10px; border: 1px solid var(--border-light); border-radius: 4px; font-size: 14.5px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color 0.2s ease; outline: none; }
+    select:focus, input[type="text"]:focus { border-color: var(--bar-purple-strong); box-shadow: 0 0 0 2px rgba(91,60,196,0.15); }
+
+    .main-content { flex: 1; display: grid; grid-template-columns: 2fr 1fr; gap: 15px; min-height: 0; }
+    .chart-container { background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: flex; flex-direction: column; min-height: 0; position: relative; }
+    .chart-header { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); }
+    .chart-title { font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .chart-subtitle { font-size: 0.9rem; color: var(--text-secondary); }
+    .chart-content { flex: 1; position: relative; min-height: 0; }
+
+    .detail-panel { background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: flex; flex-direction: column; min-height: 0; }
+    .detail-header { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); }
+    .detail-title { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .detail-subtitle { font-size: 0.9rem; color: var(--text-secondary); }
+
+    .pill { background: var(--pill-bg); border: 1px solid var(--pill-border); border-radius: 8px; padding: 12px; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .stat-item { text-align: center; padding: 12px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-light); }
+    .stat-value { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+    .stat-label { font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; }
+
+    .table-wrap { margin-top: 12px; }
+    .table-title { font-size: 0.95rem; color: var(--text-primary); margin-bottom: 6px; }
+    table.simple { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
+    table.simple tr { background: var(--bg-tertiary); }
+    table.simple td { padding: 8px 10px; border: 1px solid var(--border-light); }
+    table.simple tr td:first-child { border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
+    table.simple tr td:last-child  { border-top-right-radius: 6px; border-bottom-right-radius: 6px; text-align: right; font-weight: 600; }
+    a.org-link { color: #3f2aa5; text-decoration: none; }
+    a.org-link:hover { text-decoration: underline; }
+
+    .legend-row { display:flex; align-items:center; gap: 12px; margin-top: 8px; color: var(--text-secondary); font-size: 0.85rem; }
+    .legend-box { width: 14px; height: 14px; border-radius: 3px; background: var(--bar-purple-strong); border:1px solid rgba(0,0,0,0.05); }
+
+    .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+    .loading-spinner { border: 3px solid var(--border-light); border-top: 3px solid var(--bar-purple-strong); border-radius: 50%; width: 36px; height: 36px; animation: spin 1s linear infinite; margin-bottom: 10px; }
+    @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+    .loading-text { color: var(--text-secondary); font-size: 0.9rem; }
+    .error-message { background:#f8d7da; color:#721c24; padding: 12px; border-radius: 4px; border:1px solid #f5c6cb; }
+
+    @media (max-width: 1024px) { .main-content { grid-template-columns: 1fr; grid-template-rows: 2fr 1fr; } }
+    @media (max-width: 768px) { .app-container { padding: 10px; gap: 10px; } .filter-row { grid-template-columns: 1fr 1fr; } .stats-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="filter-panel">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label class="filter-label">Year</label>
+          <select id="yearFilter"></select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Show</label>
+          <select id="topBottomFilter">
+            <option value="top" selected>Top Countries</option>
+            <option value="bottom">Bottom Countries</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Count</label>
+          <select id="countFilter">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Chart Type</label>
+          <select id="chartTypeFilter">
+            <option value="bar" selected>Bar (Year)</option>
+            <option value="line">Line (Over Time)</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Search Country</label>
+          <input id="countrySearch" type="text" list="countryList" placeholder="Type to search…"/>
+          <datalist id="countryList"></datalist>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="chart-container">
+        <div class="loading-overlay" id="loadingOverlay">
+          <div class="loading-spinner"></div>
+          <div class="loading-text" id="loadingText">Loading data…</div>
+        </div>
+        <div class="chart-header">
+          <div class="chart-title" id="chartTitle">Foreign Country Lobbying — Top Countries</div>
+          <div class="chart-subtitle" id="chartSubtitle">Interactive chart • Click a bar to select a country</div>
+        </div>
+        <div class="chart-content">
+          <canvas id="mainChart"></canvas>
+        </div>
+      </div>
+
+      <div class="detail-panel">
+        <div class="detail-header">
+          <div class="detail-title" id="detailTitle">Overview</div>
+          <div class="detail-subtitle" id="detailSubtitle">Summary for selected year; select a country for details</div>
+        </div>
+        <div id="detailBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const fmtCurrency = (n) => n==null||isNaN(n) ? '—' : '$' + Number(n).toLocaleString(undefined,{maximumFractionDigits:0});
+    const pct = (num, den) => !den ? '—' : ((num/den)*100>0?'+':'') + ((num/den)*100).toFixed(1) + '%';
+    const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+    const GOV_TYPES = new Set(['1008','1009','1010','1011',1008,1009,1010,1011]);
+
+    let rawRows=[], years=[], countries=[];
+    let byYearCountry=new Map();
+    let byYearOrg=new Map();
+    let byCountrySeries=new Map();
+    let chart, currentDisplay=[], selectedCountry=null;
+
+    async function loadCSV(){
+      const url='foreign_country_lobbying.csv';
+      try{
+        const text=await fetch(url).then(r=>{if(!r.ok) throw new Error('CSV not found'); return r.text();});
+        const rows=parseCSV(text);
+        rawRows=rows.map(r=>({
+          report_year:Number(r.report_year),
+          country_name:r.country_name,
+          client_lobby_actor_id:r.client_lobby_actor_id,
+          organization_id:r.organization_id,
+          organization_type_id:r.organization_type_id,
+          combined_name:r.combined_name,
+          total:Number(r.total)
+        }));
+        prepareAggregates();
+        initUI();
+        hideLoading();
+      }catch(e){
+        console.error(e); showError('Could not load foreign_country_lobbying.csv. Place this HTML next to that CSV and open again.');
+      }
+    }
+
+    function parseCSV(text){
+      const lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l=>l.trim().length);
+      const headers=splitCSVLine(lines[0]);
+      const out=[];
+      for(let i=1;i<lines.length;i++){
+        const cols=splitCSVLine(lines[i]);
+        if(cols.length!==headers.length) continue;
+        const o={}; headers.forEach((h,idx)=>o[h.trim()]=cols[idx]); out.push(o);
+      }
+      return out;
+    }
+    function splitCSVLine(line){
+      const res=[]; let cur=''; let inQ=false;
+      for(let i=0;i<line.length;i++){
+        const c=line[i], n=line[i+1];
+        if(c==='"'){ if(inQ && n==='"'){ cur+='"'; i++; } else { inQ=!inQ; } }
+        else if(c===',' && !inQ){ res.push(cur); cur=''; }
+        else { cur+=c; }
+      } res.push(cur); return res;
+    }
+
+    function prepareAggregates(){
+      years=[...new Set(rawRows.map(r=>r.report_year))].sort((a,b)=>a-b);
+      countries=[...new Set(rawRows.map(r=>r.country_name))].sort((a,b)=>a.localeCompare(b));
+
+      byYearCountry=new Map(); years.forEach(y=>byYearCountry.set(y,new Map()));
+      for(const r of rawRows){ const ym=byYearCountry.get(r.report_year); ym.set(r.country_name,(ym.get(r.country_name)||0)+r.total); }
+
+      byYearOrg=new Map(); years.forEach(y=>byYearOrg.set(y,new Map()));
+      for(const r of rawRows){
+        const key=[r.organization_id,r.client_lobby_actor_id,r.combined_name,r.country_name].join('|');
+        const m=byYearOrg.get(r.report_year);
+        const prev=m.get(key)||{combined_name:r.combined_name,country_name:r.country_name,total:0,client_lobby_actor_id:r.client_lobby_actor_id,organization_id:r.organization_id,organization_type_id:r.organization_type_id};
+        prev.total+=r.total; if(!prev.organization_type_id && r.organization_type_id){ prev.organization_type_id=r.organization_type_id; }
+        m.set(key,prev);
+      }
+
+      byCountrySeries=new Map();
+      for(const c of countries){
+        const m=new Map(); for(const y of years){ m.set(y, byYearCountry.get(y).get(c)||0); } byCountrySeries.set(c,m);
+      }
+    }
+
+    function initUI(){
+      const yearSel=document.getElementById('yearFilter'); yearSel.innerHTML=''; [...years].sort((a,b)=>b-a).forEach(y=>{ const o=document.createElement('option'); o.value=y; o.textContent=y; yearSel.appendChild(o); }); yearSel.value=Math.max(...years);
+      const list=document.getElementById('countryList'); list.innerHTML=''; countries.forEach(c=>{ const o=document.createElement('option'); o.value=c; list.appendChild(o); });
+      document.getElementById('yearFilter').addEventListener('change', refresh);
+      document.getElementById('topBottomFilter').addEventListener('change', refresh);
+      document.getElementById('countFilter').addEventListener('change', refresh);
+      document.getElementById('chartTypeFilter').addEventListener('change', refresh);
+      document.getElementById('countrySearch').addEventListener('change', onCountrySearch);
+      document.getElementById('countrySearch').addEventListener('keyup', e=>{ if(e.key==='Enter') onCountrySearch(); });
+      initChart(); refresh();
+    }
+
+    function initChart(){
+      const ctx=document.getElementById('mainChart').getContext('2d');
+      chart=new Chart(ctx,{
+        type:'bar',
+        data:{ labels:[], datasets:[{ label:'Lobbying (USD)', data:[], backgroundColor:[], borderColor:[], borderWidth:1 }] },
+        options:{
+          responsive:true, maintainAspectRatio:false, indexAxis:'y',
+          interaction:{ intersect:false, mode:'nearest' },
+          onClick:(e,els)=>{ if(els.length>0){ const idx=els[0].index; const c=currentDisplay[idx]?.country; if(c){ selectedCountry=c; updateDetails(); updateChartColors(); } } },
+          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(ctx)=>fmtCurrency(ctx.parsed.x) } } },
+          scales:{
+            x:{ beginAtZero:true, title:{display:true,text:'Total Lobbying (USD)'}, grid:{ color:'var(--chart-grid)' }, ticks:{ callback:(v)=>'$'+Number(v).toLocaleString() } },
+            y:{ grid:{ display:false }, ticks:{ font:{ size:11 } } }
+          }
+        }
+      });
+    }
+
+    function refresh(){
+      const year=Number(document.getElementById('yearFilter').value);
+      const topBottom=document.getElementById('topBottomFilter').value;
+      const countVal=document.getElementById('countFilter').value;
+      const chartType=document.getElementById('chartTypeFilter').value;
+      document.getElementById('chartTitle').textContent = chartType==='bar' ? `Foreign Country Lobbying — ${topBottom==='top'?'Top':'Bottom'} Countries (${year})` : `Foreign Country Lobbying Over Time — ${topBottom==='top'?'Top':'Bottom'} Countries (based on ${year})`;
+
+      const ym=byYearCountry.get(year);
+      const pairs=Array.from(ym.entries()).map(([country,value])=>({country,value})).sort((a,b)=> topBottom==='top' ? (b.value-a.value) : (a.value-b.value));
+      const displayCount = countVal==='all' ? pairs.length : Math.min(parseInt(countVal), pairs.length);
+      let list=pairs;
+      if(selectedCountry && chartType==='bar' && countVal!=='all'){
+        const idx=pairs.findIndex(p=>p.country===selectedCountry);
+        if(idx!==-1){ const half=Math.floor(displayCount/2); const start=clamp(idx-half,0,Math.max(0,pairs.length-displayCount)); list=pairs.slice(start,start+displayCount); }
+        else { list=pairs.slice(0,displayCount); }
+      } else { list=(countVal==='all') ? pairs : pairs.slice(0,displayCount); }
+      currentDisplay=list;
+
+      if(chartType==='bar'){ renderBar(list); } else { renderLines(pairs, displayCount); }
+      updateDetails();
+    }
+
+    function renderBar(list){
+      if(chart.config.type!=='bar'){ chart.destroy(); initChart(); }
+      chart.data.labels=list.map(d=>d.country);
+      chart.data.datasets[0].data=list.map(d=>d.value);
+      updateChartColors(); chart.update();
+    }
+
+    function renderLines(rankedPairs, displayCount){
+      if(chart.config.type!=='line'){
+        chart.destroy();
+        const ctx=document.getElementById('mainChart').getContext('2d');
+        chart=new Chart(ctx,{
+          type:'line',
+          data:{ labels:years, datasets:[] },
+          options:{
+            responsive:true, maintainAspectRatio:false,
+            interaction:{ intersect:false, mode:'nearest' },
+            plugins:{ legend:{ display:false } },
+            scales:{
+              x:{ grid:{ color:'var(--chart-grid)' }, title:{ display:true, text:'Year' } },
+              y:{ beginAtZero:true, grid:{ color:'var(--chart-grid)' }, ticks:{ callback:(v)=>'$'+Number(v).toLocaleString() }, title:{ display:true, text:'Lobbying (USD)' } }
+            },
+            elements:{ line:{ tension:0.25 } }
+          }
+        });
+      }
+      const countVal=document.getElementById('countFilter').value;
+      let subset;
+      if(selectedCountry && countVal!=='all'){
+        const idx=rankedPairs.findIndex(p=>p.country===selectedCountry);
+        const half=Math.floor(displayCount/2);
+        const start=clamp(idx-half,0,Math.max(0,rankedPairs.length-displayCount));
+        subset=rankedPairs.slice(start,start+displayCount);
+      } else { subset=(countVal==='all') ? rankedPairs : rankedPairs.slice(0,displayCount); }
+
+      const ds=subset.map(p=>{
+        const series=byCountrySeries.get(p.country);
+        const arr=years.map(y=>series.get(y)||0);
+        const sel=(p.country===selectedCountry);
+        return { label:p.country, data:arr, borderWidth: sel?3:2, pointRadius: sel?3:0, borderColor: sel? 'var(--line-strong)' : 'var(--line-muted)', backgroundColor:'transparent' };
+      });
+      chart.data.labels=years; chart.data.datasets=ds; chart.update();
+    }
+
+// Get the actual color values from the CSS variables first
+    const rootStyles = getComputedStyle(document.documentElement);
+    const barPurple = rootStyles.getPropertyValue('--bar-purple').trim();
+    const barPurpleStrong = rootStyles.getPropertyValue('--bar-purple-strong').trim();
+
+    function updateChartColors() {
+      if (chart.config.type !== 'bar') return;
+      const labels = chart.data.labels;
+
+      // Now, use the resolved color variables instead of the CSS variable strings
+      chart.data.datasets[0].backgroundColor = labels.map(l => l === selectedCountry ? barPurpleStrong : barPurple);
+      chart.data.datasets[0].borderColor = labels.map(l => l === selectedCountry ? barPurpleStrong : barPurple);
+    }
+
+    function updateDetails(){
+      const body=document.getElementById('detailBody');
+      const title=document.getElementById('detailTitle');
+      const subtitle=document.getElementById('detailSubtitle');
+      const year=Number(document.getElementById('yearFilter').value);
+
+      const totalYear=sumMap(byYearCountry.get(year));
+      const prevYear=years.includes(year-1)?sumMap(byYearCountry.get(year-1)):0;
+      const delta=totalYear-prevYear;
+      const govPrivate=computeGovPrivate(year, selectedCountry);
+
+      if(!selectedCountry){
+        title.textContent='Overview'; subtitle.textContent=`Summary for ${year}`;
+        const numCountries=byYearCountry.get(year).size;
+        const topOverallOrgs=topOrgsForYear(year,10,null);
+        const orgRows=topOverallOrgs.map(o=>`<tr><td><a class="org-link" href="${orgUrl(o.client_lobby_actor_id,o.organization_id)}" target="_blank" rel="noopener">${escapeHTML(o.combined_name)}</a> <span style="color:var(--text-muted)">( ${escapeHTML(o.country_name)} )</span></td><td>${fmtCurrency(o.total)}</td></tr>`).join('');
+
+        body.innerHTML=`
+          <div class="pill">
+            <div class="stats-grid">
+              <div class="stat-item"><div class="stat-value">${numCountries}</div><div class="stat-label">Countries with activity</div></div>
+              <div class="stat-item"><div class="stat-value">${fmtCurrency(totalYear)}</div><div class="stat-label">Total Lobbying (${year})</div></div>
+              <div class="stat-item"><div class="stat-value">${fmtCurrency(delta)}</div><div class="stat-label">Change vs ${year-1}</div></div>
+              <div class="stat-item"><div class="stat-value">${pct(delta, prevYear)}</div><div class="stat-label">% Change vs ${year-1}</div></div>
+              <div class="stat-item"><div class="stat-value">${fmtCurrency(govPrivate.government)}</div><div class="stat-label">Government</div></div>
+              <div class="stat-item"><div class="stat-value">${fmtCurrency(govPrivate.private)}</div><div class="stat-label">Private</div></div>
+            </div>
+          </div>
+          <div class="table-wrap"><div class="table-title">Top Organizations Overall (${year})</div><table class="simple"><tbody>${orgRows}</tbody></table></div>
+          <div class="legend-row"><span class="legend-box"></span> Highlighted country</div>
+        `;
+      } else {
+        const ym=byYearCountry.get(year);
+        const thisVal=ym.get(selectedCountry)||0;
+        const prevVal=years.includes(year-1)?(byYearCountry.get(year-1).get(selectedCountry)||0):0;
+        const rank=rankOfCountry(year,selectedCountry);
+        const share= totalYear ? (thisVal/totalYear*100) : 0;
+
+        const topOrgs=topOrgsForYear(year,10,selectedCountry);
+        const orgRows=topOrgs.map(o=>`<tr><td><a class="org-link" href="${orgUrl(o.client_lobby_actor_id,o.organization_id)}" target="_blank" rel="noopener">${escapeHTML(o.combined_name)}</a></td><td>${fmtCurrency(o.total)}</td></tr>`).join('');
+
+        body.innerHTML=`
+          <div class="pill">
+            <div class="stats-grid">
+              <div class="stat-item"><div class="stat-value">${fmtCurrency(thisVal)}</div><div class="stat-label">Total (${year})</div></div>
+              <div class="stat-item"><div class="stat-value">#${rank}</div><div class="stat-label">Rank by dollars</div></div>
+              <div class="stat-item"><div class="stat-value">${fmtCurrency(thisVal - prevVal)}</div><div class="stat-label">Change vs ${year-1}</div></div>
+              <div class="stat-item"><div class="stat-value">${pct(thisVal - prevVal, prevVal)}</div><div class="stat-label">% Change vs ${year-1}</div></div>
+              <div class="stat-item"><div class="stat-value">${share.toFixed(1)}%</div><div class="stat-label">Share of ${year} total</div></div>
+              <div class="stat-item"><div class="stat-value">${fmtCurrency(govPrivate.government)}</div><div class="stat-label">Government</div></div>
+              <div class="stat-item"><div class="stat-value">${fmtCurrency(govPrivate.private)}</div><div class="stat-label">Private</div></div>
+            </div>
+          </div>
+          <div class="table-wrap"><div class="table-title">Top Organizations in ${escapeHTML(selectedCountry)} (${year})</div><table class="simple"><tbody>${orgRows || '<tr><td colspan="2">No organizations found for this year.</td></tr>'}</tbody></table></div>
+        `;
+        document.getElementById('detailTitle').textContent=selectedCountry;
+        document.getElementById('detailSubtitle').textContent=`Details for ${year}`;
+      }
+    }
+
+    function computeGovPrivate(year, country){
+      const rows=rawRows.filter(r=>r.report_year===year && (!country || r.country_name===country));
+      let government=0, privateSum=0;
+      for(const r of rows){ if(GOV_TYPES.has(r.organization_type_id)) government+=r.total; else privateSum+=r.total; }
+      return {government, private: privateSum};
+    }
+
+    function topOrgsForYear(year,k=10,country=null){
+      const map=byYearOrg.get(year); const arr=Array.from(map.values());
+      const filtered=country?arr.filter(o=>o.country_name===country):arr;
+      filtered.sort((a,b)=>b.total-a.total); return filtered.slice(0,k);
+    }
+
+    function rankOfCountry(year,country){ const arr=Array.from(byYearCountry.get(year).entries()).map(([c,v])=>({c,v})).sort((a,b)=>b.v-a.v); const idx=arr.findIndex(r=>r.c===country); return idx===-1?'—':(idx+1); }
+    function sumMap(m){ let s=0; for(const v of m.values()) s+=v; return s; }
+    function onCountrySearch(){ const v=document.getElementById('countrySearch').value.trim(); selectedCountry=countries.find(c=>c.toLowerCase()===v.toLowerCase())||null; refresh(); }
+    function setLoading(msg){ document.getElementById('loadingText').textContent=msg; }
+    function hideLoading(){ document.getElementById('loadingOverlay').style.display='none'; }
+    function showError(message){ const overlay=document.getElementById('loadingOverlay'); overlay.innerHTML='<div class="error-message">'+message+'</div>'; }
+    function escapeHTML(str){ return (str||'').replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
+    function orgUrl(clientLobbyActorId, organizationId){ return `https://app.legis1.com/organizations/detail?clientLobbyActorId=${encodeURIComponent(clientLobbyActorId)}&organizationId=${encodeURIComponent(organizationId)}`; }
+
+    loadCSV();
+  </script>
+</body>
+</html>

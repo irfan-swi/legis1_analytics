@@ -1,258 +1,18 @@
 {
-  "total_rows": 1092409,
+  "total_rows": 1017594,
   "date_range": {
-    "start": "2021-01-04",
-    "end": "2025-08-27"
+    "start": "2023-01-04",
+    "end": "2025-09-02"
   },
   "files": [
     {
-      "file": "tweets_2021_Q1_M01.parquet",
-      "rows": 923,
-      "size_mb": 0.1,
-      "year": 2021,
-      "quarter": 1,
-      "month": 1,
-      "start_date": "2021-01-04",
-      "end_date": "2021-01-31"
-    },
-    {
-      "file": "tweets_2021_Q1_M02.parquet",
-      "rows": 1077,
-      "size_mb": 0.11,
-      "year": 2021,
-      "quarter": 1,
-      "month": 2,
-      "start_date": "2021-02-01",
-      "end_date": "2021-02-28"
-    },
-    {
-      "file": "tweets_2021_Q1_M03.parquet",
-      "rows": 1332,
-      "size_mb": 0.14,
-      "year": 2021,
-      "quarter": 1,
-      "month": 3,
-      "start_date": "2021-03-01",
-      "end_date": "2021-03-31"
-    },
-    {
-      "file": "tweets_2021_Q2_M04.parquet",
-      "rows": 1547,
-      "size_mb": 0.15,
-      "year": 2021,
-      "quarter": 2,
-      "month": 4,
-      "start_date": "2021-04-01",
-      "end_date": "2021-04-30"
-    },
-    {
-      "file": "tweets_2021_Q2_M05.parquet",
-      "rows": 1542,
-      "size_mb": 0.15,
-      "year": 2021,
-      "quarter": 2,
-      "month": 5,
-      "start_date": "2021-05-01",
-      "end_date": "2021-05-31"
-    },
-    {
-      "file": "tweets_2021_Q2_M06.parquet",
-      "rows": 1962,
-      "size_mb": 0.19,
-      "year": 2021,
-      "quarter": 2,
-      "month": 6,
-      "start_date": "2021-06-01",
-      "end_date": "2021-06-30"
-    },
-    {
-      "file": "tweets_2021_Q3_M07.parquet",
-      "rows": 2036,
-      "size_mb": 0.19,
-      "year": 2021,
-      "quarter": 3,
-      "month": 7,
-      "start_date": "2021-07-01",
-      "end_date": "2021-07-31"
-    },
-    {
-      "file": "tweets_2021_Q3_M08.parquet",
-      "rows": 2488,
-      "size_mb": 0.23,
-      "year": 2021,
-      "quarter": 3,
-      "month": 8,
-      "start_date": "2021-08-01",
-      "end_date": "2021-08-31"
-    },
-    {
-      "file": "tweets_2021_Q3_M09.parquet",
-      "rows": 2609,
-      "size_mb": 0.24,
-      "year": 2021,
-      "quarter": 3,
-      "month": 9,
-      "start_date": "2021-09-01",
-      "end_date": "2021-09-30"
-    },
-    {
-      "file": "tweets_2021_Q4_M10.parquet",
-      "rows": 2672,
-      "size_mb": 0.25,
-      "year": 2021,
-      "quarter": 4,
-      "month": 10,
-      "start_date": "2021-10-01",
-      "end_date": "2021-10-31"
-    },
-    {
-      "file": "tweets_2021_Q4_M11.parquet",
-      "rows": 2782,
-      "size_mb": 0.25,
-      "year": 2021,
-      "quarter": 4,
-      "month": 11,
-      "start_date": "2021-11-01",
-      "end_date": "2021-11-30"
-    },
-    {
-      "file": "tweets_2021_Q4_M12.parquet",
-      "rows": 2424,
-      "size_mb": 0.23,
-      "year": 2021,
-      "quarter": 4,
-      "month": 12,
-      "start_date": "2021-12-01",
-      "end_date": "2021-12-31"
-    },
-    {
-      "file": "tweets_2022_Q1_M01.parquet",
-      "rows": 2715,
-      "size_mb": 0.27,
-      "year": 2022,
-      "quarter": 1,
-      "month": 1,
-      "start_date": "2022-01-01",
-      "end_date": "2022-01-31"
-    },
-    {
-      "file": "tweets_2022_Q1_M02.parquet",
-      "rows": 3525,
-      "size_mb": 0.32,
-      "year": 2022,
-      "quarter": 1,
-      "month": 2,
-      "start_date": "2022-02-01",
-      "end_date": "2022-02-28"
-    },
-    {
-      "file": "tweets_2022_Q1_M03.parquet",
-      "rows": 5024,
-      "size_mb": 0.45,
-      "year": 2022,
-      "quarter": 1,
-      "month": 3,
-      "start_date": "2022-03-01",
-      "end_date": "2022-03-31"
-    },
-    {
-      "file": "tweets_2022_Q2_M04.parquet",
-      "rows": 3554,
-      "size_mb": 0.34,
-      "year": 2022,
-      "quarter": 2,
-      "month": 4,
-      "start_date": "2022-04-01",
-      "end_date": "2022-04-30"
-    },
-    {
-      "file": "tweets_2022_Q2_M05.parquet",
-      "rows": 4001,
-      "size_mb": 0.38,
-      "year": 2022,
-      "quarter": 2,
-      "month": 5,
-      "start_date": "2022-05-01",
-      "end_date": "2022-05-31"
-    },
-    {
-      "file": "tweets_2022_Q2_M06.parquet",
-      "rows": 4537,
-      "size_mb": 0.43,
-      "year": 2022,
-      "quarter": 2,
-      "month": 6,
-      "start_date": "2022-06-01",
-      "end_date": "2022-06-30"
-    },
-    {
-      "file": "tweets_2022_Q3_M07.parquet",
-      "rows": 4483,
-      "size_mb": 0.42,
-      "year": 2022,
-      "quarter": 3,
-      "month": 7,
-      "start_date": "2022-07-01",
-      "end_date": "2022-07-31"
-    },
-    {
-      "file": "tweets_2022_Q3_M08.parquet",
-      "rows": 5416,
-      "size_mb": 0.48,
-      "year": 2022,
-      "quarter": 3,
-      "month": 8,
-      "start_date": "2022-08-01",
-      "end_date": "2022-08-31"
-    },
-    {
-      "file": "tweets_2022_Q3_M09.parquet",
-      "rows": 6187,
-      "size_mb": 0.59,
-      "year": 2022,
-      "quarter": 3,
-      "month": 9,
-      "start_date": "2022-09-01",
-      "end_date": "2022-09-30"
-    },
-    {
-      "file": "tweets_2022_Q4_M10.parquet",
-      "rows": 5727,
-      "size_mb": 0.54,
-      "year": 2022,
-      "quarter": 4,
-      "month": 10,
-      "start_date": "2022-10-01",
-      "end_date": "2022-10-31"
-    },
-    {
-      "file": "tweets_2022_Q4_M11.parquet",
-      "rows": 5157,
-      "size_mb": 0.5,
-      "year": 2022,
-      "quarter": 4,
-      "month": 11,
-      "start_date": "2022-11-01",
-      "end_date": "2022-11-30"
-    },
-    {
-      "file": "tweets_2022_Q4_M12.parquet",
-      "rows": 5700,
-      "size_mb": 0.55,
-      "year": 2022,
-      "quarter": 4,
-      "month": 12,
-      "start_date": "2022-12-01",
-      "end_date": "2022-12-31"
-    },
-    {
       "file": "tweets_2023_Q1_M01.parquet",
-      "rows": 7091,
-      "size_mb": 0.68,
+      "rows": 6776,
+      "size_mb": 0.65,
       "year": 2023,
       "quarter": 1,
       "month": 1,
-      "start_date": "2023-01-01",
+      "start_date": "2023-01-04",
       "end_date": "2023-01-31"
     },
     {
@@ -268,7 +28,7 @@
     {
       "file": "tweets_2023_Q1_M03.parquet",
       "rows": 12371,
-      "size_mb": 1.61,
+      "size_mb": 1.62,
       "year": 2023,
       "quarter": 1,
       "month": 3,
@@ -298,7 +58,7 @@
     {
       "file": "tweets_2023_Q2_M06.parquet",
       "rows": 13005,
-      "size_mb": 1.85,
+      "size_mb": 1.84,
       "year": 2023,
       "quarter": 2,
       "month": 6,
@@ -368,7 +128,7 @@
     {
       "file": "tweets_2024_Q1_M01.parquet",
       "rows": 53775,
-      "size_mb": 8.52,
+      "size_mb": 8.51,
       "year": 2024,
       "quarter": 1,
       "month": 1,
@@ -388,7 +148,7 @@
     {
       "file": "tweets_2024_Q1_M03.parquet",
       "rows": 60622,
-      "size_mb": 9.36,
+      "size_mb": 9.35,
       "year": 2024,
       "quarter": 1,
       "month": 3,
@@ -418,7 +178,7 @@
     {
       "file": "tweets_2024_Q2_M06.parquet",
       "rows": 36294,
-      "size_mb": 6.04,
+      "size_mb": 6.03,
       "year": 2024,
       "quarter": 2,
       "month": 6,
@@ -428,7 +188,7 @@
     {
       "file": "tweets_2024_Q3_M07.parquet",
       "rows": 30104,
-      "size_mb": 4.98,
+      "size_mb": 4.99,
       "year": 2024,
       "quarter": 3,
       "month": 7,
@@ -468,7 +228,7 @@
     {
       "file": "tweets_2024_Q4_M11.parquet",
       "rows": 28056,
-      "size_mb": 4.62,
+      "size_mb": 4.61,
       "year": 2024,
       "quarter": 4,
       "month": 11,
@@ -478,7 +238,7 @@
     {
       "file": "tweets_2024_Q4_M12.parquet",
       "rows": 37899,
-      "size_mb": 6.48,
+      "size_mb": 6.47,
       "year": 2024,
       "quarter": 4,
       "month": 12,
@@ -498,7 +258,7 @@
     {
       "file": "tweets_2025_Q1_M02.parquet",
       "rows": 57286,
-      "size_mb": 9.88,
+      "size_mb": 9.87,
       "year": 2025,
       "quarter": 1,
       "month": 2,
@@ -528,7 +288,7 @@
     {
       "file": "tweets_2025_Q2_M05.parquet",
       "rows": 53837,
-      "size_mb": 9.67,
+      "size_mb": 9.69,
       "year": 2025,
       "quarter": 2,
       "month": 5,
@@ -557,13 +317,23 @@
     },
     {
       "file": "tweets_2025_Q3_M08.parquet",
-      "rows": 23055,
-      "size_mb": 4.24,
+      "rows": 26968,
+      "size_mb": 5.07,
       "year": 2025,
       "quarter": 3,
       "month": 8,
       "start_date": "2025-08-01",
-      "end_date": "2025-08-27"
+      "end_date": "2025-08-31"
+    },
+    {
+      "file": "tweets_2025_Q3_M09.parquet",
+      "rows": 1007,
+      "size_mb": 0.09,
+      "year": 2025,
+      "quarter": 3,
+      "month": 9,
+      "start_date": "2025-09-01",
+      "end_date": "2025-09-02"
     }
   ],
   "columns": [
@@ -591,8 +361,7 @@
       "Democrat, Independent",
       "Independent",
       "Independent, Democrat",
-      "Republican",
-      "Republican, Democrat"
+      "Republican"
     ],
     "states": [
       "AK",
@@ -675,7 +444,7 @@
       "Space, Science, Technology, and Communications",
       "Transportation"
     ],
-    "members": 759
+    "members": 692
   },
   "member_list": [
     {
@@ -721,22 +490,10 @@
       "us_state_id": "AL"
     },
     {
-      "person_id": 10470,
-      "display_name": "Rep. Ron Wright R-TX-6",
-      "chamber": "House",
-      "us_state_id": "TX"
-    },
-    {
       "person_id": 12801,
       "display_name": "Sen. Ben Sasse R-NE",
       "chamber": "Senate",
       "us_state_id": "NE"
-    },
-    {
-      "person_id": 15250,
-      "display_name": "Rep. Jaime Herrera Beutler R-WA-3",
-      "chamber": "House",
-      "us_state_id": "WA"
     },
     {
       "person_id": 15290,
@@ -755,12 +512,6 @@
       "display_name": "Rep. Young Kim R-CA-40",
       "chamber": "House",
       "us_state_id": "CA"
-    },
-    {
-      "person_id": 17344,
-      "display_name": "Rep. Rodney Davis R-IL-13",
-      "chamber": "House",
-      "us_state_id": "IL"
     },
     {
       "person_id": 22560,
@@ -865,12 +616,6 @@
       "us_state_id": "OR"
     },
     {
-      "person_id": 51142,
-      "display_name": "Rep. Mark Sanford R-SC-1",
-      "chamber": "House",
-      "us_state_id": "SC"
-    },
-    {
       "person_id": 51143,
       "display_name": "Sen. Evan Bayh D-IN",
       "chamber": "Senate",
@@ -911,12 +656,6 @@
       "display_name": "Sen. Hillary Clinton D-NY",
       "chamber": "Senate",
       "us_state_id": "NY"
-    },
-    {
-      "person_id": 51166,
-      "display_name": "Sen. Tom Coburn R-OK",
-      "chamber": "Senate",
-      "us_state_id": "OK"
     },
     {
       "person_id": 51168,
@@ -985,12 +724,6 @@
       "us_state_id": "IA"
     },
     {
-      "person_id": 51191,
-      "display_name": "Sen. Orrin Hatch R-UT",
-      "chamber": "Senate",
-      "us_state_id": "UT"
-    },
-    {
       "person_id": 51193,
       "display_name": "Rep. Tim Walz D-MN-1",
       "chamber": "House",
@@ -1003,28 +736,10 @@
       "us_state_id": "TX"
     },
     {
-      "person_id": 51195,
-      "display_name": "Sen. Jim Inhofe R-OK",
-      "chamber": "Senate",
-      "us_state_id": "OK"
-    },
-    {
-      "person_id": 51197,
-      "display_name": "Sen. Johnny Isakson R-GA",
-      "chamber": "Senate",
-      "us_state_id": "GA"
-    },
-    {
       "person_id": 51201,
       "display_name": "Sen. John Kerry D-MA",
       "chamber": "Senate",
       "us_state_id": "MA"
-    },
-    {
-      "person_id": 51206,
-      "display_name": "Sen. Patrick Leahy D-VT",
-      "chamber": "Senate",
-      "us_state_id": "VT"
     },
     {
       "person_id": 51207,
@@ -1037,12 +752,6 @@
       "display_name": "Sen. Joe Lieberman D-CT",
       "chamber": "Senate",
       "us_state_id": "CT"
-    },
-    {
-      "person_id": 51212,
-      "display_name": "Sen. Dick Lugar R-IN",
-      "chamber": "Senate",
-      "us_state_id": "IN"
     },
     {
       "person_id": 51216,
@@ -1081,12 +790,6 @@
       "us_state_id": "MD"
     },
     {
-      "person_id": 51225,
-      "display_name": "Sen. Pat Roberts R-KS",
-      "chamber": "Senate",
-      "us_state_id": "KS"
-    },
-    {
       "person_id": 51230,
       "display_name": "Sen. Peter Welch D-VT",
       "chamber": "Senate",
@@ -1097,12 +800,6 @@
       "display_name": "Sen. Chuck Schumer D-NY",
       "chamber": "Senate",
       "us_state_id": "NY"
-    },
-    {
-      "person_id": 51233,
-      "display_name": "Sen. Richard Shelby R-AL",
-      "chamber": "Senate",
-      "us_state_id": "AL"
     },
     {
       "person_id": 51236,
@@ -1121,12 +818,6 @@
       "display_name": "Rep. Kevin McCarthy R-CA-20",
       "chamber": "House",
       "us_state_id": "CA"
-    },
-    {
-      "person_id": 51240,
-      "display_name": "Sen. Jim Talent R-MO",
-      "chamber": "Senate",
-      "us_state_id": "MO"
     },
     {
       "person_id": 51242,
@@ -1159,12 +850,6 @@
       "us_state_id": "WI"
     },
     {
-      "person_id": 51269,
-      "display_name": "Rep. Xavier Becerra D-CA-34",
-      "chamber": "House",
-      "us_state_id": "CA"
-    },
-    {
       "person_id": 51277,
       "display_name": "Rep. Sanford Bishop D-GA-2",
       "chamber": "House",
@@ -1181,12 +866,6 @@
       "display_name": "Rep. Earl Blumenauer D-OR-3",
       "chamber": "House",
       "us_state_id": "OR"
-    },
-    {
-      "person_id": 51281,
-      "display_name": "Sen. Roy Blunt R-MO",
-      "chamber": "Senate",
-      "us_state_id": "MO"
     },
     {
       "person_id": 51287,
@@ -1213,34 +892,16 @@
       "us_state_id": "TX"
     },
     {
-      "person_id": 51304,
-      "display_name": "Rep. G.K. Butterfield D-NC-1",
-      "chamber": "House",
-      "us_state_id": "NC"
-    },
-    {
       "person_id": 51306,
       "display_name": "Rep. Ken Calvert R-CA-41",
       "chamber": "House",
       "us_state_id": "CA"
     },
     {
-      "person_id": 51309,
-      "display_name": "Rep. Eric Cantor R-VA-7",
-      "chamber": "House",
-      "us_state_id": "VA"
-    },
-    {
       "person_id": 51310,
       "display_name": "Sen. Shelley Moore Capito R-WV",
       "chamber": "Senate",
       "us_state_id": "WV"
-    },
-    {
-      "person_id": 51312,
-      "display_name": "Rep. Mike Capuano D-MA-7",
-      "chamber": "House",
-      "us_state_id": "MA"
     },
     {
       "person_id": 51313,
@@ -1253,12 +914,6 @@
       "display_name": "Rep. John Carter R-TX-31",
       "chamber": "House",
       "us_state_id": "TX"
-    },
-    {
-      "person_id": 51317,
-      "display_name": "Rep. Ed Perlmutter D-CO-7",
-      "chamber": "House",
-      "us_state_id": "CO"
     },
     {
       "person_id": 51318,
@@ -1345,12 +1000,6 @@
       "us_state_id": "PA"
     },
     {
-      "person_id": 51354,
-      "display_name": "Rep. Joe Sestak D-PA-7",
-      "chamber": "House",
-      "us_state_id": "PA"
-    },
-    {
       "person_id": 51356,
       "display_name": "Rep. Mario Diaz-Balart R-FL-26",
       "chamber": "House",
@@ -1361,12 +1010,6 @@
       "display_name": "Rep. Lloyd Doggett D-TX-37",
       "chamber": "House",
       "us_state_id": "TX"
-    },
-    {
-      "person_id": 51361,
-      "display_name": "Rep. Mike Doyle D-PA-18",
-      "chamber": "House",
-      "us_state_id": "PA"
     },
     {
       "person_id": 51368,
@@ -1393,22 +1036,10 @@
       "us_state_id": "TN"
     },
     {
-      "person_id": 51386,
-      "display_name": "Rep. Jeff Fortenberry R-NE-1",
-      "chamber": "House",
-      "us_state_id": "NE"
-    },
-    {
       "person_id": 51389,
       "display_name": "Rep. Virginia Foxx R-NC-5",
       "chamber": "House",
       "us_state_id": "NC"
-    },
-    {
-      "person_id": 51390,
-      "display_name": "Rep. Barney Frank D-MA-4",
-      "chamber": "House",
-      "us_state_id": "MA"
     },
     {
       "person_id": 51401,
@@ -1441,12 +1072,6 @@
       "us_state_id": "AZ"
     },
     {
-      "person_id": 51412,
-      "display_name": "Rep. Luis Guti\u00e9rrez D-IL-4",
-      "chamber": "House",
-      "us_state_id": "IL"
-    },
-    {
       "person_id": 51427,
       "display_name": "Rep. Brian Higgins D-NY-26",
       "chamber": "House",
@@ -1457,12 +1082,6 @@
       "display_name": "Rep. Pete Hoekstra R-MI-2",
       "chamber": "House",
       "us_state_id": "MI"
-    },
-    {
-      "person_id": 51434,
-      "display_name": "Rep. Mike Honda D-CA-17",
-      "chamber": "House",
-      "us_state_id": "CA"
     },
     {
       "person_id": 51438,
@@ -1501,12 +1120,6 @@
       "us_state_id": "RI"
     },
     {
-      "person_id": 51464,
-      "display_name": "Rep. Ron Kind D-WI-3",
-      "chamber": "House",
-      "us_state_id": "WI"
-    },
-    {
       "person_id": 51466,
       "display_name": "Rep. Steve King R-IA-4",
       "chamber": "House",
@@ -1541,18 +1154,6 @@
       "display_name": "Rep. Barbara Lee D-CA-12",
       "chamber": "House",
       "us_state_id": "CA"
-    },
-    {
-      "person_id": 51488,
-      "display_name": "Rep. Dan Lipinski D-IL-3",
-      "chamber": "House",
-      "us_state_id": "IL"
-    },
-    {
-      "person_id": 51489,
-      "display_name": "Rep. Frank LoBiondo R-NJ-2",
-      "chamber": "House",
-      "us_state_id": "NJ"
     },
     {
       "person_id": 51490,
@@ -1747,12 +1348,6 @@
       "us_state_id": "KY"
     },
     {
-      "person_id": 51591,
-      "display_name": "Rep. Dana Rohrabacher R-CA-48",
-      "chamber": "House",
-      "us_state_id": "CA"
-    },
-    {
       "person_id": 51597,
       "display_name": "Rep. Dutch Ruppersberger D-MD-2",
       "chamber": "House",
@@ -1825,12 +1420,6 @@
       "us_state_id": "WA"
     },
     {
-      "person_id": 51636,
-      "display_name": "Rep. Ted Strickland D-OH-6",
-      "chamber": "House",
-      "us_state_id": "OH"
-    },
-    {
       "person_id": 51647,
       "display_name": "Rep. Bennie Thompson D-MS-2",
       "chamber": "House",
@@ -1843,28 +1432,10 @@
       "us_state_id": "CA"
     },
     {
-      "person_id": 51651,
-      "display_name": "Rep. Pat Tiberi R-OH-12",
-      "chamber": "House",
-      "us_state_id": "OH"
-    },
-    {
       "person_id": 51654,
       "display_name": "Rep. Mike Turner R-OH-10",
       "chamber": "House",
       "us_state_id": "OH"
-    },
-    {
-      "person_id": 51656,
-      "display_name": "Sen. Tom Udall D-NM",
-      "chamber": "Senate",
-      "us_state_id": "NM"
-    },
-    {
-      "person_id": 51657,
-      "display_name": "Rep. Fred Upton R-MI-6",
-      "chamber": "House",
-      "us_state_id": "MI"
     },
     {
       "person_id": 51658,
@@ -1889,12 +1460,6 @@
       "display_name": "Rep. Maxine Waters D-CA-43",
       "chamber": "House",
       "us_state_id": "CA"
-    },
-    {
-      "person_id": 51672,
-      "display_name": "Rep. Lynn Westmoreland R-GA-3",
-      "chamber": "House",
-      "us_state_id": "GA"
     },
     {
       "person_id": 51675,
@@ -1957,22 +1522,10 @@
       "us_state_id": "GA"
     },
     {
-      "person_id": 51799,
-      "display_name": "Sen. Robert Torricelli D-NJ",
-      "chamber": "Senate",
-      "us_state_id": "NJ"
-    },
-    {
       "person_id": 51818,
       "display_name": "Rep. Doug Ose R-CA-3",
       "chamber": "House",
       "us_state_id": "CA"
-    },
-    {
-      "person_id": 51829,
-      "display_name": "Rep. Martin Frost D-TX-24",
-      "chamber": "House",
-      "us_state_id": "TX"
     },
     {
       "person_id": 51835,
@@ -2017,12 +1570,6 @@
       "us_state_id": "MT"
     },
     {
-      "person_id": 51846,
-      "display_name": "Sen. Jim Webb D-VA",
-      "chamber": "Senate",
-      "us_state_id": "VA"
-    },
-    {
       "person_id": 51847,
       "display_name": "Rep. Jason Altmire D-PA-4",
       "chamber": "House",
@@ -2065,28 +1612,10 @@
       "us_state_id": "CT"
     },
     {
-      "person_id": 51859,
-      "display_name": "Sen. Joe Donnelly D-IN",
-      "chamber": "Senate",
-      "us_state_id": "IN"
-    },
-    {
-      "person_id": 51860,
-      "display_name": "Rep. Keith Ellison D-MN-5",
-      "chamber": "House",
-      "us_state_id": "MN"
-    },
-    {
       "person_id": 51863,
       "display_name": "Sen. John Barrasso R-WY",
       "chamber": "Senate",
       "us_state_id": "WY"
-    },
-    {
-      "person_id": 51865,
-      "display_name": "Rep. Paul Broun R-GA-10",
-      "chamber": "House",
-      "us_state_id": "GA"
     },
     {
       "person_id": 51866,
@@ -2347,12 +1876,6 @@
       "us_state_id": "MP"
     },
     {
-      "person_id": 66894,
-      "display_name": "Rep. Marcia Fudge D-OH-11",
-      "chamber": "House",
-      "us_state_id": "OH"
-    },
-    {
       "person_id": 66898,
       "display_name": "Sen. Mark Begich D-AK",
       "chamber": "Senate",
@@ -2449,12 +1972,6 @@
       "us_state_id": "LA"
     },
     {
-      "person_id": 128100,
-      "display_name": "Rep. David Mann D-OH-1",
-      "chamber": "House",
-      "us_state_id": "OH"
-    },
-    {
       "person_id": 128149,
       "display_name": "Rep. Bob McEwen R-OH-6",
       "chamber": "House",
@@ -2481,12 +1998,6 @@
     {
       "person_id": 141760,
       "display_name": "Rep. Carlos Curbelo R-FL-26",
-      "chamber": "House",
-      "us_state_id": "FL"
-    },
-    {
-      "person_id": 142846,
-      "display_name": "Rep. Ted Deutch D-FL-22",
       "chamber": "House",
       "us_state_id": "FL"
     },
@@ -2605,12 +2116,6 @@
       "us_state_id": "KS"
     },
     {
-      "person_id": 151766,
-      "display_name": "Rep. Cedric Richmond D-LA-2",
-      "chamber": "House",
-      "us_state_id": "LA"
-    },
-    {
       "person_id": 151767,
       "display_name": "Rep. Jeff Landry R-LA-3",
       "chamber": "House",
@@ -2623,26 +2128,8 @@
       "us_state_id": "MD"
     },
     {
-      "person_id": 151773,
-      "display_name": "Rep. Hansen Clarke D-MI-13",
-      "chamber": "House",
-      "us_state_id": "MI"
-    },
-    {
-      "person_id": 151779,
-      "display_name": "Rep. Joe Heck R-NV-3",
-      "chamber": "House",
-      "us_state_id": "NV"
-    },
-    {
       "person_id": 151784,
       "display_name": "Rep. Nan Hayworth R-NY-19",
-      "chamber": "House",
-      "us_state_id": "NY"
-    },
-    {
-      "person_id": 151787,
-      "display_name": "Rep. Tom Reed R-NY-23",
       "chamber": "House",
       "us_state_id": "NY"
     },
@@ -2685,12 +2172,6 @@
     {
       "person_id": 151802,
       "display_name": "Rep. Trey Gowdy R-SC-4",
-      "chamber": "House",
-      "us_state_id": "SC"
-    },
-    {
-      "person_id": 151803,
-      "display_name": "Rep. Mick Mulvaney R-SC-5",
       "chamber": "House",
       "us_state_id": "SC"
     },
@@ -2771,12 +2252,6 @@
       "display_name": "Sen. John Hoeven R-ND",
       "chamber": "Senate",
       "us_state_id": "ND"
-    },
-    {
-      "person_id": 151863,
-      "display_name": "Rep. David McKinley R-WV-1",
-      "chamber": "House",
-      "us_state_id": "WV"
     },
     {
       "person_id": 152889,
@@ -3229,12 +2704,6 @@
       "us_state_id": "TX"
     },
     {
-      "person_id": 194822,
-      "display_name": "Rep. Van Taylor R-TX-3",
-      "chamber": "House",
-      "us_state_id": "TX"
-    },
-    {
       "person_id": 194830,
       "display_name": "Rep. Pete Gallego D-TX-23",
       "chamber": "House",
@@ -3247,20 +2716,8 @@
       "us_state_id": "TX"
     },
     {
-      "person_id": 194940,
-      "display_name": "Rep. Ben McAdams D-UT-4",
-      "chamber": "House",
-      "us_state_id": "UT"
-    },
-    {
       "person_id": 195099,
       "display_name": "Rep. Jennifer McClellan D-VA-4",
-      "chamber": "House",
-      "us_state_id": "VA"
-    },
-    {
-      "person_id": 195162,
-      "display_name": "Rep. Donald McEachin D-VA-4",
       "chamber": "House",
       "us_state_id": "VA"
     },
@@ -3451,12 +2908,6 @@
       "us_state_id": "TX"
     },
     {
-      "person_id": 198780,
-      "display_name": "Rep. Filem\u00f3n Vela D-TX-34",
-      "chamber": "House",
-      "us_state_id": "TX"
-    },
-    {
       "person_id": 198781,
       "display_name": "Rep. Ann Kuster D-NH-2",
       "chamber": "House",
@@ -3467,12 +2918,6 @@
       "display_name": "Rep. John Delaney D-MD-6",
       "chamber": "House",
       "us_state_id": "MD"
-    },
-    {
-      "person_id": 198784,
-      "display_name": "Rep. Cheri Bustos D-IL-17",
-      "chamber": "House",
-      "us_state_id": "IL"
     },
     {
       "person_id": 198785,
@@ -3505,18 +2950,6 @@
       "us_state_id": "NM"
     },
     {
-      "person_id": 198801,
-      "display_name": "Rep. Jackie Walorski R-IN-2",
-      "chamber": "House",
-      "us_state_id": "IN"
-    },
-    {
-      "person_id": 198803,
-      "display_name": "Rep. Susan Brooks R-IN-5",
-      "chamber": "House",
-      "us_state_id": "IN"
-    },
-    {
       "person_id": 198805,
       "display_name": "Rep. Dan Kildee D-MI-8",
       "chamber": "House",
@@ -3545,12 +2978,6 @@
       "display_name": "Rep. Suzan DelBene D-WA-1",
       "chamber": "House",
       "us_state_id": "WA"
-    },
-    {
-      "person_id": 198812,
-      "display_name": "Rep. Robert Pittenger R-NC-9",
-      "chamber": "House",
-      "us_state_id": "NC"
     },
     {
       "person_id": 198814,
@@ -3599,12 +3026,6 @@
       "display_name": "Rep. Mark Takano D-CA-39",
       "chamber": "House",
       "us_state_id": "CA"
-    },
-    {
-      "person_id": 198830,
-      "display_name": "Rep. Elizabeth Esty D-CT-5",
-      "chamber": "House",
-      "us_state_id": "CT"
     },
     {
       "person_id": 198832,
@@ -3703,12 +3124,6 @@
       "us_state_id": "NM"
     },
     {
-      "person_id": 221829,
-      "display_name": "Sen. David Perdue R-GA",
-      "chamber": "Senate",
-      "us_state_id": "GA"
-    },
-    {
       "person_id": 221840,
       "display_name": "Sen. Dan Sullivan R-AK",
       "chamber": "Senate",
@@ -3751,12 +3166,6 @@
       "us_state_id": "MA"
     },
     {
-      "person_id": 227135,
-      "display_name": "Rep. Brenda Lawrence D-MI-14",
-      "chamber": "House",
-      "us_state_id": "MI"
-    },
-    {
       "person_id": 227391,
       "display_name": "Rep. Brendan Boyle D-PA-2",
       "chamber": "House",
@@ -3793,12 +3202,6 @@
       "us_state_id": "CO"
     },
     {
-      "person_id": 227506,
-      "display_name": "Rep. Jody Hice R-GA-10",
-      "chamber": "House",
-      "us_state_id": "GA"
-    },
-    {
       "person_id": 227524,
       "display_name": "Rep. Mark Walker R-NC-6",
       "chamber": "House",
@@ -3821,12 +3224,6 @@
       "display_name": "Rep. Rick Allen R-GA-12",
       "chamber": "House",
       "us_state_id": "GA"
-    },
-    {
-      "person_id": 227648,
-      "display_name": "Rep. Bruce Poliquin R-ME-2",
-      "chamber": "House",
-      "us_state_id": "ME"
     },
     {
       "person_id": 227706,
@@ -4021,12 +3418,6 @@
       "us_state_id": "WY"
     },
     {
-      "person_id": 252179,
-      "display_name": "Rep. Kai Kahele D-HI-2",
-      "chamber": "House",
-      "us_state_id": "HI"
-    },
-    {
       "person_id": 253419,
       "display_name": "Rep. Warren Davidson R-OH-8",
       "chamber": "House",
@@ -4049,12 +3440,6 @@
       "display_name": "Rep. Chuck Edwards R-NC-11",
       "chamber": "House",
       "us_state_id": "NC"
-    },
-    {
-      "person_id": 259481,
-      "display_name": "Rep. Val Demings D-FL-10",
-      "chamber": "House",
-      "us_state_id": "FL"
     },
     {
       "person_id": 259485,
@@ -4159,12 +3544,6 @@
       "us_state_id": "DE"
     },
     {
-      "person_id": 260061,
-      "display_name": "Rep. Al Lawson D-FL-5",
-      "chamber": "House",
-      "us_state_id": "FL"
-    },
-    {
       "person_id": 260072,
       "display_name": "Rep. James Comer R-KY-1",
       "chamber": "House",
@@ -4235,12 +3614,6 @@
       "display_name": "Sen. Jim Justice R-WV",
       "chamber": "Senate",
       "us_state_id": "WV"
-    },
-    {
-      "person_id": 268149,
-      "display_name": "Rep. Greg Gianforte R-MT",
-      "chamber": "House",
-      "us_state_id": "MT"
     },
     {
       "person_id": 276057,
@@ -4361,12 +3734,6 @@
       "display_name": "Rep. Andy Levin D-MI-9",
       "chamber": "House",
       "us_state_id": "MI"
-    },
-    {
-      "person_id": 306820,
-      "display_name": "Rep. Deb Haaland D-NM-1",
-      "chamber": "House",
-      "us_state_id": "NM"
     },
     {
       "person_id": 306829,
@@ -5233,6 +4600,6 @@
       "us_state_id": "MP"
     }
   ],
-  "generated_at": "2025-08-29T16:40:52.477028",
+  "generated_at": "2025-09-04T15:26:23.235025",
   "file_structure": "consistent_monthly"
 }

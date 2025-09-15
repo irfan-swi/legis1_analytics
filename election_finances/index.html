@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 Campaign Finance Analysis - Legis1</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+    <style>
+        /* Legis1 Application Theme - Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 14.5px;
+            line-height: 1.4;
+            color: #333333;
+            background-color: #F3F3EC;
+            margin: 0;
+        }
+
+        /* CSS Variables */
+        :root {
+            --bg-primary: #F3F3EC;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #f8f8f8;
+            --text-primary: #333333;
+            --text-secondary: #555961;
+            --text-muted: #999999;
+            --border-light: #ced4da;
+            --border-medium: #ced4da;
+            --hover-bg: #f8f8f8;
+            --focus-outline: #31598B;
+            --legis-blue: #31598B;
+            --democrat-color: #4a90e2;
+            --republican-color: #d32f2f;
+            --libertarian-color: #FFD700;
+            --independent-color: #757575;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+
+        /* Main Container */
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px;
+            gap: 15px;
+            box-sizing: border-box;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--legis-blue);
+        }
+
+        .cycle-indicator {
+            background: var(--legis-blue);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Filter Panel */
+        .filter-panel {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: stretch;
+        }
+
+        .filter-group {
+            flex: 1 1 140px;
+            min-width: 140px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group.search-group {
+            flex: 1.5 1 200px;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .filter-label {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Chamber Toggle */
+        .chamber-toggle {
+            display: flex;
+            gap: 0;
+            height: 38px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .chamber-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14.5px;
+            font-weight: 500;
+        }
+
+        .chamber-btn:not(:last-child) {
+            border-right: 1px solid var(--border-light);
+        }
+
+        .chamber-btn:hover {
+            background: var(--hover-bg);
+        }
+
+        .chamber-btn.active {
+            background: var(--legis-blue);
+            color: white;
+        }
+
+        /* Form Controls */
+        select, input[type="text"] {
+            width: 100%;
+            height: 38px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            font-size: 14.5px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--focus-outline);
+            box-shadow: 0 0 0 2px rgba(49, 89, 139, 0.2);
+        }
+
+        select:disabled {
+            background-color: var(--bg-tertiary);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Toggle Buttons */
+        .toggle-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .toggle-btn {
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .toggle-btn.active {
+            background: var(--legis-blue);
+            border-color: var(--legis-blue);
+            color: white;
+        }
+
+        .toggle-btn:hover:not(.active) {
+            background: var(--hover-bg);
+            border-color: var(--border-medium);
+        }
+
+        /* Stats Summary */
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--legis-blue);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            flex: 1;
+            position: relative;
+            min-height: 300px;
+        }
+
+        /* Details Section */
+        .details-section {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .metric-controls {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .ranking-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .ranking-controls select {
+            flex: 1;
+        }
+
+        .show-count-group {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .show-count-group label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .show-count-group input {
+            flex: 1;
+            max-width: 80px;
+            height: 38px;
+        }
+
+        .detail-chart-container {
+            flex: 1;
+            position: relative;
+            min-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* Horizontal Bar Styles */
+        .detail-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .detail-bar-item {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            padding: 8px 12px;
+            position: relative;
+            overflow: hidden;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+        }
+
+        .detail-bar-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            opacity: 0.3;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .detail-bar-content {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .detail-bar-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 60%;
+        }
+
+        .detail-bar-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Party Colors */
+        .color-dem { background-color: var(--democrat-color) !important; }
+        .color-rep { background-color: var(--republican-color) !important; }
+        .color-lib { background-color: var(--libertarian-color) !important; }
+        .color-other { background-color: var(--independent-color) !important; }
+
+        /* Autocomplete Dropdown */
+        .autocomplete-dropdown {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .autocomplete-item:hover {
+            background: var(--hover-bg);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: 2fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .filter-group {
+                flex: 1 1 45%;
+                min-width: 120px;
+            }
+            
+            .filter-group.search-group {
+                flex: 1 1 100%;
+            }
+            
+            .stats-summary {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-medium);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="logo">Legis1 Campaign Finance</div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div id="dataStatus" style="font-size: 14px; color: #555961;"></div>
+                <div class="cycle-indicator">2026 Election Cycle</div>
+            </div>
+        </div>
+        
+        <div class="filter-panel">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label">Chamber</label>
+                    <div class="chamber-toggle">
+                        <button class="chamber-btn active" data-chamber="S">Senate</button>
+                        <button class="chamber-btn" data-chamber="H">House</button>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">State</label>
+                    <select id="stateFilter">
+                        <option value="">All States</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">District</label>
+                    <select id="districtFilter" disabled>
+                        <option value=""></option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Party</label>
+                    <select id="partyFilter">
+                        <option value="">All Parties</option>
+                        <option value="DEM">Democratic</option>
+                        <option value="REP">Republican</option>
+                        <option value="LIB">Libertarian</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group search-group">
+                    <label class="filter-label">Search Candidate</label>
+                    <input type="text" id="candidateSearch" placeholder="Type candidate name...">
+                    <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="chart-section">
+                <div class="section-header">
+                    <h2 class="section-title">Campaign Funding Overview</h2>
+                    <div class="toggle-buttons">
+                        <button class="toggle-btn active" data-view="party">Party View</button>
+                        <button class="toggle-btn" data-view="race">Race View</button>
+                    </div>
+                </div>
+                
+                <div class="stats-summary">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalRaised">$0</div>
+                        <div class="stat-label">Total Raised</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalCandidates">0</div>
+                        <div class="stat-label">Races</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="avgRaised">$0</div>
+                        <div class="stat-label">Avg per Race</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="details-section">
+                <div class="section-header">
+                    <h2 class="section-title">Campaign Finance Rankings</h2>
+                </div>
+                
+                <div class="metric-controls">
+                    <select id="metricSelect">
+                        <option value="total_receipts">Total Raised</option>
+                        <option value="total_disbursements">Total Spent</option>
+                        <option value="cash_end">Cash on Hand</option>
+                        <option value="debts_owed">Debt</option>
+                        <option value="total_indiv_contributions">Individual Contributions</option>
+                        <option value="other_cmte_contr">PAC Contributions</option>
+                        <option value="indiv_pac_ratio">Individual to PAC Ratio</option>
+                        <option value="cand_contr">Self Funding</option>
+                    </select>
+                    
+                    <div class="ranking-controls">
+                        <select id="sortOrder">
+                            <option value="desc">Highest</option>
+                            <option value="asc">Lowest</option>
+                        </select>
+                        <div class="show-count-group">
+                            <label>Top</label>
+                            <input type="number" id="showCount" value="10" min="1" max="50">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-chart-container">
+                    <div class="detail-bars" id="detailChart">
+                        <div class="loading">Loading details...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        const states = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'];
+        
+        let candidates = [];
+        let dataLoaded = false;
+        let currentView = 'party';
+        let mainChartInstance = null;
+        let sortOrder = 'desc';
+        let showCount = 10;
+        let filters = {
+            chamber: 'S',  // Default to Senate
+            state: '',
+            district: '',
+            party: '',
+            candidate: ''
+        };
+        
+        // Data Loading Functions
+        async function loadCSV(filepath) {
+            return new Promise((resolve, reject) => {
+                Papa.parse(filepath, {
+                    download: true,
+                    header: true,
+                    dynamicTyping: true,
+                    skipEmptyLines: true,
+                    complete: (results) => {
+                        console.log(`Loaded ${filepath}: ${results.data.length} rows`);
+                        resolve(results.data);
+                    },
+                    error: (error) => {
+                        console.error(`Error loading ${filepath}:`, error);
+                        reject(error);
+                    }
+                });
+            });
+        }
+        
+        async function loadCampaignData() {
+            try {
+                console.log('Loading campaign finance data from /data folder...');
+                
+                // Load the two CSV files in parallel
+                const [candidatesData, racesData] = await Promise.all([
+                    loadCSV('data/candidates_2026.csv'),
+                    loadCSV('data/current_races_2026.csv')
+                ]);
+                
+                return processData(candidatesData, racesData);
+            } catch (error) {
+                console.error('Error loading campaign data:', error);
+                throw error;
+            }
+        }
+        
+        function processData(candidatesData, racesData) {
+            console.log('Processing and merging data...');
+            
+            // Filter for 2026 candidates only
+            const candidates2026 = candidatesData.filter(c => 
+                c.election_year === 2026 || c.election_year === '2026'
+            );
+            
+            console.log(`Filtered to ${candidates2026.length} candidates for 2026`);
+            
+            // Create map for race data
+            const raceMap = new Map();
+            racesData.forEach(race => {
+                if (race.fec_id) {
+                    raceMap.set(race.fec_id, race);
+                }
+            });
+            
+            // Merge data
+            const mergedData = candidates2026
+                .filter(candidate => candidate.fec_id && candidate.office) // Filter out invalid records
+                .map(candidate => {
+                    const raceInfo = raceMap.get(candidate.fec_id) || {};
+                    
+                    // Normalize party codes
+                    let normalizedParty = candidate.party || raceInfo.party || '';
+                    // Ensure party is a string before processing
+                    if (normalizedParty && typeof normalizedParty !== 'string') {
+                        normalizedParty = String(normalizedParty);
+                    }
+                    if (normalizedParty) {
+                        normalizedParty = normalizedParty.toUpperCase().substring(0, 3);
+                    }
+                    
+                    // Get financial metrics from race data
+                    const totalReceipts = raceInfo.total_receipts || 0;
+                    const totalDisbursements = raceInfo.total_disbursements || 0;
+                    const cashEnd = raceInfo.cash_end || 0;
+                    const debtsOwed = raceInfo.debts_owed || 0;
+                    const individualContributions = raceInfo.total_indiv_contributions || 0;
+                    const pacContributions = raceInfo.other_cmte_contr || 0;
+                    const selfFunding = raceInfo.cand_contr || 0;
+                    
+                    return {
+                        // Core candidate info
+                        fec_id: candidate.fec_id,
+                        name: candidate.name,
+                        party: normalizedParty,
+                        office: candidate.office,
+                        office_state: candidate.office_state,
+                        district: candidate.district ? parseInt(candidate.district) : null,
+                        incumbency: candidate.incumbency || raceInfo.incumbency,
+                        
+                        // Financial metrics from race data
+                        total_receipts: totalReceipts,
+                        total_disbursements: totalDisbursements,
+                        cash_end: cashEnd,
+                        debts_owed: debtsOwed,
+                        total_indiv_contributions: individualContributions,
+                        other_cmte_contr: pacContributions,
+                        cand_contr: selfFunding,
+                        indiv_pac_ratio: pacContributions > 0 ? 
+                            individualContributions / pacContributions : 0
+                    };
+                })
+                .filter(candidate => candidate.total_receipts > 0); // Only show candidates with financial activity
+            
+            console.log(`Merged data: ${mergedData.length} candidates with financial data`);
+            return mergedData;
+        }
+        
+        // Generate Demo Data (fallback)
+        const generateCandidates = () => {
+            console.log('Using demo data...');
+            const candidates = [];
+            const firstNames = ['John', 'Sarah', 'Michael', 'Jennifer', 'Robert', 'Lisa', 'David', 'Mary', 'James', 'Patricia'];
+            const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'];
+            const parties = ['DEM', 'REP', 'LIB', 'GRN', 'IND'];
+            
+            for (let i = 0; i < 500; i++) {
+                const state = states[Math.floor(Math.random() * states.length)];
+                const office = Math.random() > 0.3 ? 'H' : 'S';
+                const district = office === 'H' ? Math.floor(Math.random() * 10) + 1 : null;
+                
+                candidates.push({
+                    fec_id: `H${i}XX${Math.floor(Math.random() * 10000)}`,
+                    name: `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`,
+                    party: parties[Math.floor(Math.random() * parties.length)],
+                    election_year: 2026,
+                    office_state: state,
+                    office: office,
+                    district: district,
+                    incumbency: Math.random() > 0.7 ? 'I' : 'C',
+                    status: 'Active',
+                    total_receipts: Math.floor(Math.random() * 5000000) + 10000,
+                    total_disbursements: Math.floor(Math.random() * 3000000) + 5000,
+                    cash_end: Math.floor(Math.random() * 2000000) + 1000,
+                    debts_owed: Math.floor(Math.random() * 100000),
+                    total_indiv_contributions: Math.floor(Math.random() * 3000000) + 5000,
+                    other_cmte_contr: Math.floor(Math.random() * 2000000) + 1000,
+                    cand_contr: Math.floor(Math.random() * 500000)
+                });
+            }
+            
+            return candidates;
+        };
+        
+        // Utility Functions
+        const formatCurrency = (value) => {
+            if (value >= 1000000) {
+                return `${(value / 1000000).toFixed(1)}M`;
+            } else if (value >= 1000) {
+                return `${(value / 1000).toFixed(0)}K`;
+            }
+            return `${value.toFixed(0)}`;
+        };
+        
+        const getPartyAbbreviation = (party) => {
+            const abbrevMap = {
+                'DEM': 'D',
+                'REP': 'R',
+                'LIB': 'L',
+                'GRN': 'G',
+                'IND': 'I'
+            };
+            return abbrevMap[party] || party;
+        };
+        
+        const getRaceKey = (candidate) => {
+            // Create a unique key for each race
+            if (candidate.office === 'S') {
+                return `${candidate.office_state}-S`;
+            } else {
+                return `${candidate.office_state}-H-${candidate.district}`;
+            }
+        };
+        
+        const getRaceLabel = (candidate) => {
+            // Create a readable label for each race
+            if (candidate.office === 'S') {
+                return `${candidate.office_state} - Senate`;
+            } else {
+                return `${candidate.office_state}-${candidate.district}`;
+            }
+        };
+        
+        const getPartyColor = (party) => {
+            const colorMap = {
+                'DEM': '#4a90e2',
+                'REP': '#d32f2f',
+                'LIB': '#FFD700',
+                'GRN': '#757575',
+                'IND': '#757575'
+            };
+            return colorMap[party] || '#757575';
+        };
+        
+        const getPartyColorClass = (party) => {
+            const colorMap = {
+                'DEM': 'color-dem',
+                'REP': 'color-rep',
+                'LIB': 'color-lib',
+                'GRN': 'color-other',
+                'IND': 'color-other'
+            };
+            return colorMap[party] || 'color-other';
+        };
+        
+        const getPartyLabel = (party) => {
+            const labelMap = {
+                'DEM': 'Democrats',
+                'REP': 'Republicans',
+                'LIB': 'Libertarian',
+                'OTHER': 'Other'
+            };
+            return labelMap[party] || party;
+        };
+        
+        // Check if Race View should be enabled
+        const canShowRaceView = () => {
+            if (filters.chamber === 'S' && filters.state) {
+                return true; // Senate with state selected
+            }
+            if (filters.chamber === 'H' && filters.state && filters.district) {
+                return true; // House with state and district selected
+            }
+            return false;
+        };
+        
+        // Update toggle buttons based on filter state
+        const updateToggleButtons = () => {
+            const raceViewBtn = document.querySelector('[data-view="race"]');
+            const partyViewBtn = document.querySelector('[data-view="party"]');
+            
+            if (canShowRaceView()) {
+                raceViewBtn.disabled = false;
+                raceViewBtn.style.opacity = '1';
+                raceViewBtn.style.cursor = 'pointer';
+            } else {
+                raceViewBtn.disabled = true;
+                raceViewBtn.style.opacity = '0.4';
+                raceViewBtn.style.cursor = 'not-allowed';
+                // Switch back to party view if currently on race view
+                if (currentView === 'race') {
+                    currentView = 'party';
+                    partyViewBtn.classList.add('active');
+                    raceViewBtn.classList.remove('active');
+                }
+            }
+        };
+        const getFilteredCandidates = () => {
+            return candidates.filter(c => {
+                if (filters.chamber && c.office !== filters.chamber) return false;
+                if (filters.state && c.office_state !== filters.state) return false;
+                if (filters.district && c.district != filters.district) return false;
+                if (filters.party) {
+                    if (filters.party === 'OTHER' && ['DEM', 'REP', 'LIB'].includes(c.party)) return false;
+                    if (filters.party !== 'OTHER' && c.party !== filters.party) return false;
+                }
+                if (filters.candidate && c.fec_id !== filters.candidate) return false;
+                return true;
+            });
+        };
+        
+        // Update Functions
+        const updateStats = () => {
+            const filtered = getFilteredCandidates();
+            
+            // Count unique races
+            const races = new Set();
+            filtered.forEach(c => {
+                races.add(getRaceKey(c));
+            });
+            const numRaces = races.size;
+            
+            const totalRaised = filtered.reduce((sum, c) => sum + c.total_receipts, 0);
+            const avgPerRace = numRaces > 0 ? totalRaised / numRaces : 0;
+            
+            document.getElementById('totalRaised').textContent = formatCurrency(totalRaised);
+            document.getElementById('totalCandidates').textContent = numRaces;
+            document.getElementById('avgRaised').textContent = formatCurrency(avgPerRace);
+        };
+        
+        const updateMainChart = () => {
+            const filtered = getFilteredCandidates();
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            
+            if (mainChartInstance) {
+                mainChartInstance.destroy();
+            }
+            
+            if (filtered.length === 0) {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.font = '14px Helvetica Neue';
+                ctx.fillStyle = '#999';
+                ctx.textAlign = 'center';
+                ctx.fillText('No data available for selected filters', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+            
+            let chartData = [];
+            
+            if (currentView === 'party') {
+                // Aggregate by party
+                const partyTotals = {};
+                filtered.forEach(c => {
+                    let partyKey = ['DEM', 'REP', 'LIB'].includes(c.party) ? c.party : 'OTHER';
+                    if (!partyTotals[partyKey]) partyTotals[partyKey] = 0;
+                    partyTotals[partyKey] += c.total_receipts;
+                });
+                
+                chartData = Object.entries(partyTotals)
+                    .map(([party, total]) => ({ 
+                        label: getPartyLabel(party), 
+                        value: total, 
+                        party,
+                        color: getPartyColor(party)
+                    }))
+                    .sort((a, b) => b.value - a.value);
+            } else {
+                // Show individual candidates in race
+                chartData = filtered
+                    .map(c => ({ 
+                        label: c.incumbency === 'I' ? `${c.name} *` : c.name, 
+                        value: c.total_receipts, 
+                        party: c.party,
+                        color: getPartyColor(c.party),
+                        incumbent: c.incumbency === 'I'
+                    }))
+                    .sort((a, b) => b.value - a.value)
+                    .slice(0, 10); // Show top 10 candidates
+            }
+            
+            mainChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.map(d => d.label),
+                    datasets: [{
+                        data: chartData.map(d => d.value),
+                        backgroundColor: chartData.map(d => d.color),
+                        borderColor: chartData.map(d => d.color),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                },
+                                color: '#555961'
+                            },
+                            grid: {
+                                color: '#e9ecef'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#555961',
+                                maxRotation: 45,
+                                minRotation: 0,
+                                font: function(context) {
+                                    // Make incumbent labels bold
+                                    const label = context.chart.data.labels[context.index];
+                                    return {
+                                        weight: label && label.includes('*') ? 'bold' : 'normal'
+                                    };
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        };
+        
+        const updateDetailChart = () => {
+            const filtered = getFilteredCandidates();
+            const metric = document.getElementById('metricSelect').value;
+            const chartContainer = document.getElementById('detailChart');
+            
+            if (filtered.length === 0) {
+                chartContainer.innerHTML = '<div class="loading">No data available</div>';
+                return;
+            }
+            
+            let chartData = filtered.map(c => {
+                let value = 0;
+                if (metric === 'indiv_pac_ratio') {
+                    value = c.other_cmte_contr > 0 ? c.total_indiv_contributions / c.other_cmte_contr : 0;
+                } else {
+                    value = c[metric] || 0;
+                }
+                
+                // Create label with party, state, and district
+                let label = c.name;
+                const partyAbbrev = getPartyAbbreviation(c.party);
+                const isIncumbent = c.incumbency === 'I';
+                
+                if (c.office === 'S') {
+                    label = `${isIncumbent ? '<strong>' : ''}${c.name}${isIncumbent ? ' *</strong>' : ''} (${partyAbbrev} - ${c.office_state})`;
+                } else {
+                    label = `${isIncumbent ? '<strong>' : ''}${c.name}${isIncumbent ? ' *</strong>' : ''} (${partyAbbrev} - ${c.office_state}-${c.district})`;
+                }
+                
+                return { name: label, value, party: c.party };
+            });
+            
+            // Sort based on current sort order
+            if (sortOrder === 'desc') {
+                chartData.sort((a, b) => b.value - a.value);
+            } else {
+                chartData.sort((a, b) => a.value - b.value);
+            }
+            
+            // Limit to showCount
+            chartData = chartData.slice(0, showCount);
+            
+            const maxValue = Math.max(...chartData.map(d => d.value));
+            
+            const chartHTML = chartData.map(item => {
+                const displayValue = metric === 'indiv_pac_ratio' 
+                    ? item.value.toFixed(2) + 'x' 
+                    : formatCurrency(item.value);
+                
+                return `
+                    <div class="detail-bar-item">
+                        <div class="detail-bar-fill ${getPartyColorClass(item.party)}" style="width: ${(item.value / maxValue) * 100}%"></div>
+                        <div class="detail-bar-content">
+                            <div class="detail-bar-name">${item.name}</div>
+                            <div class="detail-bar-value">${displayValue}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            chartContainer.innerHTML = chartHTML;
+        };
+        
+        const updateAll = () => {
+            updateStats();
+            updateToggleButtons();
+            updateMainChart();
+            updateDetailChart();
+        };
+        
+        // Initialize Filters
+        const initializeFilters = () => {
+            // Populate states
+            const stateSelect = document.getElementById('stateFilter');
+            states.forEach(state => {
+                const option = document.createElement('option');
+                option.value = state;
+                option.textContent = state;
+                stateSelect.appendChild(option);
+            });
+            
+            // Chamber toggle logic
+            document.querySelectorAll('.chamber-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // Update active state
+                    document.querySelectorAll('.chamber-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    
+                    filters.chamber = e.target.dataset.chamber;
+                    const districtFilter = document.getElementById('districtFilter');
+                    
+                    if (filters.chamber === 'S') {
+                        districtFilter.disabled = true;
+                        districtFilter.value = '';
+                        filters.district = '';
+                    } else if (filters.chamber === 'H' && filters.state) {
+                        districtFilter.disabled = false;
+                        updateDistrictOptions();
+                    } else {
+                        districtFilter.disabled = !filters.state;
+                    }
+                    
+                    updateAll();
+                });
+            });
+            
+            // State filter logic
+            document.getElementById('stateFilter').addEventListener('change', (e) => {
+                filters.state = e.target.value;
+                const districtFilter = document.getElementById('districtFilter');
+                
+                if (e.target.value && filters.chamber === 'H') {
+                    districtFilter.disabled = false;
+                    updateDistrictOptions();
+                } else {
+                    districtFilter.disabled = true;
+                    districtFilter.value = '';
+                    filters.district = '';
+                }
+                
+                updateAll();
+            });
+            
+            // District filter
+            document.getElementById('districtFilter').addEventListener('change', (e) => {
+                filters.district = e.target.value;
+                updateAll();
+            });
+            
+            // Party filter
+            document.getElementById('partyFilter').addEventListener('change', (e) => {
+                filters.party = e.target.value;
+                updateAll();
+            });
+            
+            // View toggle
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (e.target.disabled) return;
+                    
+                    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentView = e.target.dataset.view;
+                    updateMainChart();
+                });
+            });
+            
+            // Metric select
+            document.getElementById('metricSelect').addEventListener('change', updateDetailChart);
+            
+            // Sort order select
+            document.getElementById('sortOrder').addEventListener('change', (e) => {
+                sortOrder = e.target.value;
+                updateDetailChart();
+            });
+            
+            // Show count input
+            document.getElementById('showCount').addEventListener('input', (e) => {
+                let value = parseInt(e.target.value);
+                if (isNaN(value) || value < 1) {
+                    value = 1;
+                    e.target.value = 1;
+                } else if (value > 50) {
+                    value = 50;
+                    e.target.value = 50;
+                }
+                showCount = value;
+                updateDetailChart();
+            });
+            
+            // Candidate search with autocomplete
+            const searchInput = document.getElementById('candidateSearch');
+            const dropdown = document.getElementById('autocompleteDropdown');
+            
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                
+                if (query.length < 2) {
+                    dropdown.classList.remove('show');
+                    filters.candidate = '';
+                    updateAll();
+                    return;
+                }
+                
+                const matches = candidates.filter(c => 
+                    c.name.toLowerCase().includes(query)
+                ).slice(0, 10);
+                
+                if (matches.length > 0) {
+                    dropdown.innerHTML = matches.map(c => {
+                        const partyAbbrev = getPartyAbbreviation(c.party);
+                        const location = c.office === 'H' ? 
+                            `${partyAbbrev} - ${c.office_state}-${c.district}` : 
+                            `${partyAbbrev} - ${c.office_state}`;
+                        return `
+                            <div class="autocomplete-item" data-id="${c.fec_id}" data-name="${c.name}">
+                                ${c.name} (${location})
+                            </div>
+                        `;
+                    }).join('');
+                    dropdown.classList.add('show');
+                    
+                    dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            const selectedCandidate = candidates.find(c => c.fec_id === item.dataset.id);
+                            searchInput.value = item.dataset.name;
+                            filters.candidate = item.dataset.id;
+                            
+                            // If no party filter is set, auto-set filters to show the race
+                            if (!filters.party) {
+                                filters.chamber = selectedCandidate.office;
+                                filters.state = selectedCandidate.office_state;
+                                filters.district = selectedCandidate.district || '';
+                                
+                                // Update filter UI
+                                document.querySelectorAll('.chamber-btn').forEach(b => {
+                                    b.classList.toggle('active', b.dataset.chamber === filters.chamber);
+                                });
+                                document.getElementById('stateFilter').value = filters.state;
+                                if (filters.chamber === 'H' && filters.district) {
+                                    document.getElementById('districtFilter').disabled = false;
+                                    updateDistrictOptions();
+                                    document.getElementById('districtFilter').value = filters.district;
+                                }
+                            }
+                            
+                            dropdown.classList.remove('show');
+                            updateAll();
+                        });
+                    });
+                } else {
+                    dropdown.classList.remove('show');
+                }
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-group')) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        };
+        
+        const updateDistrictOptions = () => {
+            const districtFilter = document.getElementById('districtFilter');
+            const districts = [...new Set(
+                candidates
+                    .filter(c => c.office === 'H' && c.office_state === filters.state)
+                    .map(c => c.district)
+                    .filter(d => d)
+            )].sort((a, b) => a - b);
+            
+            districtFilter.innerHTML = '<option value="">All Districts</option>';
+            districts.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = `District ${district}`;
+                districtFilter.appendChild(option);
+            });
+        };
+        
+        // Initialize Application
+        async function initializeApp() {
+            console.log('Initializing campaign finance app...');
+            
+            // Show loading state
+            document.getElementById('mainChart').innerHTML = '<div class="loading">Loading FEC data...</div>';
+            document.getElementById('detailChart').innerHTML = '<div class="loading">Loading FEC data...</div>';
+            
+            try {
+                // Try to load real data from /data folder
+                candidates = await loadCampaignData();
+                dataLoaded = true;
+                console.log('Successfully loaded FEC data');
+                document.getElementById('dataStatus').textContent = `${candidates.length} candidates loaded`;
+                document.getElementById('dataStatus').style.color = '#28a745';
+            } catch (error) {
+                // Use demo data if files not found
+                console.error('Failed to load FEC data from /data folder:', error);
+                candidates = generateCandidates();
+                dataLoaded = false;
+                document.getElementById('dataStatus').textContent = 'Demo Data';
+                document.getElementById('dataStatus').style.color = '#ffc107';
+            }
+            
+            // Initialize filters and update UI
+            initializeFilters();
+            updateAll();
+        }
+        
+        // Start the app when DOM is ready
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>

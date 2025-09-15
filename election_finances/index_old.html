@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 Congressional Campaign Finance</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        :root {
+            --dem-color: #4a90e2;
+            --rep-color: #e85450;
+            --ind-color: #9b59b6;
+            --background: #f5f5f5;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --text-muted: #999999;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --hover-bg: #f9f9f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .filters-section {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 0.625rem 2.5rem 0.625rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.875rem;
+            background-color: white;
+            color: var(--text-primary);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"] {
+            background-image: none;
+            padding: 0.625rem 0.75rem;
+        }
+
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--dem-color);
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: var(--shadow);
+            margin-top: 0.25rem;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+        }
+
+        .search-result-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .search-result-item:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .reset-button {
+            padding: 0.625rem 1.25rem;
+            background-color: var(--text-secondary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .reset-button:hover {
+            background-color: var(--text-primary);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 22px;
+            background-color: var(--border-color);
+            border-radius: 11px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-switch.active {
+            background-color: var(--dem-color);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(22px);
+        }
+
+        .metric-selector {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: var(--hover-bg);
+            border-radius: 4px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .ranking-item:hover {
+            background-color: #f0f0f0;
+            transform: translateX(4px);
+        }
+
+        .ranking-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            border-radius: 4px 0 0 4px;
+            opacity: 0.3;
+            transition: width 0.5s ease;
+        }
+
+        .ranking-bar.dem, .ranking-bar.dfl {
+            background-color: var(--dem-color);
+        }
+
+        .ranking-bar.rep {
+            background-color: var(--rep-color);
+        }
+
+        .ranking-bar.lib {
+            background-color: #FFA500;
+        }
+
+        .ranking-bar.gre {
+            background-color: #00AF33;
+        }
+
+        .ranking-bar.ind, .ranking-bar.oth {
+            background-color: #999999;
+        }
+
+        .ranking-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .ranking-position {
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-right: 1rem;
+            min-width: 24px;
+        }
+
+        .ranking-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ranking-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .ranking-details {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .ranking-value {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .no-data {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem;
+            font-style: italic;
+        }
+
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+        }
+
+        .party-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-left: 0.25rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="filters-section">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Cycle</label>
+                    <select id="cycleFilter">
+                        <option value="2026">2026 Elections</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Chamber</label>
+                    <select id="chamberFilter">
+                        <option value="">All Chambers</option>
+                        <option value="S">Senate</option>
+                        <option value="H">House</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">State</label>
+                    <select id="stateFilter">
+                        <option value="">All States</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">District</label>
+                    <select id="districtFilter" disabled>
+                        <option value="">All Districts</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Party</label>
+                    <select id="partyFilter">
+                        <option value="">All Parties</option>
+                        <option value="DEM">Democratic</option>
+                        <option value="REP">Republican</option>
+                        <option value="IND">Independent</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Search Candidate</label>
+                    <div class="search-container">
+                        <input type="text" id="candidateSearch" placeholder="Search by name...">
+                        <div class="search-results" id="searchResults"></div>
+                    </div>
+                </div>
+                <div class="filter-group" style="justify-content: flex-end;">
+                    <label class="filter-label">&nbsp;</label>
+                    <button class="reset-button" onclick="resetFilters()">Reset Filters</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" id="vizTitle">Congressional Campaign Finance Rankings</h2>
+                    <p class="card-subtitle">
+                        <span id="vizSubtitle">Showing fundraising by party • Click bars to view details</span>
+                    </p>
+                    <div class="toggle-container">
+                        <span>Party View</span>
+                        <div class="toggle-switch" id="viewToggle">
+                            <div class="toggle-slider"></div>
+                        </div>
+                        <span>Race View</span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="chart-container" id="mainChart"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Member Details</h2>
+                    <p class="card-subtitle">Click on a bar to view member information • Click member name to open profile</p>
+                </div>
+                <div class="card-content">
+                    <select class="metric-selector" id="metricSelector">
+                        <option value="total_receipts">Show Top: Total Raised</option>
+                        <option value="total_disbursements">Show Top: Total Spent</option>
+                        <option value="cash_end">Show Top: Cash on Hand</option>
+                        <option value="debts_owed">Show Top: Debt</option>
+                        <option value="individual_contributions">Show Top: Individual Contributions</option>
+                        <option value="pac_contributions">Show Top: PAC Contributions</option>
+                        <option value="self_funding">Show Top: Self Funding</option>
+                    </select>
+                    <div class="ranking-list" id="rankingList">
+                        <div class="no-data">Select a metric to view rankings</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Global data storage
+        let candidatesData = [];
+        let racesData = [];
+        let currentView = 'party';
+        let selectedCandidate = null;
+
+        // Initialize the application
+        async function init() {
+            try {
+                await loadRealData();
+            } catch (e) {
+                console.log('Using demonstration data');
+                generateMockData();
+            }
+            
+            populateFilters();
+            setupEventListeners();
+            updateVisualization();
+            updateRankings();
+        }
+
+        // Attempt to load real CSV data
+        async function loadRealData() {
+            try {
+                let candidatesCSV, racesCSV, pacsCSV;
+                
+                // Check if running in Claude environment or browser
+                if (typeof window.fs !== 'undefined' && window.fs.readFile) {
+                    // Claude environment
+                    candidatesCSV = await window.fs.readFile('candidates_2026.csv', { encoding: 'utf8' });
+                    racesCSV = await window.fs.readFile('current_races_2026.csv', { encoding: 'utf8' });
+                    pacsCSV = await window.fs.readFile('pac_summary_2026.csv', { encoding: 'utf8' });
+                } else {
+                    // Regular browser - use fetch
+                    console.log('Loading data files via fetch...');
+                    const candidatesResponse = await fetch('candidates_2026.csv');
+                    candidatesCSV = await candidatesResponse.text();
+                    
+                    const racesResponse = await fetch('current_races_2026.csv');
+                    racesCSV = await racesResponse.text();
+                    
+                    const pacsResponse = await fetch('pac_summary_2026.csv');
+                    pacsCSV = await pacsResponse.text();
+                }
+                
+                // Parse candidates
+                const candidatesParsed = Papa.parse(candidatesCSV, {
+                    header: true,
+                    dynamicTyping: true,
+                    skipEmptyLines: true
+                });
+                
+                // Parse races
+                const racesParsed = Papa.parse(racesCSV, {
+                    header: true,
+                    dynamicTyping: true,
+                    skipEmptyLines: true
+                });
+                
+                // Parse PACs (store for potential future use)
+                const pacsParsed = Papa.parse(pacsCSV, {
+                    header: true,
+                    dynamicTyping: true,
+                    skipEmptyLines: true
+                });
+                
+                candidatesData = candidatesParsed.data;
+                racesData = racesParsed.data;
+                pacsData = pacsParsed.data;
+                
+                console.log(`Loaded ${candidatesData.length} candidates, ${racesData.length} races, ${pacsData.length} PACs`);
+                
+                // Merge financial data
+                candidatesData = candidatesData.map(candidate => {
+                    const raceInfo = racesData.find(r => r.fec_id === candidate.fec_id);
+                    return { ...candidate, ...(raceInfo || {}) };
+                });
+            } catch (error) {
+                console.error('Error loading real data:', error);
+                throw error;
+            }
+        }
+
+        // Generate mock data
+        function generateMockData() {
+            const states = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'];
+            const firstNames = ['John', 'Jane', 'Michael', 'Sarah', 'Robert', 'Emily', 'David', 'Lisa', 'James', 'Mary'];
+            const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'];
+            
+            for (let i = 0; i < 500; i++) {
+                const state = states[Math.floor(Math.random() * states.length)];
+                const office = Math.random() > 0.8 ? 'S' : 'H';
+                const party = ['DEM', 'REP', 'IND'][Math.floor(Math.random() * 3)];
+                const incumbency = ['I', 'C', 'O'][Math.floor(Math.random() * 3)];
+                const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+                
+                candidatesData.push({
+                    fec_id: `${office}${state}${String(i).padStart(5, '0')}`,
+                    name: `${firstName} ${lastName}`,
+                    party: party,
+                    office: office,
+                    office_state: state,
+                    district: office === 'H' ? Math.floor(Math.random() * 10) + 1 : null,
+                    incumbency: incumbency,
+                    total_receipts: Math.floor(Math.random() * 5000000),
+                    total_disbursements: Math.floor(Math.random() * 4000000),
+                    cash_end: Math.floor(Math.random() * 1000000),
+                    total_indiv_contributions: Math.floor(Math.random() * 3000000),
+                    other_cmte_contr: Math.floor(Math.random() * 1000000),
+                    cand_contr: Math.floor(Math.random() * 500000),
+                    cand_loans: Math.floor(Math.random() * 200000),
+                    debts_owed: Math.floor(Math.random() * 100000)
+                });
+            }
+        }
+
+        // Populate filter dropdowns
+        function populateFilters() {
+            const stateFilter = document.getElementById('stateFilter');
+            const uniqueStates = [...new Set(candidatesData.map(c => c.office_state))].sort();
+            
+            uniqueStates.forEach(state => {
+                const option = document.createElement('option');
+                option.value = state;
+                option.textContent = state;
+                stateFilter.appendChild(option);
+            });
+        }
+
+        // Update district filter based on state and chamber
+        function updateDistrictFilter() {
+            const state = document.getElementById('stateFilter').value;
+            const chamber = document.getElementById('chamberFilter').value;
+            const districtFilter = document.getElementById('districtFilter');
+            
+            districtFilter.innerHTML = '<option value="">All Districts</option>';
+            
+            if (state && chamber === 'H') {
+                districtFilter.disabled = false;
+                const districts = [...new Set(candidatesData
+                    .filter(c => c.office_state === state && c.office === 'H')
+                    .map(c => c.district))]
+                    .sort((a, b) => a - b);
+                
+                districts.forEach(district => {
+                    if (district) {
+                        const option = document.createElement('option');
+                        option.value = district;
+                        option.textContent = `District ${district}`;
+                        districtFilter.appendChild(option);
+                    }
+                });
+            } else {
+                districtFilter.disabled = true;
+            }
+        }
+
+        // Get filtered candidates
+        function getFilteredCandidates() {
+            const state = document.getElementById('stateFilter').value;
+            const chamber = document.getElementById('chamberFilter').value;
+            const district = document.getElementById('districtFilter').value;
+            const party = document.getElementById('partyFilter').value;
+            
+            return candidatesData.filter(candidate => {
+                // Filter out candidates not in 2025 or 2026 elections
+                if (candidate.election_year !== 2025 && candidate.election_year !== 2026) return false;
+                
+                // Filter out non-House/Senate offices
+                if (candidate.office !== 'H' && candidate.office !== 'S') return false;
+                
+                // Filter out N, P, and F status candidates
+                if (candidate.status === 'N' || candidate.status === 'P' || candidate.status === 'F') return false;
+                
+                // Apply user filters
+                if (state && candidate.office_state !== state) return false;
+                if (chamber && candidate.office !== chamber) return false;
+                if (district && candidate.district != district) return false;
+                if (party && candidate.party !== party) return false;
+                return true;
+            });
+        }
+
+        // Check if filters represent a single race
+        function isSingleRace() {
+            const state = document.getElementById('stateFilter').value;
+            const chamber = document.getElementById('chamberFilter').value;
+            const district = document.getElementById('districtFilter').value;
+            
+            if (chamber === 'S') {
+                return state !== '';
+            } else if (chamber === 'H') {
+                return state !== '' && district !== '';
+            }
+            return false;
+        }
+
+        // Update main visualization
+        function updateVisualization() {
+            const container = d3.select('#mainChart');
+            container.selectAll('*').remove();
+            
+            if (currentView === 'party' || !isSingleRace()) {
+                renderPartyChart();
+            } else {
+                renderRaceChart();
+            }
+        }
+
+        // Render party aggregate chart
+        function renderPartyChart() {
+            const container = d3.select('#mainChart');
+            const rect = container.node().getBoundingClientRect();
+            const margin = {top: 20, right: 20, bottom: 80, left: 80};
+            const width = rect.width - margin.left - margin.right;
+            const height = 360 - margin.top - margin.bottom;
+            
+            const svg = container.append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom);
+            
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            // Aggregate data by party
+            const candidates = getFilteredCandidates();
+            const partyData = d3.rollup(
+                candidates,
+                v => ({
+                    total: d3.sum(v, d => d.total_receipts || 0),
+                    count: v.length
+                }),
+                d => d.party
+            );
+            
+            // Group parties into main categories
+            const mainParties = ['REP', 'DEM', 'DFL', 'LIB', 'GRE'];
+            const groupedData = [];
+            let otherTotal = 0;
+            let otherCount = 0;
+            
+            partyData.forEach((stats, party) => {
+                if (mainParties.includes(party)) {
+                    // For display, show DFL as Democratic
+                    const displayParty = party === 'DFL' ? 'DEM' : party;
+                    const existing = groupedData.find(d => d.party === displayParty);
+                    if (existing) {
+                        existing.total += stats.total;
+                        existing.count += stats.count;
+                    } else {
+                        groupedData.push({
+                            party: displayParty,
+                            total: stats.total,
+                            count: stats.count,
+                            label: party === 'REP' ? 'Republican' : 
+                                   party === 'DEM' || party === 'DFL' ? 'Democratic' :
+                                   party === 'LIB' ? 'Libertarian' :
+                                   party === 'GRE' ? 'Green' : party
+                        });
+                    }
+                } else if (stats.total > 0) {
+                    otherTotal += stats.total;
+                    otherCount += stats.count;
+                }
+            });
+            
+            // Add "Other" category if there are other parties
+            if (otherTotal > 0) {
+                groupedData.push({
+                    party: 'OTH',
+                    total: otherTotal,
+                    count: otherCount,
+                    label: 'Other'
+                });
+            }
+            
+            // Sort by total raised
+            const data = groupedData.sort((a, b) => b.total - a.total);
+            
+            if (data.length === 0) {
+                container.append('div')
+                    .attr('class', 'no-data')
+                    .text('No data available for selected filters');
+                return;
+            }
+            
+            // Scales
+            const x = d3.scaleBand()
+                .domain(data.map(d => d.label))
+                .range([0, width])
+                .padding(0.3);
+            
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.total)])
+                .nice()
+                .range([height, 0]);
+            
+            // Grid lines
+            g.append('g')
+                .attr('class', 'grid')
+                .call(d3.axisLeft(y)
+                    .tickSize(-width)
+                    .tickFormat(''))
+                .style('stroke-dasharray', '3,3')
+                .style('opacity', 0.3);
+            
+            // Bars
+            const bars = g.selectAll('.bar')
+                .data(data)
+                .enter().append('rect')
+                .attr('class', 'bar')
+                .attr('x', d => x(d.label))
+                .attr('y', height)
+                .attr('width', x.bandwidth())
+                .attr('height', 0)
+                .attr('fill', d => {
+                    if (d.party === 'DEM') return 'var(--dem-color)';
+                    if (d.party === 'REP') return 'var(--rep-color)';
+                    if (d.party === 'LIB') return '#FFA500';
+                    if (d.party === 'GRE') return '#00AF33';
+                    return '#999999';
+                })
+                .style('cursor', 'pointer')
+                .on('mouseover', function(event, d) {
+                    const tooltip = d3.select('#tooltip');
+                    tooltip.style('opacity', 1)
+                        .html(`
+                            <strong>${d.label}</strong><br>
+                            Total Raised: ${formatMoney(d.total)}<br>
+                            Candidates: ${d.count}
+                        `)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 10) + 'px');
+                })
+                .on('mouseout', function() {
+                    d3.select('#tooltip').style('opacity', 0);
+                })
+                .on('click', function(event, d) {
+                    if (d.party !== 'OTH') {
+                        document.getElementById('partyFilter').value = d.party === 'DEM' ? 'DEM' : d.party;
+                        updateRankings();
+                    }
+                });
+            
+            // Animate bars
+            bars.transition()
+                .duration(500)
+                .attr('y', d => y(d.total))
+                .attr('height', d => height - y(d.total));
+            
+            // X axis
+            g.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x))
+                .selectAll('text')
+                .style('font-size', '0.875rem')
+                .attr('transform', 'rotate(-45)')
+                .style('text-anchor', 'end');
+            
+            // Y axis
+            g.append('g')
+                .call(d3.axisLeft(y).tickFormat(d => formatMoneyShort(d)))
+                .style('font-size', '0.75rem');
+            
+            // Add incumbent indicator note
+            svg.append('text')
+                .attr('x', width + margin.left)
+                .attr('y', height + margin.top + margin.bottom - 5)
+                .attr('text-anchor', 'end')
+                .style('font-size', '0.75rem')
+                .style('fill', 'var(--text-secondary)')
+                .text('* Incumbent');
+        }
+
+        // Render individual race chart
+        function renderRaceChart() {
+            const container = d3.select('#mainChart');
+            const rect = container.node().getBoundingClientRect();
+            const margin = {top: 20, right: 20, bottom: 100, left: 80};
+            const width = rect.width - margin.left - margin.right;
+            const height = 360 - margin.top - margin.bottom;
+            
+            const svg = container.append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom);
+            
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            const candidates = getFilteredCandidates()
+                .sort((a, b) => (b.total_receipts || 0) - (a.total_receipts || 0));
+            
+            if (candidates.length === 0) {
+                container.append('div')
+                    .attr('class', 'no-data')
+                    .text('No candidates in this race');
+                return;
+            }
+            
+            // Scales
+            const x = d3.scaleBand()
+                .domain(candidates.map(d => d.name))
+                .range([0, width])
+                .padding(0.3);
+            
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(candidates, d => d.total_receipts || 0)])
+                .nice()
+                .range([height, 0]);
+            
+            // Grid lines
+            g.append('g')
+                .attr('class', 'grid')
+                .call(d3.axisLeft(y)
+                    .tickSize(-width)
+                    .tickFormat(''))
+                .style('stroke-dasharray', '3,3')
+                .style('opacity', 0.3);
+            
+            // Bars
+            const bars = g.selectAll('.bar')
+                .data(candidates)
+                .enter().append('rect')
+                .attr('class', 'bar')
+                .attr('x', d => x(d.name))
+                .attr('y', height)
+                .attr('width', x.bandwidth())
+                .attr('height', 0)
+                .attr('fill', d => {
+                    if (d.party === 'DEM' || d.party === 'DFL') return 'var(--dem-color)';
+                    if (d.party === 'REP') return 'var(--rep-color)';
+                    return 'var(--ind-color)';
+                })
+                .style('cursor', 'pointer')
+                .on('mouseover', function(event, d) {
+                    const tooltip = d3.select('#tooltip');
+                    tooltip.style('opacity', 1)
+                        .html(`
+                            <strong>${d.name}</strong> (${d.party})<br>
+                            ${d.incumbency === 'I' ? 'Incumbent<br>' : ''}
+                            Total Raised: ${formatMoney(d.total_receipts || 0)}<br>
+                            Total Spent: ${formatMoney(d.total_disbursements || 0)}<br>
+                            Cash on Hand: ${formatMoney(d.cash_end || 0)}
+                        `)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 10) + 'px');
+                })
+                .on('mouseout', function() {
+                    d3.select('#tooltip').style('opacity', 0);
+                })
+                .on('click', function(event, d) {
+                    selectedCandidate = d;
+                    updateRankings();
+                });
+            
+            // Animate bars
+            bars.transition()
+                .duration(500)
+                .attr('y', d => y(d.total_receipts || 0))
+                .attr('height', d => height - y(d.total_receipts || 0));
+            
+            // X axis with rotated labels
+            g.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x))
+                .selectAll('text')
+                .attr('transform', 'rotate(-45)')
+                .style('text-anchor', 'end')
+                .style('font-size', '0.75rem')
+                .style('font-weight', d => {
+                    const candidate = candidates.find(c => c.name === d);
+                    return candidate.incumbency === 'I' ? '700' : 'normal';
+                })
+                .text(d => {
+                    const candidate = candidates.find(c => c.name === d);
+                    return `${candidate.name}${candidate.incumbency === 'I' ? '*' : ''} ${candidate.party ? candidate.party.charAt(0) : ''}`;
+                });
+            
+            // Y axis
+            g.append('g')
+                .call(d3.axisLeft(y).tickFormat(d => formatMoneyShort(d)))
+                .style('font-size', '0.75rem');
+            
+            // Add incumbent indicator note
+            svg.append('text')
+                .attr('x', width + margin.left)
+                .attr('y', height + margin.top + margin.bottom - 5)
+                .attr('text-anchor', 'end')
+                .style('font-size', '0.75rem')
+                .style('fill', 'var(--text-secondary)')
+                .text('* Incumbent');
+        }
+
+        // Update rankings
+        function updateRankings() {
+            const metric = document.getElementById('metricSelector').value;
+            const candidates = getFilteredCandidates();
+            
+            // Calculate metric values
+            let sortedCandidates = candidates.map(c => {
+                let value = 0;
+                switch(metric) {
+                    case 'total_receipts':
+                        value = c.total_receipts || 0;
+                        break;
+                    case 'total_disbursements':
+                        value = c.total_disbursements || 0;
+                        break;
+                    case 'cash_end':
+                        value = c.cash_end || 0;
+                        break;
+                    case 'debts_owed':
+                        value = c.debts_owed || 0;
+                        break;
+                    case 'individual_contributions':
+                        value = c.total_indiv_contributions || 0;
+                        break;
+                    case 'pac_contributions':
+                        value = c.other_cmte_contr || 0;
+                        break;
+                    case 'self_funding':
+                        value = (c.cand_contr || 0) + (c.cand_loans || 0);
+                        break;
+                }
+                return { ...c, metricValue: value };
+            });
+            
+            // Sort and take top 10
+            sortedCandidates = sortedCandidates
+                .sort((a, b) => b.metricValue - a.metricValue)
+                .slice(0, 10);
+            
+            // Get max value for scaling bars
+            const maxValue = d3.max(sortedCandidates, d => d.metricValue) || 1;
+            
+            // Render rankings
+            const rankingList = document.getElementById('rankingList');
+            
+            if (sortedCandidates.length === 0) {
+                rankingList.innerHTML = '<div class="no-data">No data available for selected filters</div>';
+                return;
+            }
+            
+            rankingList.innerHTML = sortedCandidates.map((candidate, index) => `
+                <div class="ranking-item" style="position: relative;">
+                    <div class="ranking-bar ${candidate.party ? (candidate.party === 'DEM' || candidate.party === 'DFL' ? 'dem' : candidate.party.toLowerCase()) : 'ind'}" 
+                         style="width: ${(candidate.metricValue / maxValue) * 100}%"></div>
+                    <div class="ranking-content">
+                        <span class="ranking-position">${index + 1}</span>
+                        <div class="ranking-info">
+                            <div class="ranking-name" style="${candidate.incumbency === 'I' ? 'font-weight: 700;' : ''}">
+                                ${candidate.name}${candidate.incumbency === 'I' ? '*' : ''} 
+                                ${candidate.party ? candidate.party.charAt(0) : ''}-${candidate.office_state}${candidate.office === 'H' && candidate.district ? '-' + candidate.district : ''}
+                            </div>
+                        </div>
+                        <div class="ranking-value">${formatMoney(candidate.metricValue)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('candidateSearch');
+            const searchResults = document.getElementById('searchResults');
+            
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                
+                if (query.length < 2) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                // Search through all candidates that meet base criteria
+                const matches = candidatesData
+                    .filter(c => {
+                        // Apply same base filters as getFilteredCandidates
+                        if (c.election_year !== 2025 && c.election_year !== 2026) return false;
+                        if (c.office !== 'H' && c.office !== 'S') return false;
+                        if (c.status === 'N' || c.status === 'P' || c.status === 'F') return false;
+                        
+                        // Then check name match
+                        return c.name.toLowerCase().includes(query);
+                    })
+                    .slice(0, 10);
+                
+                if (matches.length > 0) {
+                    searchResults.innerHTML = matches.map(candidate => `
+                        <div class="search-result-item" data-fec-id="${candidate.fec_id}">
+                            <strong style="${candidate.incumbency === 'I' ? 'font-weight: 700;' : ''}">${candidate.name}</strong>
+                            <span class="party-label">${candidate.party}</span>
+                            <br>
+                            <span style="font-size: 0.75rem; color: var(--text-secondary);">
+                                ${candidate.office_state}-${candidate.office}${candidate.office === 'H' && candidate.district ? candidate.district : ''}
+                                ${candidate.incumbency === 'I' ? '• Incumbent' : ''}
+                            </span>
+                        </div>
+                    `).join('');
+                    searchResults.style.display = 'block';
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            });
+            
+            // Handle search result clicks
+            searchResults.addEventListener('click', (e) => {
+                const item = e.target.closest('.search-result-item');
+                if (item && item.dataset.fecId) {
+                    const candidate = candidatesData.find(c => c.fec_id === item.dataset.fecId);
+                    if (candidate) {
+                        // Set filters to show this candidate's race
+                        document.getElementById('stateFilter').value = candidate.office_state;
+                        document.getElementById('chamberFilter').value = candidate.office;
+                        updateDistrictFilter();
+                        if (candidate.office === 'H' && candidate.district) {
+                            document.getElementById('districtFilter').value = candidate.district;
+                        }
+                        
+                        // Switch to race view if applicable
+                        if (isSingleRace() && !document.getElementById('viewToggle').classList.contains('active')) {
+                            document.getElementById('viewToggle').click();
+                        }
+                        
+                        updateVisualization();
+                        updateRankings();
+                        
+                        searchInput.value = '';
+                        searchResults.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Hide search results when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) {
+                    searchResults.style.display = 'none';
+                }
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Filter changes
+            const filters = ['stateFilter', 'chamberFilter', 'districtFilter', 'partyFilter'];
+            filters.forEach(filterId => {
+                document.getElementById(filterId).addEventListener('change', () => {
+                    if (filterId === 'stateFilter' || filterId === 'chamberFilter') {
+                        updateDistrictFilter();
+                    }
+                    updateVisualization();
+                    updateRankings();
+                    updateTitle();
+                });
+            });
+            
+            // View toggle
+            document.getElementById('viewToggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                currentView = this.classList.contains('active') ? 'race' : 'party';
+                updateVisualization();
+                updateTitle();
+            });
+            
+            // Metric selector
+            document.getElementById('metricSelector').addEventListener('change', updateRankings);
+            
+            // Setup search
+            setupSearch();
+        }
+
+        // Update visualization title
+        function updateTitle() {
+            const subtitle = document.getElementById('vizSubtitle');
+            if (currentView === 'race' && isSingleRace()) {
+                const state = document.getElementById('stateFilter').value;
+                const chamber = document.getElementById('chamberFilter').value;
+                const district = document.getElementById('districtFilter').value;
+                
+                if (chamber === 'S') {
+                    subtitle.textContent = `${state} Senate Race • Click bars to view details`;
+                } else {
+                    subtitle.textContent = `${state}-${district} House Race • Click bars to view details`;
+                }
+            } else {
+                subtitle.textContent = 'Showing fundraising by party • Click bars to view details';
+            }
+        }
+
+        // Reset all filters
+        function resetFilters() {
+            document.getElementById('stateFilter').value = '';
+            document.getElementById('chamberFilter').value = '';
+            document.getElementById('districtFilter').value = '';
+            document.getElementById('districtFilter').disabled = true;
+            document.getElementById('partyFilter').value = '';
+            document.getElementById('candidateSearch').value = '';
+            
+            if (document.getElementById('viewToggle').classList.contains('active')) {
+                document.getElementById('viewToggle').click();
+            }
+            
+            updateVisualization();
+            updateRankings();
+            updateTitle();
+        }
+
+        // Utility functions
+        function formatMoney(amount) {
+            if (amount >= 1000000) {
+                return '$' + (amount / 1000000).toFixed(1) + 'M';
+            } else if (amount >= 1000) {
+                return '$' + (amount / 1000).toFixed(0) + 'K';
+            }
+            return '$' + amount.toLocaleString();
+        }
+
+        function formatMoneyShort(amount) {
+            if (amount >= 1000000) {
+                return '$' + (amount / 1000000).toFixed(0) + 'M';
+            } else if (amount >= 1000) {
+                return '$' + (amount / 1000).toFixed(0) + 'K';
+            }
+            return '$' + amount.toLocaleString();
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congressional Vote Factors Analysis</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .app-header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .app-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .filters-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .filter-select, .search-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            min-width: 120px;
+        }
+        
+        .search-input {
+            min-width: 300px;
+        }
+        
+        .main-container {
+            display: flex;
+            gap: 20px;
+            padding: 0 20px 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .content-area {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar {
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .bill-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .bill-number {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .bill-title {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.4;
+        }
+        
+        .vote-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .vote-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+        }
+        
+        .vote-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .vote-count {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .vote-yes { color: #27ae60; }
+        .vote-no { color: #e74c3c; }
+        .vote-present { color: #f39c12; }
+        .vote-not-voting { color: #95a5a6; }
+        
+        .members-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .member-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+        
+        .member-row:hover {
+            background: #f8f9fa;
+        }
+        
+        .member-info {
+            flex: 1;
+        }
+        
+        .member-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .member-details {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        .member-vote {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .vote-badge-yes {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .vote-badge-no {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .vote-badge-present {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .vote-badge-not-voting {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .factors-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .factors-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .factors-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .model-toggle {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .model-btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .model-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .accuracy-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #e8f4f8;
+            color: #2980b9;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 15px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .info-label {
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            font-size: 13px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        
+        function App() {
+            const [rollcallData, setRollcallData] = useState([]);
+            const [featureData, setFeatureData] = useState([]);
+            const [loading, setLoading] = useState(true);
+            
+            const [filters, setFilters] = useState({
+                congress: '',
+                session: '',
+                chamber: '',
+                billType: '',
+                search: ''
+            });
+            
+            const [selectedVote, setSelectedVote] = useState(null);
+            const [selectedModel, setSelectedModel] = useState('LogisticRegression');
+            
+            useEffect(() => {
+                loadData();
+            }, []);
+            
+            const loadData = async () => {
+                try {
+                    const rollcallResponse = await fetch('data/rollcall_data.csv');
+                    const rollcallText = await rollcallResponse.text();
+                    const rollcallParsed = Papa.parse(rollcallText, { header: true, dynamicTyping: true });
+                    setRollcallData(rollcallParsed.data.filter(row => row.person_id));
+                    
+                    const featureResponse = await fetch('data/feature_importance_results.csv');
+                    const featureText = await featureResponse.text();
+                    const featureParsed = Papa.parse(featureText, { header: true, dynamicTyping: true });
+                    setFeatureData(featureParsed.data.filter(row => row.feature));
+                    
+                    setLoading(false);
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    setLoading(false);
+                }
+            };
+            
+            const uniqueValues = useMemo(() => {
+                if (!rollcallData.length) return {};
+                
+                return {
+                    congresses: [...new Set(rollcallData.map(r => r.congress))].sort((a, b) => a - b),
+                    sessions: [...new Set(rollcallData.map(r => r.session))].sort((a, b) => a - b),
+                    chambers: [...new Set(rollcallData.map(r => r.chamber))].sort(),
+                    billTypes: [...new Set(rollcallData.map(r => r.bill_type))].sort(),
+                    models: [...new Set(featureData.map(f => f.model))].sort()
+                };
+            }, [rollcallData, featureData]);
+            
+            const filteredBills = useMemo(() => {
+                let filtered = rollcallData;
+                
+                if (filters.congress) {
+                    filtered = filtered.filter(r => r.congress == filters.congress);
+                }
+                if (filters.session) {
+                    filtered = filtered.filter(r => r.session == filters.session);
+                }
+                if (filters.chamber) {
+                    filtered = filtered.filter(r => r.chamber === filters.chamber);
+                }
+                if (filters.billType) {
+                    filtered = filtered.filter(r => r.bill_type === filters.billType);
+                }
+                if (filters.search) {
+                    const searchLower = filters.search.toLowerCase();
+                    filtered = filtered.filter(r => 
+                        (r.title && r.title.toLowerCase().includes(searchLower)) ||
+                        (r.bill_code && r.bill_code.toLowerCase().includes(searchLower))
+                    );
+                }
+                
+                const uniqueBills = {};
+                filtered.forEach(row => {
+                    const key = `${row.congress}-${row.session}-${row.chamber}-${row.RollCallNumber}`;
+                    if (!uniqueBills[key]) {
+                        uniqueBills[key] = {
+                            congress: row.congress,
+                            session: row.session,
+                            chamber: row.chamber,
+                            rollCallNumber: row.RollCallNumber,
+                            billCode: row.bill_code,
+                            billType: row.bill_type,
+                            billNumber: row.bill_number,
+                            title: row.title,
+                            question: row.question,
+                            voteDate: row.VoteDate,
+                            outcome: row.outcome
+                        };
+                    }
+                });
+                
+                return Object.values(uniqueBills);
+            }, [rollcallData, filters]);
+            
+            const handleBillSelect = (bill) => {
+                const voteData = rollcallData.filter(r => 
+                    r.congress === bill.congress &&
+                    r.session === bill.session &&
+                    r.chamber === bill.chamber &&
+                    r.RollCallNumber === bill.rollCallNumber
+                );
+                
+                const voteCounts = {
+                    yes: voteData.filter(v => v.member_vote === 'Yes').length,
+                    no: voteData.filter(v => v.member_vote === 'No').length,
+                    present: voteData.filter(v => v.member_vote === 'Present').length,
+                    notVoting: voteData.filter(v => v.member_vote === 'Not Voting').length
+                };
+                
+                setSelectedVote({
+                    ...bill,
+                    members: voteData,
+                    voteCounts
+                });
+            };
+            
+            const currentFactors = useMemo(() => {
+                if (!selectedVote || !featureData.length) return [];
+                
+                const factors = featureData.filter(f => 
+                    f.congress === selectedVote.congress &&
+                    f.session === selectedVote.session &&
+                    f.chamber === selectedVote.chamber &&
+                    f.roll_call_number === selectedVote.rollCallNumber &&
+                    f.model === selectedModel
+                );
+                
+                return factors
+                    .sort((a, b) => b.importance_pct - a.importance_pct)
+                    .slice(0, 10);
+            }, [selectedVote, featureData, selectedModel]);
+            
+            const modelAccuracy = currentFactors.length > 0 ? currentFactors[0].model_accuracy : 0;
+            
+            if (loading) {
+                return <div className="loading">Loading data...</div>;
+            }
+            
+            return (
+                <div>
+                    <div className="app-header">
+                        <h1 className="app-title">Congressional Vote Factors Analysis</h1>
+                        <div className="filters-container">
+                            <div className="filter-group">
+                                <label className="filter-label">Congress</label>
+                                <select 
+                                    className="filter-select"
+                                    value={filters.congress}
+                                    onChange={(e) => setFilters({...filters, congress: e.target.value})}
+                                >
+                                    <option value="">All</option>
+                                    {uniqueValues.congresses?.map(c => (
+                                        <option key={c} value={c}>{c}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div className="filter-group">
+                                <label className="filter-label">Session</label>
+                                <select 
+                                    className="filter-select"
+                                    value={filters.session}
+                                    onChange={(e) => setFilters({...filters, session: e.target.value})}
+                                >
+                                    <option value="">All</option>
+                                    {uniqueValues.sessions?.map(s => (
+                                        <option key={s} value={s}>{s}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div className="filter-group">
+                                <label className="filter-label">Chamber</label>
+                                <select 
+                                    className="filter-select"
+                                    value={filters.chamber}
+                                    onChange={(e) => setFilters({...filters, chamber: e.target.value})}
+                                >
+                                    <option value="">All</option>
+                                    {uniqueValues.chambers?.map(c => (
+                                        <option key={c} value={c}>{c}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div className="filter-group">
+                                <label className="filter-label">Bill Type</label>
+                                <select 
+                                    className="filter-select"
+                                    value={filters.billType}
+                                    onChange={(e) => setFilters({...filters, billType: e.target.value})}
+                                >
+                                    <option value="">All</option>
+                                    {uniqueValues.billTypes?.map(t => (
+                                        <option key={t} value={t}>{t}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div className="filter-group">
+                                <label className="filter-label">Search Bills</label>
+                                <input 
+                                    type="text"
+                                    className="search-input"
+                                    placeholder="Search by title or bill number (e.g., H.R. 5)"
+                                    value={filters.search}
+                                    onChange={(e) => setFilters({...filters, search: e.target.value})}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="main-container">
+                        <div className="content-area">
+                            {!selectedVote ? (
+                                <div>
+                                    <h2 style={{marginBottom: '20px', color: '#2c3e50'}}>Select a Bill</h2>
+                                    <div style={{maxHeight: '600px', overflowY: 'auto'}}>
+                                        {filteredBills.map((bill, idx) => (
+                                            <div 
+                                                key={idx}
+                                                onClick={() => handleBillSelect(bill)}
+                                                style={{
+                                                    padding: '15px',
+                                                    borderBottom: '1px solid #f0f0f0',
+                                                    cursor: 'pointer',
+                                                    transition: 'background 0.2s'
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                                                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                                            >
+                                                <div style={{fontWeight: '600', color: '#2c3e50', marginBottom: '5px'}}>
+                                                    {bill.billCode}
+                                                </div>
+                                                <div style={{color: '#666', fontSize: '14px'}}>
+                                                    {bill.title}
+                                                </div>
+                                                <div style={{color: '#999', fontSize: '12px', marginTop: '5px'}}>
+                                                    {bill.chamber} • Roll Call #{bill.rollCallNumber} • {bill.voteDate}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div className="bill-header">
+                                        <div className="bill-number">{selectedVote.billCode}</div>
+                                        <div className="bill-title">{selectedVote.title}</div>
+                                        <button 
+                                            onClick={() => setSelectedVote(null)}
+                                            style={{
+                                                marginTop: '10px',
+                                                padding: '6px 12px',
+                                                background: '#3498db',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            Back to Bills
+                                        </button>
+                                    </div>
+                                    
+                                    <h3 style={{marginBottom: '15px', color: '#2c3e50'}}>Member Votes</h3>
+                                    <div className="members-list">
+                                        {selectedVote.members.map((member, idx) => (
+                                            <div key={idx} className="member-row">
+                                                <div className="member-info">
+                                                    <div className="member-name">{member.lawmaker}</div>
+                                                    <div className="member-details">
+                                                        {member.party} • {member.state}
+                                                    </div>
+                                                </div>
+                                                <div className={`member-vote vote-badge-${member.member_vote.toLowerCase().replace(' ', '-')}`}>
+                                                    {member.member_vote}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {selectedVote && (
+                            <div className="sidebar">
+                                <div className="summary-card">
+                                    <h3 style={{marginBottom: '15px', color: '#2c3e50'}}>Vote Summary</h3>
+                                    
+                                    <div className="info-row">
+                                        <span className="info-label">Roll Call</span>
+                                        <span className="info-value">#{selectedVote.rollCallNumber}</span>
+                                    </div>
+                                    <div className="info-row">
+                                        <span className="info-label">Date</span>
+                                        <span className="info-value">{selectedVote.voteDate}</span>
+                                    </div>
+                                    <div className="info-row">
+                                        <span className="info-label">Chamber</span>
+                                        <span className="info-value">{selectedVote.chamber}</span>
+                                    </div>
+                                    <div className="info-row">
+                                        <span className="info-label">Outcome</span>
+                                        <span className="info-value">{selectedVote.outcome}</span>
+                                    </div>
+                                    <div className="info-row" style={{borderBottom: 'none'}}>
+                                        <span className="info-label">Question</span>
+                                    </div>
+                                    <div style={{fontSize: '13px', color: '#666', marginBottom: '15px'}}>
+                                        {selectedVote.question}
+                                    </div>
+                                    
+                                    <div className="vote-grid">
+                                        <div className="vote-stat">
+                                            <span className="vote-label">Yes</span>
+                                            <span className="vote-count vote-yes">{selectedVote.voteCounts.yes}</span>
+                                        </div>
+                                        <div className="vote-stat">
+                                            <span className="vote-label">No</span>
+                                            <span className="vote-count vote-no">{selectedVote.voteCounts.no}</span>
+                                        </div>
+                                        <div className="vote-stat">
+                                            <span className="vote-label">Present</span>
+                                            <span className="vote-count vote-present">{selectedVote.voteCounts.present}</span>
+                                        </div>
+                                        <div className="vote-stat">
+                                            <span className="vote-label">Not Voting</span>
+                                            <span className="vote-count vote-not-voting">{selectedVote.voteCounts.notVoting}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="factors-card">
+                                    <div className="factors-header">
+                                        <h3 className="factors-title">Top Factors</h3>
+                                        <div className="model-toggle">
+                                            {uniqueValues.models?.map(model => (
+                                                <button 
+                                                    key={model}
+                                                    className={`model-btn ${selectedModel === model ? 'active' : ''}`}
+                                                    onClick={() => setSelectedModel(model)}
+                                                >
+                                                    {model === 'LogisticRegression' ? 'Logistic' : 'Random Forest'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    
+                                    {currentFactors.length > 0 ? (
+                                        <>
+                                            <FactorChart factors={currentFactors} />
+                                            <div className="accuracy-badge">
+                                                Model Accuracy: {(modelAccuracy * 100).toFixed(2)}%
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="no-data">No factor data available for this vote</div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+        
+        function FactorChart({ factors }) {
+            useEffect(() => {
+                const canvas = document.getElementById('factorChart');
+                const ctx = canvas.getContext('2d');
+                
+                const existingChart = Chart.getChart(canvas);
+                if (existingChart) {
+                    existingChart.destroy();
+                }
+                
+                const colors = factors.map(f => {
+                    if (f.direction === 'positive') return 'rgba(52, 152, 219, 0.8)';
+                    if (f.direction === 'negative') return 'rgba(231, 76, 60, 0.8)';
+                    return 'rgba(149, 165, 166, 0.8)';
+                });
+                
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: factors.map(f => f.feature.replace(/_/g, ' ').substring(0, 30)),
+                        datasets: [{
+                            data: factors.map(f => f.importance_pct),
+                            backgroundColor: colors,
+                            borderColor: colors.map(c => c.replace('0.8', '1')),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const factor = factors[context.dataIndex];
+                                        return `${factor.importance_pct.toFixed(2)}% (${factor.direction})`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Importance (%)'
+                                }
+                            },
+                            y: {
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }, [factors]);
+            
+            return (
+                <div className="chart-container">
+                    <canvas id="factorChart"></canvas>
+                </div>
+            );
+        }
+        
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

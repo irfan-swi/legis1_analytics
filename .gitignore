@@ -1,0 +1,27 @@
+# Analytics refresh files (contains credentials)
+refresh_config.json
+refresh_log.txt
+
+# CSV data files (local only)
+lawmaker_tweets/1_tweets_df.csv
+congressional-tweet-sentiment/scripts/old.csv
+congressional-tweet-sentiment/scripts/old_1.csv
+
+# Backup files
+*.old
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db

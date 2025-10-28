@@ -18,28 +18,33 @@ Automated script to refresh data for legislative analytics apps.
 
 ### Refresh All Apps
 ```bash
-python refresh_analytics.py
+./refresh.sh
 ```
 
 ### Refresh Specific Apps
 ```bash
-python refresh_analytics.py --apps lawmaker_tweets
-python refresh_analytics.py --apps lawmaker_tweets,congressional_tweet_sentiment
+./refresh.sh --apps lawmaker_tweets
+./refresh.sh --apps lawmaker_tweets,congressional_tweet_sentiment
 ```
 
 ### Dry Run (Preview Without Executing)
 ```bash
-python refresh_analytics.py --dry-run
+./refresh.sh --dry-run
 ```
 
 ### Skip Git Push (Commit Locally Only)
 ```bash
-python refresh_analytics.py --no-push
+./refresh.sh --no-push
 ```
 
 ### Verbose Logging
 ```bash
-python refresh_analytics.py --verbose
+./refresh.sh --verbose
+```
+
+**Note:** The `refresh.sh` wrapper script automatically sets up the ODBC environment. You can also call the Python script directly if needed:
+```bash
+export ODBCSYSINI=~ && python3 refresh_analytics.py
 ```
 
 ## What the Script Does
@@ -74,7 +79,20 @@ To run this automatically every day:
 crontab -e
 
 # Add this line (runs daily at 6 AM)
-0 6 * * * cd /Users/irfanhussain/Desktop/legis1_analytics && /usr/bin/python3 refresh_analytics.py >> refresh_log.txt 2>&1
+0 6 * * * cd /Users/irfanhussain/Desktop/legis1_analytics && ./refresh.sh >> refresh_log.txt 2>&1
+```
+
+**To set up now:**
+```bash
+# Open crontab editor
+crontab -e
+
+# Press 'i' to enter insert mode (if using vi)
+# Add the line above
+# Press ESC, then type :wq to save and exit
+
+# Verify it's set up
+crontab -l
 ```
 
 ### Windows (Task Scheduler)
@@ -82,8 +100,7 @@ crontab -e
 2. Create Basic Task
 3. Set trigger to Daily
 4. Action: Start a Program
-   - Program: `python`
-   - Arguments: `refresh_analytics.py`
+   - Program: Full path to `refresh.sh`
    - Start in: `C:\path\to\legis1_analytics`
 
 ## Apps Currently Configured

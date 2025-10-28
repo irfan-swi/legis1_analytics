@@ -482,41 +482,43 @@
             startSelect.innerHTML = '';
             endSelect.innerHTML = '';
             
-            // Generate month options - extend by one month to include October 2025
-            const current = new Date(dateRange.start);
-            const dates = [];
+            // Only show months that actually exist in the index
+            const availableMonths = dataLoader.index.months || [];
             
-            // Get the actual end date from data and add one month to ensure October 2025 is included
-            const extendedEnd = new Date(dateRange.end);
-            extendedEnd.setMonth(extendedEnd.getMonth() + 1);
-            
-            while (current <= extendedEnd) {
-                dates.push(new Date(current));
-                current.setMonth(current.getMonth() + 1);
+            if (availableMonths.length === 0) {
+                console.error('No months available in index');
+                return;
             }
             
-            dates.forEach((date, index) => {
-                const dateLabel = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
-                // Ensure proper date format: YYYY-MM-DD
-                const year = date.getFullYear();
-                const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                const dateValue = `${year}-${month}-01`;
+            // Parse each available month and create date objects, then sort chronologically
+            const dates = availableMonths.map(monthStr => {
+                const [year, month] = monthStr.split('-').map(Number);
+                const date = new Date(year, month - 1, 1);
+                return {
+                    date: date,
+                    monthStr: monthStr,
+                    label: date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
+                };
+            }).sort((a, b) => a.date - b.date); // Sort chronologically!
+            
+            dates.forEach(({ date, monthStr, label }) => {
+                const dateValue = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-01`;
                 
                 const startOption = document.createElement('option');
                 startOption.value = dateValue;
-                startOption.textContent = dateLabel;
+                startOption.textContent = label;
                 startSelect.appendChild(startOption);
                 
                 const endOption = document.createElement('option');
                 endOption.value = dateValue;
-                endOption.textContent = dateLabel;
+                endOption.textContent = label;
                 endSelect.appendChild(endOption);
             });
             
-            // Set default date range (last month only, so October 2025)
+            // Set default date range (last month only)
             if (dates.length > 0) {
-                startSelect.selectedIndex = dates.length - 1;  // Last month (October)
-                endSelect.selectedIndex = dates.length - 1;    // Last month (October)
+                startSelect.selectedIndex = dates.length - 1;  // Last available month
+                endSelect.selectedIndex = dates.length - 1;    // Last available month
             }
         };
         

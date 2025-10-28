@@ -26,10 +26,21 @@ class DataLoader {
         // Store issues list
         this.issues = this.index.issues || [];
         
-        // Load last 2 months by default
-        const lastTwoMonths = this.index.months.slice(-2);
-        if (lastTwoMonths.length > 0) {
-            await this.loadMonths(lastTwoMonths);
+        // FIX: Sort months chronologically before taking last months
+        // This handles cases where index.json might be alphabetically sorted
+        const sortedMonths = [...this.index.months].sort((a, b) => {
+            const [yearA, monthA] = a.split('-').map(Number);
+            const [yearB, monthB] = b.split('-').map(Number);
+            return yearA === yearB ? monthA - monthB : yearA - yearB;
+        });
+        
+        // Update the index with sorted months
+        this.index.months = sortedMonths;
+        
+        // Load last 3 months by default (increased from 2 to be safe)
+        const lastThreeMonths = sortedMonths.slice(-3);
+        if (lastThreeMonths.length > 0) {
+            await this.loadMonths(lastThreeMonths);
         }
     }
     
@@ -60,6 +71,7 @@ class DataLoader {
         });
         
         await Promise.all(promises);
+        console.log(`Successfully loaded ${monthsToLoad.length} month(s). Total records in memory: ${this.tweetData.size}`);
     }
     
     async decompress(compressed) {
@@ -87,7 +99,20 @@ class DataLoader {
     filterData(filters) {
         const aggregated = new Map();
         
+        console.log(`Filtering ${this.tweetData.size} records with:`, {
+            startDate: filters.startDate,
+            endDate: filters.endDate,
+            issue: filters.issue,
+            chamber: filters.chamber,
+            party: filters.party
+        });
+        
+        let recordsProcessed = 0;
+        let recordsPassed = 0;
+        
         for (const [key, record] of this.tweetData) {
+            recordsProcessed++;
+            
             const lawmaker = this.lawmakers.get(record.person_id);
             if (!lawmaker) continue;
             
@@ -102,6 +127,8 @@ class DataLoader {
             
             if (recordDate < filters.startDate || recordDate > filters.endDate) continue;
             
+            recordsPassed++;
+            
             // Aggregate by person
             const personId = record.person_id;
             if (!aggregated.has(personId)) {
@@ -114,6 +141,8 @@ class DataLoader {
             }
             aggregated.get(personId).posts += record.count;
         }
+        
+        console.log(`Filtered ${recordsProcessed} records, ${recordsPassed} passed filters, ${aggregated.size} unique lawmakers`);
         
         return Array.from(aggregated.values());
     }

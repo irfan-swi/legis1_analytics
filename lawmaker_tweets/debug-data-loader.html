@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Data Loader</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+        .log { background: white; padding: 10px; margin: 10px 0; border: 1px solid #ddd; }
+        .error { background: #fee; border-color: #c00; }
+        .success { background: #efe; border-color: #0c0; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Data Loader Debugger</h1>
+    
+    <button onclick="testLoadData()">Test Load October 2025 Data</button>
+    <button onclick="testFilterData()">Test Filter October 2025</button>
+    <button onclick="testDateComparison()">Test Date Comparison Logic</button>
+    
+    <div id="output"></div>
+
+    <script>
+        function log(message, isError = false) {
+            const div = document.createElement('div');
+            div.className = 'log' + (isError ? ' error' : ' success');
+            div.textContent = message;
+            document.getElementById('output').appendChild(div);
+            console.log(message);
+        }
+
+        function testDateComparison() {
+            log('=== Testing Date Comparison Logic ===');
+            
+            // Simulate what happens with October 2025
+            const startDateStr = '2025-10-01';
+            const endDateStr = '2025-10-01';
+            
+            const startDate = new Date(startDateStr);
+            const endDate = new Date(endDateStr);
+            
+            // This is what the HTML does
+            endDate.setMonth(endDate.getMonth() + 1);
+            endDate.setDate(0);
+            
+            log(`Start Date Input: ${startDateStr}`);
+            log(`End Date Input: ${endDateStr}`);
+            log(`Start Date Object: ${startDate}`);
+            log(`End Date Object (after manipulation): ${endDate}`);
+            
+            // Test a record from October 2025
+            const recordMonth = '2025-10';
+            const [year, month] = recordMonth.split('-').map(Number);
+            const recordDate = new Date(year, month - 1, 1);
+            
+            log(`Record Month: ${recordMonth}`);
+            log(`Record Date: ${recordDate}`);
+            log(`recordDate < startDate: ${recordDate < startDate}`);
+            log(`recordDate > endDate: ${recordDate > endDate}`);
+            log(`PASSES FILTER: ${!(recordDate < startDate || recordDate > endDate)}`);
+            
+            // What the getMonthsInRange would generate
+            const months = [];
+            const current = new Date(startDate);
+            current.setDate(1);
+            
+            while (current <= endDate) {
+                const y = current.getFullYear();
+                const m = current.getMonth() + 1;
+                months.push(`${y}-${m}`);
+                current.setMonth(current.getMonth() + 1);
+            }
+            
+            log(`Months in range: ${JSON.stringify(months)}`);
+        }
+
+        async function testLoadData() {
+            log('=== Testing Data Load ===');
+            
+            // Check if files exist
+            try {
+                const response = await fetch('data/tweets-2025-10.json.gz');
+                log(`Status for tweets-2025-10.json.gz: ${response.status}`);
+                
+                if (response.ok) {
+                    const compressed = await response.arrayBuffer();
+                    log(`Compressed size: ${compressed.byteLength} bytes`);
+                    
+                    // Try to decompress
+                    const ds = new DecompressionStream('gzip');
+                    const decompressedStream = new Response(compressed).body.pipeThrough(ds);
+                    const text = await new Response(decompressedStream).text();
+                    const data = JSON.parse(text);
+                    
+                    log(`Decompressed successfully! Records: ${data.length}`);
+                    log(`First record: ${JSON.stringify(data[0], null, 2)}`);
+                } else {
+                    log(`File not found or error: ${response.status}`, true);
+                }
+            } catch (error) {
+                log(`Error loading data: ${error.message}`, true);
+            }
+        }
+
+        async function testFilterData() {
+            log('=== Testing Full Filter Process ===');
+            
+            try {
+                // Load index
+                const indexResponse = await fetch('data/index.json');
+                const index = await indexResponse.json();
+                log(`Index loaded. Months: ${JSON.stringify(index.months.slice(-3))}`);
+                
+                // Load lawmakers
+                const lawmakersResponse = await fetch('data/lawmakers.json');
+                const lawmakers = await lawmakersResponse.json();
+                log(`Lawmakers loaded: ${lawmakers.length}`);
+                
+                // Load October data
+                const dataResponse = await fetch('data/tweets-2025-10.json.gz');
+                const compressed = await dataResponse.arrayBuffer();
+                const ds = new DecompressionStream('gzip');
+                const decompressedStream = new Response(compressed).body.pipeThrough(ds);
+                const text = await new Response(decompressedStream).text();
+                const tweetData = JSON.parse(text);
+                
+                log(`Tweet data loaded: ${tweetData.length} records`);
+                
+                // Create lawmaker map
+                const lawmakerMap = new Map();
+                lawmakers.forEach(lm => lawmakerMap.set(lm.person_id, lm));
+                
+                // Apply filters (simulating October 2025, All filters)
+                const startDate = new Date('2025-10-01');
+                const endDate = new Date('2025-10-01');
+                endDate.setMonth(endDate.getMonth() + 1);
+                endDate.setDate(0);
+                
+                log(`Filter dates: ${startDate} to ${endDate}`);
+                
+                const aggregated = new Map();
+                let filtered = 0;
+                let passed = 0;
+                
+                for (const record of tweetData) {
+                    filtered++;
+                    
+                    const lawmaker = lawmakerMap.get(record.person_id);
+                    if (!lawmaker) continue;
+                    
+                    // Check date range
+                    const [year, month] = record.month.split('-').map(Number);
+                    const recordDate = new Date(year, month - 1, 1);
+                    
+                    if (recordDate < startDate || recordDate > endDate) continue;
+                    
+                    passed++;
+                    
+                    // Aggregate
+                    const personId = record.person_id;
+                    if (!aggregated.has(personId)) {
+                        aggregated.set(personId, {
+                            person_id: personId,
+                            display_name: lawmaker.display_name,
+                            party_clean: lawmaker.party_name,
+                            posts: 0
+                        });
+                    }
+                    aggregated.get(personId).posts += record.count;
+                }
+                
+                log(`Records processed: ${filtered}`);
+                log(`Records passed filter: ${passed}`);
+                log(`Unique lawmakers: ${aggregated.size}`);
+                
+                if (aggregated.size > 0) {
+                    const results = Array.from(aggregated.values());
+                    results.sort((a, b) => b.posts - a.posts);
+                    log(`Top 3 lawmakers:`);
+                    results.slice(0, 3).forEach(lm => {
+                        log(`  ${lm.display_name}: ${lm.posts} posts`);
+                    });
+                }
+                
+            } catch (error) {
+                log(`Error in filter test: ${error.message}`, true);
+                log(`Stack: ${error.stack}`, true);
+            }
+        }
+    </script>
+</body>
+</html>

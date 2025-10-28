@@ -26,10 +26,19 @@ class DataLoader {
         // Store issues list
         this.issues = this.index.issues || [];
         
-        // Load last 2 months by default
-        const lastTwoMonths = this.index.months.slice(-2);
-        if (lastTwoMonths.length > 0) {
-            await this.loadMonths(lastTwoMonths);
+        // Sort months chronologically before taking last months
+        const sortedMonths = [...this.index.months].sort((a, b) => {
+            const [yearA, monthA] = a.split('-').map(Number);
+            const [yearB, monthB] = b.split('-').map(Number);
+            return yearA === yearB ? monthA - monthB : yearA - yearB;
+        });
+        
+        this.index.months = sortedMonths;
+        
+        // Load last 3 months by default
+        const lastThreeMonths = sortedMonths.slice(-3);
+        if (lastThreeMonths.length > 0) {
+            await this.loadMonths(lastThreeMonths);
         }
     }
     
@@ -38,19 +47,15 @@ class DataLoader {
         
         if (monthsToLoad.length === 0) return;
         
-        // Show loading indicator
         console.log(`Loading data for months: ${monthsToLoad.join(', ')}`);
         
-        // Load compressed monthly data
         const promises = monthsToLoad.map(async (month) => {
             const response = await fetch(`data/tweets-${month}.json.gz`);
             const compressed = await response.arrayBuffer();
             
-            // Decompress in browser
             const decompressed = await this.decompress(compressed);
             const data = JSON.parse(decompressed);
             
-            // Store in memory
             data.forEach(record => {
                 const key = `${record.person_id}_${record.issue_name}_${record.month}`;
                 this.tweetData.set(key, record);
@@ -60,10 +65,10 @@ class DataLoader {
         });
         
         await Promise.all(promises);
+        console.log(`Successfully loaded ${monthsToLoad.length} month(s). Total records: ${this.tweetData.size}`);
     }
     
     async decompress(compressed) {
-        // Use browser's native decompression
         const ds = new DecompressionStream('gzip');
         const decompressedStream = new Response(compressed).body.pipeThrough(ds);
         return new Response(decompressedStream).text();
@@ -72,12 +77,10 @@ class DataLoader {
     getFilteredData(filters) {
         const { startDate, endDate, issue, chamber, party } = filters;
         
-        // Ensure we have the needed months loaded
         const neededMonths = this.getMonthsInRange(startDate, endDate);
         const unloadedMonths = neededMonths.filter(m => !this.loadedMonths.has(m));
         
         if (unloadedMonths.length > 0) {
-            // Return promise that loads data first
             return this.loadMonths(unloadedMonths).then(() => this.filterData(filters));
         }
         
@@ -121,7 +124,7 @@ class DataLoader {
     getMonthsInRange(startDate, endDate) {
         const months = [];
         const current = new Date(startDate);
-        current.setDate(1); // Start at beginning of month
+        current.setDate(1);
         
         while (current <= endDate) {
             const year = current.getFullYear();
@@ -151,5 +154,4 @@ class DataLoader {
     }
 }
 
-// Export for use in main app
 window.DataLoader = DataLoader;

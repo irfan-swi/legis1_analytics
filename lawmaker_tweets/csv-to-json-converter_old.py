@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 Convert lawmaker tweet CSV data to optimized JSON format for web app.
-Counts UNIQUE tweets (by comm_content_id) to avoid double-counting when tweets have multiple issue tags.
 Usage: python convert_tweets_data.py input.csv output_directory/
 """
 
@@ -49,8 +48,8 @@ def convert_csv_to_json(csv_file, output_dir):
     
     # Data structures
     lawmakers = {}
-    # NEW: Track unique comm_content_ids per (person, issue, month)
-    unique_tweets = defaultdict(lambda: defaultdict(set))  # month -> (person, issue) -> set of comm_content_ids
+    monthly_data = defaultdict(list)
+    aggregated_data = defaultdict(lambda: defaultdict(int))
     issues = set()
     
     # Read CSV file
@@ -66,7 +65,6 @@ def convert_csv_to_json(csv_file, output_dir):
                 print(f"Processed {row_count} rows...")
             
             person_id = row['person_id']
-            comm_content_id = row['comm_content_id']  # Unique tweet identifier
             
             # Parse lawmaker info if not already stored
             if person_id not in lawmakers:
@@ -87,8 +85,9 @@ def convert_csv_to_json(csv_file, output_dir):
             issues.add(row['issue_name'])
             
             # Create month key (YYYY-MM format)
+            # The CSV has separate year and month columns
             year = row['year']
-            month_name = row['month']
+            month_name = row['month']  # This appears to be month name like "July"
             
             # Convert month name to number
             month_map = {
@@ -97,12 +96,12 @@ def convert_csv_to_json(csv_file, output_dir):
                 'September': 9, 'October': 10, 'November': 11, 'December': 12
             }
             
-            month_num = month_map.get(month_name, 1)
+            month_num = month_map.get(month_name, 1)  # Default to 1 if not found
             month_key = f"{year}-{month_num}"
             
-            # Track unique tweet ID for this person/issue/month combination
-            agg_key = (person_id, row['issue_name'])
-            unique_tweets[month_key][agg_key].add(comm_content_id)
+            # Aggregate data by person_id, issue, and month
+            agg_key = (person_id, row['issue_name'], month_key)
+            aggregated_data[month_key][agg_key] += 1
     
     print(f"Total rows processed: {row_count}")
     print(f"Total lawmakers: {len(lawmakers)}")
@@ -115,23 +114,19 @@ def convert_csv_to_json(csv_file, output_dir):
     print(f"Saved lawmakers to: {lawmakers_file}")
     
     # Save aggregated data by month
-    # Sort months chronologically
-    months = sorted(unique_tweets.keys(), key=lambda x: tuple(map(int, x.split('-'))))
+    # FIX: Sort months chronologically (not alphabetically)
+    months = sorted(aggregated_data.keys(), key=lambda x: tuple(map(int, x.split('-'))))
     
-    total_records = 0
     for month in months:
         month_records = []
         
-        for (person_id, issue_name), tweet_ids in unique_tweets[month].items():
-            # Count UNIQUE tweets for this person/issue/month
-            unique_count = len(tweet_ids)
+        for (person_id, issue_name, month_key), count in aggregated_data[month].items():
             month_records.append({
                 'person_id': int(person_id),
                 'issue_name': issue_name,
-                'month': month,
-                'count': unique_count
+                'month': month_key,
+                'count': count
             })
-            total_records += 1
         
         # Save compressed monthly data
         month_file = os.path.join(output_dir, 'data', f'tweets-{month}.json.gz')
@@ -145,7 +140,7 @@ def convert_csv_to_json(csv_file, output_dir):
     # Create index file
     index_data = {
         'months': months,
-        'totalRecords': total_records,
+        'totalRecords': sum(len(records) for records in aggregated_data.values()),
         'lawmakers': len(lawmakers),
         'issues': sorted(list(issues))
     }
@@ -160,13 +155,14 @@ def convert_csv_to_json(csv_file, output_dir):
     default_data = []
     
     for month in recent_months:
-        for (person_id, issue_name), tweet_ids in unique_tweets[month].items():
-            default_data.append({
-                'person_id': int(person_id),
-                'issue_name': issue_name,
-                'month': month,
-                'count': len(tweet_ids)
-            })
+        for (person_id, issue_name, month_key), count in aggregated_data[month].items():
+            if issue_name == 'All' or month_key in recent_months:  # Customize as needed
+                default_data.append({
+                    'person_id': int(person_id),
+                    'issue_name': issue_name,
+                    'month': month_key,
+                    'count': count
+                })
     
     default_file = os.path.join(output_dir, 'data', 'default-view.json')
     with open(default_file, 'w', encoding='utf-8') as f:
@@ -187,6 +183,7 @@ def convert_csv_to_json(csv_file, output_dir):
         if os.path.exists(month_file):
             size = os.path.getsize(month_file)
             total_size += size
+            print(f"  {month}: {size / 1024:.1f} KB")
     
     print(f"Total compressed size: {total_size / 1024 / 1024:.1f} MB")
     
@@ -224,19 +221,10 @@ class DataLoader {
         // Store issues list
         this.issues = this.index.issues || [];
         
-        // Sort months chronologically before taking last months
-        const sortedMonths = [...this.index.months].sort((a, b) => {
-            const [yearA, monthA] = a.split('-').map(Number);
-            const [yearB, monthB] = b.split('-').map(Number);
-            return yearA === yearB ? monthA - monthB : yearA - yearB;
-        });
-        
-        this.index.months = sortedMonths;
-        
-        // Load last 3 months by default
-        const lastThreeMonths = sortedMonths.slice(-3);
-        if (lastThreeMonths.length > 0) {
-            await this.loadMonths(lastThreeMonths);
+        // Load last 2 months by default
+        const lastTwoMonths = this.index.months.slice(-2);
+        if (lastTwoMonths.length > 0) {
+            await this.loadMonths(lastTwoMonths);
         }
     }
     
@@ -245,15 +233,19 @@ class DataLoader {
         
         if (monthsToLoad.length === 0) return;
         
+        // Show loading indicator
         console.log(`Loading data for months: ${monthsToLoad.join(', ')}`);
         
+        // Load compressed monthly data
         const promises = monthsToLoad.map(async (month) => {
             const response = await fetch(`data/tweets-${month}.json.gz`);
             const compressed = await response.arrayBuffer();
             
+            // Decompress in browser
             const decompressed = await this.decompress(compressed);
             const data = JSON.parse(decompressed);
             
+            // Store in memory
             data.forEach(record => {
                 const key = `${record.person_id}_${record.issue_name}_${record.month}`;
                 this.tweetData.set(key, record);
@@ -263,10 +255,10 @@ class DataLoader {
         });
         
         await Promise.all(promises);
-        console.log(`Successfully loaded ${monthsToLoad.length} month(s). Total records: ${this.tweetData.size}`);
     }
     
     async decompress(compressed) {
+        // Use browser's native decompression
         const ds = new DecompressionStream('gzip');
         const decompressedStream = new Response(compressed).body.pipeThrough(ds);
         return new Response(decompressedStream).text();
@@ -275,10 +267,12 @@ class DataLoader {
     getFilteredData(filters) {
         const { startDate, endDate, issue, chamber, party } = filters;
         
+        // Ensure we have the needed months loaded
         const neededMonths = this.getMonthsInRange(startDate, endDate);
         const unloadedMonths = neededMonths.filter(m => !this.loadedMonths.has(m));
         
         if (unloadedMonths.length > 0) {
+            // Return promise that loads data first
             return this.loadMonths(unloadedMonths).then(() => this.filterData(filters));
         }
         
@@ -322,7 +316,7 @@ class DataLoader {
     getMonthsInRange(startDate, endDate) {
         const months = [];
         const current = new Date(startDate);
-        current.setDate(1);
+        current.setDate(1); // Start at beginning of month
         
         while (current <= endDate) {
             const year = current.getFullYear();
@@ -352,6 +346,7 @@ class DataLoader {
     }
 }
 
+// Export for use in main app
 window.DataLoader = DataLoader;
 '''
     
@@ -361,6 +356,8 @@ window.DataLoader = DataLoader;
     print(f"\nCreated data loader script: {js_file}")
 
 if __name__ == "__main__":
+
+    
     csv_file = '1_tweets_df.csv'
     output_dir = './'
     

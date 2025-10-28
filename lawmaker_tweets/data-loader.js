@@ -23,8 +23,8 @@ class DataLoader {
             this.lawmakers.set(lm.person_id, lm);
         });
         
-        // Store issues list
-        this.issues = this.index.issues || [];
+        // Store issues list (excluding "All" if present)
+        this.issues = (this.index.issues || []).filter(i => i !== 'All');
         
         // Sort months chronologically before taking last months
         const sortedMonths = [...this.index.months].sort((a, b) => {
@@ -90,12 +90,36 @@ class DataLoader {
     filterData(filters) {
         const aggregated = new Map();
         
+        console.log(`Filtering ${this.tweetData.size} records with:`, {
+            startDate: filters.startDate,
+            endDate: filters.endDate,
+            issue: filters.issue,
+            chamber: filters.chamber,
+            party: filters.party
+        });
+        
+        let recordsProcessed = 0;
+        let recordsPassed = 0;
+        
         for (const [key, record] of this.tweetData) {
+            recordsProcessed++;
+            
             const lawmaker = this.lawmakers.get(record.person_id);
             if (!lawmaker) continue;
             
-            // Apply filters
-            if (filters.issue !== 'All' && record.issue_name !== filters.issue) continue;
+            // CRITICAL FIX: Handle "All" issue properly
+            // When filtering by "All", only use records with issue_name="All"
+            // When filtering by specific issue, only use records with that specific issue (skip "All")
+            if (filters.issue === 'All') {
+                // Only include records with issue_name="All" (the deduplicated count)
+                if (record.issue_name !== 'All') continue;
+            } else {
+                // Only include records matching the specific issue (skip "All")
+                if (record.issue_name === 'All') continue;
+                if (record.issue_name !== filters.issue) continue;
+            }
+            
+            // Apply other filters
             if (filters.chamber !== 'Both Chambers' && lawmaker.chamber !== filters.chamber) continue;
             if (filters.party !== 'All Parties' && !lawmaker.party_name.includes(filters.party)) continue;
             
@@ -104,6 +128,8 @@ class DataLoader {
             const recordDate = new Date(year, month - 1, 1);
             
             if (recordDate < filters.startDate || recordDate > filters.endDate) continue;
+            
+            recordsPassed++;
             
             // Aggregate by person
             const personId = record.person_id;
@@ -117,6 +143,8 @@ class DataLoader {
             }
             aggregated.get(personId).posts += record.count;
         }
+        
+        console.log(`Filtered ${recordsProcessed} records, ${recordsPassed} passed filters, ${aggregated.size} unique lawmakers`);
         
         return Array.from(aggregated.values());
     }
@@ -154,4 +182,5 @@ class DataLoader {
     }
 }
 
+// Export for use in main app
 window.DataLoader = DataLoader;

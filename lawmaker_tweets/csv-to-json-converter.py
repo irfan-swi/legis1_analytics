@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Convert lawmaker tweet CSV data to optimized JSON format for web app.
-Counts UNIQUE tweets (by comm_content_id) to avoid double-counting when tweets have multiple issue tags.
+Tracks UNIQUE tweets both per-issue and overall to avoid double-counting.
 Usage: python convert_tweets_data.py input.csv output_directory/
 """
 
@@ -16,13 +16,7 @@ import re
 
 def parse_display_name(display_name):
     """Extract name, party, state, and district from display name."""
-    # Pattern for House members: "Rep. Name Party-State-District"
-    # Pattern for Senators: "Sen. Name Party-State"
-    
-    # Remove Rep./Sen. prefix
     name = display_name.replace('Rep. ', '').replace('Sen. ', '')
-    
-    # Extract party-state-district info
     match = re.search(r'(.+?)\s+([A-Z])-([A-Z]{2})(?:-(\d+))?', name)
     
     if match:
@@ -43,54 +37,83 @@ def parse_display_name(display_name):
 def convert_csv_to_json(csv_file, output_dir):
     """Convert CSV file to optimized JSON format."""
     
-    # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(os.path.join(output_dir, 'data'), exist_ok=True)
     
-    # Data structures
     lawmakers = {}
-    # NEW: Track unique comm_content_ids per (person, issue, month)
-    unique_tweets = defaultdict(lambda: defaultdict(set))  # month -> (person, issue) -> set of comm_content_ids
+    # Track unique tweets per (person, issue, month) for issue-specific counts
+    unique_tweets_by_issue = defaultdict(lambda: defaultdict(set))
+    # Track unique tweets per (person, month) for "All Issues" counts  
+    unique_tweets_overall = defaultdict(lambda: defaultdict(set))
     issues = set()
     
-    # Read CSV file
     print(f"Reading CSV file: {csv_file}")
-    row_count = 0
     
-    with open(csv_file, 'r', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
+    # First, detect the delimiter and check the header
+    with open(csv_file, 'r', encoding='utf-8', newline='') as f:
+        # Read first line to check format
+        first_line = f.readline()
+        print(f"First line: {repr(first_line[:100])}")
+        
+        # Detect delimiter
+        if '\t' in first_line:
+            delimiter = '\t'
+            print("Detected tab-delimited file")
+        elif ',' in first_line:
+            delimiter = ','
+            print("Detected comma-delimited file")
+        else:
+            print("ERROR: Could not detect delimiter")
+            sys.exit(1)
+    
+    # Now read the actual data
+    row_count = 0
+    with open(csv_file, 'r', encoding='utf-8', newline='') as f:
+        reader = csv.DictReader(f, delimiter=delimiter)
+        
+        # Check if required columns exist
+        fieldnames = reader.fieldnames
+        print(f"Columns found: {fieldnames}")
+        
+        required_cols = ['person_id', 'comm_content_id', 'issue_name', 'year', 'month', 'display_name']
+        missing_cols = [col for col in required_cols if col not in fieldnames]
+        
+        if missing_cols:
+            print(f"ERROR: Missing required columns: {missing_cols}")
+            print(f"Available columns: {fieldnames}")
+            sys.exit(1)
         
         for row in reader:
             row_count += 1
             if row_count % 10000 == 0:
                 print(f"Processed {row_count} rows...")
             
-            person_id = row['person_id']
-            comm_content_id = row['comm_content_id']  # Unique tweet identifier
+            person_id = row['person_id'].strip()
+            comm_content_id = row['comm_content_id'].strip()
             
-            # Parse lawmaker info if not already stored
+            if not person_id or not comm_content_id:
+                continue  # Skip rows with empty values
+            
             if person_id not in lawmakers:
                 parsed = parse_display_name(row['display_name'])
                 if parsed:
                     lawmakers[person_id] = {
                         'person_id': int(person_id),
                         'display_name': row['display_name'],
-                        'chamber': row['chamber'],
-                        'party_name': row['party_name'],
+                        'chamber': row.get('chamber', ''),
+                        'party_name': row.get('party_name', ''),
                         'party': parsed['party'],
                         'state': parsed['state'],
                         'district': parsed['district'],
                         'full_name': parsed['full_name']
                     }
             
-            # Add issue to set
-            issues.add(row['issue_name'])
+            issue_name = row['issue_name'].strip()
+            issues.add(issue_name)
             
-            # Create month key (YYYY-MM format)
-            year = row['year']
-            month_name = row['month']
+            year = row['year'].strip()
+            month_name = row['month'].strip()
             
-            # Convert month name to number
             month_map = {
                 'January': 1, 'February': 2, 'March': 3, 'April': 4,
                 'May': 5, 'June': 6, 'July': 7, 'August': 8,
@@ -100,11 +123,15 @@ def convert_csv_to_json(csv_file, output_dir):
             month_num = month_map.get(month_name, 1)
             month_key = f"{year}-{month_num}"
             
-            # Track unique tweet ID for this person/issue/month combination
-            agg_key = (person_id, row['issue_name'])
-            unique_tweets[month_key][agg_key].add(comm_content_id)
+            # Track by issue (for issue-specific filtering)
+            issue_key = (person_id, issue_name)
+            unique_tweets_by_issue[month_key][issue_key].add(comm_content_id)
+            
+            # Track overall (for "All Issues" counts - this is the TRUE unique count)
+            person_key = (person_id, 'All')
+            unique_tweets_overall[month_key][person_key].add(comm_content_id)
     
-    print(f"Total rows processed: {row_count}")
+    print(f"\nTotal rows processed: {row_count}")
     print(f"Total lawmakers: {len(lawmakers)}")
     print(f"Total issues: {len(issues)}")
     
@@ -114,20 +141,30 @@ def convert_csv_to_json(csv_file, output_dir):
         json.dump(list(lawmakers.values()), f, ensure_ascii=False, separators=(',', ':'))
     print(f"Saved lawmakers to: {lawmakers_file}")
     
-    # Save aggregated data by month
     # Sort months chronologically
-    months = sorted(unique_tweets.keys(), key=lambda x: tuple(map(int, x.split('-'))))
+    months = sorted(unique_tweets_by_issue.keys(), key=lambda x: tuple(map(int, x.split('-'))))
     
     total_records = 0
     for month in months:
         month_records = []
         
-        for (person_id, issue_name), tweet_ids in unique_tweets[month].items():
-            # Count UNIQUE tweets for this person/issue/month
+        # Add per-issue records
+        for (person_id, issue_name), tweet_ids in unique_tweets_by_issue[month].items():
             unique_count = len(tweet_ids)
             month_records.append({
                 'person_id': int(person_id),
                 'issue_name': issue_name,
+                'month': month,
+                'count': unique_count
+            })
+            total_records += 1
+        
+        # Add "All" records with true unique counts
+        for (person_id, _), tweet_ids in unique_tweets_overall[month].items():
+            unique_count = len(tweet_ids)
+            month_records.append({
+                'person_id': int(person_id),
+                'issue_name': 'All',
                 'month': month,
                 'count': unique_count
             })
@@ -155,30 +192,13 @@ def convert_csv_to_json(csv_file, output_dir):
         json.dump(index_data, f, ensure_ascii=False, indent=2)
     print(f"Saved index to: {index_file}")
     
-    # Create a demo/default view with most recent data
-    recent_months = months[-3:] if len(months) >= 3 else months
-    default_data = []
-    
-    for month in recent_months:
-        for (person_id, issue_name), tweet_ids in unique_tweets[month].items():
-            default_data.append({
-                'person_id': int(person_id),
-                'issue_name': issue_name,
-                'month': month,
-                'count': len(tweet_ids)
-            })
-    
-    default_file = os.path.join(output_dir, 'data', 'default-view.json')
-    with open(default_file, 'w', encoding='utf-8') as f:
-        json.dump(default_data, f, ensure_ascii=False, separators=(',', ':'))
-    print(f"Saved default view to: {default_file}")
-    
     # Print summary statistics
     print("\n=== Conversion Summary ===")
     print(f"Total lawmakers: {len(lawmakers)}")
     print(f"Total months: {len(months)}")
     print(f"Total issues: {len(issues)}")
-    print(f"Date range: {months[0]} to {months[-1]}")
+    if months:
+        print(f"Date range: {months[0]} to {months[-1]}")
     
     # Calculate file sizes
     total_size = 0
@@ -190,175 +210,16 @@ def convert_csv_to_json(csv_file, output_dir):
     
     print(f"Total compressed size: {total_size / 1024 / 1024:.1f} MB")
     
-    # Create sample HTML update for data loading
-    create_data_loader_js(output_dir)
-
-def create_data_loader_js(output_dir):
-    """Create a JavaScript file with the data loading logic."""
-    
-    js_content = '''// Data loader for lawmaker Twitter activity
-class DataLoader {
-    constructor() {
-        this.lawmakers = new Map();
-        this.tweetData = new Map();
-        this.loadedMonths = new Set();
-        this.index = null;
-        this.issues = [];
-    }
-    
-    async init() {
-        // Load index and lawmakers (small files)
-        const [indexResponse, lawmakersResponse] = await Promise.all([
-            fetch('data/index.json'),
-            fetch('data/lawmakers.json')
-        ]);
-        
-        this.index = await indexResponse.json();
-        const lawmakersArray = await lawmakersResponse.json();
-        
-        // Create lawmakers map
-        lawmakersArray.forEach(lm => {
-            this.lawmakers.set(lm.person_id, lm);
-        });
-        
-        // Store issues list
-        this.issues = this.index.issues || [];
-        
-        // Sort months chronologically before taking last months
-        const sortedMonths = [...this.index.months].sort((a, b) => {
-            const [yearA, monthA] = a.split('-').map(Number);
-            const [yearB, monthB] = b.split('-').map(Number);
-            return yearA === yearB ? monthA - monthB : yearA - yearB;
-        });
-        
-        this.index.months = sortedMonths;
-        
-        // Load last 3 months by default
-        const lastThreeMonths = sortedMonths.slice(-3);
-        if (lastThreeMonths.length > 0) {
-            await this.loadMonths(lastThreeMonths);
-        }
-    }
-    
-    async loadMonths(months) {
-        const monthsToLoad = months.filter(m => !this.loadedMonths.has(m));
-        
-        if (monthsToLoad.length === 0) return;
-        
-        console.log(`Loading data for months: ${monthsToLoad.join(', ')}`);
-        
-        const promises = monthsToLoad.map(async (month) => {
-            const response = await fetch(`data/tweets-${month}.json.gz`);
-            const compressed = await response.arrayBuffer();
-            
-            const decompressed = await this.decompress(compressed);
-            const data = JSON.parse(decompressed);
-            
-            data.forEach(record => {
-                const key = `${record.person_id}_${record.issue_name}_${record.month}`;
-                this.tweetData.set(key, record);
-            });
-            
-            this.loadedMonths.add(month);
-        });
-        
-        await Promise.all(promises);
-        console.log(`Successfully loaded ${monthsToLoad.length} month(s). Total records: ${this.tweetData.size}`);
-    }
-    
-    async decompress(compressed) {
-        const ds = new DecompressionStream('gzip');
-        const decompressedStream = new Response(compressed).body.pipeThrough(ds);
-        return new Response(decompressedStream).text();
-    }
-    
-    getFilteredData(filters) {
-        const { startDate, endDate, issue, chamber, party } = filters;
-        
-        const neededMonths = this.getMonthsInRange(startDate, endDate);
-        const unloadedMonths = neededMonths.filter(m => !this.loadedMonths.has(m));
-        
-        if (unloadedMonths.length > 0) {
-            return this.loadMonths(unloadedMonths).then(() => this.filterData(filters));
-        }
-        
-        return Promise.resolve(this.filterData(filters));
-    }
-    
-    filterData(filters) {
-        const aggregated = new Map();
-        
-        for (const [key, record] of this.tweetData) {
-            const lawmaker = this.lawmakers.get(record.person_id);
-            if (!lawmaker) continue;
-            
-            // Apply filters
-            if (filters.issue !== 'All' && record.issue_name !== filters.issue) continue;
-            if (filters.chamber !== 'Both Chambers' && lawmaker.chamber !== filters.chamber) continue;
-            if (filters.party !== 'All Parties' && !lawmaker.party_name.includes(filters.party)) continue;
-            
-            // Check date range
-            const [year, month] = record.month.split('-').map(Number);
-            const recordDate = new Date(year, month - 1, 1);
-            
-            if (recordDate < filters.startDate || recordDate > filters.endDate) continue;
-            
-            // Aggregate by person
-            const personId = record.person_id;
-            if (!aggregated.has(personId)) {
-                aggregated.set(personId, {
-                    person_id: personId,
-                    display_name: lawmaker.display_name,
-                    party_clean: lawmaker.party_name,
-                    posts: 0
-                });
-            }
-            aggregated.get(personId).posts += record.count;
-        }
-        
-        return Array.from(aggregated.values());
-    }
-    
-    getMonthsInRange(startDate, endDate) {
-        const months = [];
-        const current = new Date(startDate);
-        current.setDate(1);
-        
-        while (current <= endDate) {
-            const year = current.getFullYear();
-            const month = current.getMonth() + 1;
-            months.push(`${year}-${month}`);
-            current.setMonth(current.getMonth() + 1);
-        }
-        
-        return months;
-    }
-    
-    getDateRange() {
-        if (!this.index || !this.index.months || this.index.months.length === 0) {
-            return { start: new Date(), end: new Date() };
-        }
-        
-        const firstMonth = this.index.months[0];
-        const lastMonth = this.index.months[this.index.months.length - 1];
-        
-        const [startYear, startMonth] = firstMonth.split('-').map(Number);
-        const [endYear, endMonth] = lastMonth.split('-').map(Number);
-        
-        return {
-            start: new Date(startYear, startMonth - 1, 1),
-            end: new Date(endYear, endMonth - 1, 1)
-        };
-    }
-}
-
-window.DataLoader = DataLoader;
-'''
-    
-    js_file = os.path.join(output_dir, 'data-loader.js')
-    with open(js_file, 'w', encoding='utf-8') as f:
-        f.write(js_content)
-    print(f"\nCreated data loader script: {js_file}")
+    # Verification: Check Nancy Mace's data if present
+    nancy_mace_id = '282851'
+    if nancy_mace_id in lawmakers:
+        print(f"\n=== Verification for Nancy Mace (person_id={nancy_mace_id}) ===")
+        for month in months[-3:]:  # Check last 3 months
+            if month in unique_tweets_overall:
+                for (pid, _), tweets in unique_tweets_overall[month].items():
+                    if pid == nancy_mace_id:
+                        print(f"{month}: {len(tweets)} unique tweets")
+                        break
 
 if __name__ == "__main__":
     csv_file = '1_tweets_df.csv'

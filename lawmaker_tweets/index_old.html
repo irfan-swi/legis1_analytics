@@ -482,15 +482,11 @@
             startSelect.innerHTML = '';
             endSelect.innerHTML = '';
             
-            // Generate month options - extend by one month to include October 2025
+            // Generate month options
             const current = new Date(dateRange.start);
             const dates = [];
             
-            // Get the actual end date from data and add one month to ensure October 2025 is included
-            const extendedEnd = new Date(dateRange.end);
-            extendedEnd.setMonth(extendedEnd.getMonth() + 1);
-            
-            while (current <= extendedEnd) {
+            while (current <= dateRange.end) {
                 dates.push(new Date(current));
                 current.setMonth(current.getMonth() + 1);
             }
@@ -513,10 +509,13 @@
                 endSelect.appendChild(endOption);
             });
             
-            // Set default date range (last month only, so October 2025)
-            if (dates.length > 0) {
-                startSelect.selectedIndex = dates.length - 1;  // Last month (October)
-                endSelect.selectedIndex = dates.length - 1;    // Last month (October)
+            // Set default date range (second-to-last month to last month)
+            if (dates.length > 1) {
+                startSelect.selectedIndex = dates.length - 2;  // Second-to-last month
+                endSelect.selectedIndex = dates.length - 1;    // Last month
+            } else if (dates.length === 1) {
+                startSelect.selectedIndex = 0;
+                endSelect.selectedIndex = 0;
             }
         };
         
@@ -538,11 +537,7 @@
             const chamber = document.getElementById('chamber-filter').value;
             const party = document.getElementById('party-filter').value;
             const startDate = new Date(document.getElementById('start-date').value);
-            
-            // For end date, set to the last day of the selected month to include all data from that month
             const endDate = new Date(document.getElementById('end-date').value);
-            endDate.setMonth(endDate.getMonth() + 1); // Move to next month
-            endDate.setDate(0); // Set to last day of previous month (the selected month)
             
             // Show loading state while fetching data
             const container = document.getElementById('chart-container');

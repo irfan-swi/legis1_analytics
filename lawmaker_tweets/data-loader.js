@@ -107,19 +107,16 @@ class DataLoader {
             const lawmaker = this.lawmakers.get(record.person_id);
             if (!lawmaker) continue;
             
-            // CRITICAL FIX: Handle "All" issue properly including NULL/undefined values
+            // CRITICAL FIX: Handle "All" issue properly
             // When filtering by "All", only use records with issue_name="All"
             // When filtering by specific issue, only use records with that specific issue (skip "All")
-            // When filtering by specific issue OR "All", include tweets with no issue (NULL/undefined)
             if (filters.issue === 'All') {
                 // Only include records with issue_name="All" (the deduplicated count)
-                // OR records with no issue assignment (NULL/undefined)
-                if (record.issue_name !== 'All' && record.issue_name != null) continue;
+                if (record.issue_name !== 'All') continue;
             } else {
                 // Only include records matching the specific issue (skip "All")
-                // OR records with no issue assignment (NULL/undefined)
                 if (record.issue_name === 'All') continue;
-                if (record.issue_name != null && record.issue_name !== filters.issue) continue;
+                if (record.issue_name !== filters.issue) continue;
             }
             
             // Apply other filters

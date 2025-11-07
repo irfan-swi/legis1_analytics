@@ -1,8 +1,8 @@
 {
-  "total_rows": 1021592,
+  "total_rows": 1025675,
   "date_range": {
     "start": "2023-01-04",
-    "end": "2025-11-02"
+    "end": "2025-11-05"
   },
   "files": [
     {
@@ -38,7 +38,7 @@
     {
       "file": "tweets_2023_Q2_M04.parquet",
       "rows": 9141,
-      "size_mb": 0.94,
+      "size_mb": 0.95,
       "year": 2023,
       "quarter": 2,
       "month": 4,
@@ -58,7 +58,7 @@
     {
       "file": "tweets_2023_Q2_M06.parquet",
       "rows": 11366,
-      "size_mb": 1.47,
+      "size_mb": 1.56,
       "year": 2023,
       "quarter": 2,
       "month": 6,
@@ -78,7 +78,7 @@
     {
       "file": "tweets_2023_Q3_M08.parquet",
       "rows": 13540,
-      "size_mb": 1.96,
+      "size_mb": 1.95,
       "year": 2023,
       "quarter": 3,
       "month": 8,
@@ -88,7 +88,7 @@
     {
       "file": "tweets_2023_Q3_M09.parquet",
       "rows": 20828,
-      "size_mb": 3.19,
+      "size_mb": 3.18,
       "year": 2023,
       "quarter": 3,
       "month": 9,
@@ -118,7 +118,7 @@
     {
       "file": "tweets_2023_Q4_M12.parquet",
       "rows": 28823,
-      "size_mb": 4.61,
+      "size_mb": 4.62,
       "year": 2023,
       "quarter": 4,
       "month": 12,
@@ -128,7 +128,7 @@
     {
       "file": "tweets_2024_Q1_M01.parquet",
       "rows": 47177,
-      "size_mb": 7.47,
+      "size_mb": 7.46,
       "year": 2024,
       "quarter": 1,
       "month": 1,
@@ -148,7 +148,7 @@
     {
       "file": "tweets_2024_Q1_M03.parquet",
       "rows": 53104,
-      "size_mb": 8.18,
+      "size_mb": 8.17,
       "year": 2024,
       "quarter": 1,
       "month": 3,
@@ -168,7 +168,7 @@
     {
       "file": "tweets_2024_Q2_M05.parquet",
       "rows": 40918,
-      "size_mb": 6.81,
+      "size_mb": 6.82,
       "year": 2024,
       "quarter": 2,
       "month": 5,
@@ -208,7 +208,7 @@
     {
       "file": "tweets_2024_Q3_M09.parquet",
       "rows": 27492,
-      "size_mb": 4.66,
+      "size_mb": 4.67,
       "year": 2024,
       "quarter": 3,
       "month": 9,
@@ -218,7 +218,7 @@
     {
       "file": "tweets_2024_Q4_M10.parquet",
       "rows": 37454,
-      "size_mb": 6.47,
+      "size_mb": 6.46,
       "year": 2024,
       "quarter": 4,
       "month": 10,
@@ -238,7 +238,7 @@
     {
       "file": "tweets_2024_Q4_M12.parquet",
       "rows": 35941,
-      "size_mb": 6.13,
+      "size_mb": 6.14,
       "year": 2024,
       "quarter": 4,
       "month": 12,
@@ -278,7 +278,7 @@
     {
       "file": "tweets_2025_Q2_M04.parquet",
       "rows": 34836,
-      "size_mb": 6.08,
+      "size_mb": 6.07,
       "year": 2025,
       "quarter": 2,
       "month": 4,
@@ -308,7 +308,7 @@
     {
       "file": "tweets_2025_Q3_M07.parquet",
       "rows": 27545,
-      "size_mb": 4.9,
+      "size_mb": 4.91,
       "year": 2025,
       "quarter": 3,
       "month": 7,
@@ -328,7 +328,7 @@
     {
       "file": "tweets_2025_Q3_M09.parquet",
       "rows": 38950,
-      "size_mb": 7.3,
+      "size_mb": 7.29,
       "year": 2025,
       "quarter": 3,
       "month": 9,
@@ -338,7 +338,7 @@
     {
       "file": "tweets_2025_Q4_M10.parquet",
       "rows": 48993,
-      "size_mb": 8.86,
+      "size_mb": 8.85,
       "year": 2025,
       "quarter": 4,
       "month": 10,
@@ -347,13 +347,13 @@
     },
     {
       "file": "tweets_2025_Q4_M11.parquet",
-      "rows": 840,
-      "size_mb": 0.08,
+      "rows": 4923,
+      "size_mb": 0.4,
       "year": 2025,
       "quarter": 4,
       "month": 11,
       "start_date": "2025-11-01",
-      "end_date": "2025-11-02"
+      "end_date": "2025-11-05"
     }
   ],
   "columns": [
@@ -3291,6 +3291,6 @@
       "us_state_id": "MP"
     }
   ],
-  "generated_at": "2025-11-04T09:25:12.271877",
+  "generated_at": "2025-11-07T15:07:52.973092",
   "file_structure": "consistent_monthly"
 }

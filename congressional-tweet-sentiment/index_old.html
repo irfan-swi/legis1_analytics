@@ -1553,7 +1553,7 @@
                         pub_date as date,
                         party_name,
                         AVG(CAST(score AS DOUBLE)) as daily_avg_score,
-                        COUNT(DISTINCT comm_content_id) as daily_tweet_count
+                        COUNT(*) as daily_tweet_count
                     FROM tweets
                     ${whereClause}
                     GROUP BY pub_date, party_name
@@ -1567,7 +1567,7 @@
                             pub_date as date,
                             party_name,
                             AVG(CAST(score AS DOUBLE)) as daily_avg_score,
-                            COUNT(DISTINCT comm_content_id) as daily_tweet_count
+                            COUNT(*) as daily_tweet_count
                         FROM tweets
                         ${whereClause}
                         GROUP BY pub_date, party_name
@@ -1625,11 +1625,11 @@
                         us_state_id,
                         person_id,
                         AVG(CAST(score AS DOUBLE)) as avg_score,
-                        COUNT(DISTINCT comm_content_id) as tweet_count
+                        COUNT(*) as tweet_count
                     FROM tweets
                     ${whereClause}
                     GROUP BY display_name, party_name, chamber, us_state_id, person_id
-                    HAVING COUNT(DISTINCT comm_content_id) >= 1
+                    HAVING COUNT(*) >= 1
                 `;
                 
                 const memberResult = await conn.query(memberQuery);
@@ -1638,7 +1638,7 @@
                 // Get summary statistics - optimized query
                 const summaryQuery = `
                     SELECT 
-                        COUNT(DISTINCT comm_content_id) as total_tweets,
+                        COUNT(*) as total_tweets,
                         AVG(CAST(score AS DOUBLE)) as avg_sentiment,
                         COUNT(DISTINCT display_name) as unique_members,
                         MIN(pub_date) as min_date,
@@ -1906,7 +1906,7 @@
                 const cleanName = nameParts.slice(1, -1).join(' ');
                 
                 // Create Legis1 URL
-                const legis1Url = `https://app.legis1.com/lawmaker/detail?id=${member.person_id}#communications`;
+                const legis1Url = `https://app.legis1.com/lawmaker/detail?id=${member.person_id}#communication`;
                 
                 return `
                     <div class="member-row">

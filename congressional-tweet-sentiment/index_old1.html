@@ -773,7 +773,7 @@
                     total_rows: 1059871,
                     date_range: {
                         start: "2021-01-03",  // Use actual start date from processing script
-                        end: "2025-11-12"     // Use actual end date from processing script
+                        end: "2025-07-18"     // Use actual end date from processing script
                     },
                     files: [
                         {file: "tweets_2021_Q1.parquet", rows: 3358, size_mb: 0.3, year: 2021, quarter: 1, start_date: "2021-01-03", end_date: "2021-03-31"},
@@ -806,11 +806,7 @@
                         {file: "tweets_2025_Q2_M04.parquet", rows: 34898, size_mb: 3.1, year: 2025, quarter: 2, month: 4, start_date: "2025-04-01", end_date: "2025-04-30"},
                         {file: "tweets_2025_Q2_M05.parquet", rows: 53837, size_mb: 5.0, year: 2025, quarter: 2, month: 5, start_date: "2025-05-01", end_date: "2025-05-31"},
                         {file: "tweets_2025_Q2_M06.parquet", rows: 31833, size_mb: 2.9, year: 2025, quarter: 2, month: 6, start_date: "2025-06-01", end_date: "2025-06-30"},
-                        {file: "tweets_2025_Q3_M07.parquet", rows: 18148, size_mb: 1.4, year: 2025, quarter: 3, month: 7, start_date: "2025-07-01", end_date: "2025-07-31"},
-                        {file: "tweets_2025_Q3_M08.parquet", rows: 20000, size_mb: 1.8, year: 2025, quarter: 3, month: 8, start_date: "2025-08-01", end_date: "2025-08-31"},
-                        {file: "tweets_2025_Q3_M09.parquet", rows: 22000, size_mb: 2.0, year: 2025, quarter: 3, month: 9, start_date: "2025-09-01", end_date: "2025-09-30"},
-                        {file: "tweets_2025_Q4_M10.parquet", rows: 24000, size_mb: 2.2, year: 2025, quarter: 4, month: 10, start_date: "2025-10-01", end_date: "2025-10-31"},
-                        {file: "tweets_2025_Q4_M11.parquet", rows: 12000, size_mb: 1.1, year: 2025, quarter: 4, month: 11, start_date: "2025-11-01", end_date: "2025-11-12"}
+                        {file: "tweets_2025_Q3.parquet", rows: 18148, size_mb: 1.4, year: 2025, quarter: 3, start_date: "2025-07-01", end_date: "2025-07-18"}
                     ],
                     unique_values: {
                         chambers: ['House', 'Senate'],
@@ -1910,7 +1906,7 @@
                 const cleanName = nameParts.slice(1, -1).join(' ');
                 
                 // Create Legis1 URL
-                const legis1Url = `https://app.legis1.com/lawmaker/detail?id=${member.person_id}#communication`;
+                const legis1Url = `https://app.legis1.com/lawmaker/detail?id=${member.person_id}#communications`;
                 
                 return `
                     <div class="member-row">

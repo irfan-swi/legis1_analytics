@@ -1,8 +1,8 @@
 {
-  "total_rows": 1034363,
+  "total_rows": 1042998,
   "date_range": {
     "start": "2023-01-04",
-    "end": "2025-11-12"
+    "end": "2025-11-19"
   },
   "files": [
     {
@@ -48,7 +48,7 @@
     {
       "file": "tweets_2023_Q2_M05.parquet",
       "rows": 10193,
-      "size_mb": 1.25,
+      "size_mb": 1.24,
       "year": 2023,
       "quarter": 2,
       "month": 5,
@@ -58,7 +58,7 @@
     {
       "file": "tweets_2023_Q2_M06.parquet",
       "rows": 11366,
-      "size_mb": 1.48,
+      "size_mb": 1.47,
       "year": 2023,
       "quarter": 2,
       "month": 6,
@@ -78,7 +78,7 @@
     {
       "file": "tweets_2023_Q3_M08.parquet",
       "rows": 13540,
-      "size_mb": 1.95,
+      "size_mb": 1.96,
       "year": 2023,
       "quarter": 3,
       "month": 8,
@@ -88,7 +88,7 @@
     {
       "file": "tweets_2023_Q3_M09.parquet",
       "rows": 20828,
-      "size_mb": 3.18,
+      "size_mb": 3.19,
       "year": 2023,
       "quarter": 3,
       "month": 9,
@@ -98,7 +98,7 @@
     {
       "file": "tweets_2023_Q4_M10.parquet",
       "rows": 34931,
-      "size_mb": 5.48,
+      "size_mb": 5.49,
       "year": 2023,
       "quarter": 4,
       "month": 10,
@@ -118,7 +118,7 @@
     {
       "file": "tweets_2023_Q4_M12.parquet",
       "rows": 28823,
-      "size_mb": 4.62,
+      "size_mb": 4.61,
       "year": 2023,
       "quarter": 4,
       "month": 12,
@@ -148,7 +148,7 @@
     {
       "file": "tweets_2024_Q1_M03.parquet",
       "rows": 53104,
-      "size_mb": 8.18,
+      "size_mb": 8.17,
       "year": 2024,
       "quarter": 1,
       "month": 3,
@@ -168,7 +168,7 @@
     {
       "file": "tweets_2024_Q2_M05.parquet",
       "rows": 40918,
-      "size_mb": 6.81,
+      "size_mb": 6.82,
       "year": 2024,
       "quarter": 2,
       "month": 5,
@@ -178,7 +178,7 @@
     {
       "file": "tweets_2024_Q2_M06.parquet",
       "rows": 32205,
-      "size_mb": 5.34,
+      "size_mb": 5.35,
       "year": 2024,
       "quarter": 2,
       "month": 6,
@@ -208,7 +208,7 @@
     {
       "file": "tweets_2024_Q3_M09.parquet",
       "rows": 27492,
-      "size_mb": 4.67,
+      "size_mb": 4.66,
       "year": 2024,
       "quarter": 3,
       "month": 9,
@@ -218,7 +218,7 @@
     {
       "file": "tweets_2024_Q4_M10.parquet",
       "rows": 37454,
-      "size_mb": 6.47,
+      "size_mb": 6.48,
       "year": 2024,
       "quarter": 4,
       "month": 10,
@@ -238,7 +238,7 @@
     {
       "file": "tweets_2024_Q4_M12.parquet",
       "rows": 35941,
-      "size_mb": 6.14,
+      "size_mb": 6.13,
       "year": 2024,
       "quarter": 4,
       "month": 12,
@@ -258,7 +258,7 @@
     {
       "file": "tweets_2025_Q1_M02.parquet",
       "rows": 57182,
-      "size_mb": 9.86,
+      "size_mb": 9.85,
       "year": 2025,
       "quarter": 1,
       "month": 2,
@@ -278,7 +278,7 @@
     {
       "file": "tweets_2025_Q2_M04.parquet",
       "rows": 34836,
-      "size_mb": 6.08,
+      "size_mb": 6.07,
       "year": 2025,
       "quarter": 2,
       "month": 4,
@@ -298,7 +298,7 @@
     {
       "file": "tweets_2025_Q2_M06.parquet",
       "rows": 31721,
-      "size_mb": 5.68,
+      "size_mb": 5.69,
       "year": 2025,
       "quarter": 2,
       "month": 6,
@@ -318,7 +318,7 @@
     {
       "file": "tweets_2025_Q3_M08.parquet",
       "rows": 26903,
-      "size_mb": 5.04,
+      "size_mb": 5.05,
       "year": 2025,
       "quarter": 3,
       "month": 8,
@@ -338,7 +338,7 @@
     {
       "file": "tweets_2025_Q4_M10.parquet",
       "rows": 48993,
-      "size_mb": 8.86,
+      "size_mb": 8.85,
       "year": 2025,
       "quarter": 4,
       "month": 10,
@@ -347,13 +347,13 @@
     },
     {
       "file": "tweets_2025_Q4_M11.parquet",
-      "rows": 13611,
-      "size_mb": 2.31,
+      "rows": 22246,
+      "size_mb": 4.21,
       "year": 2025,
       "quarter": 4,
       "month": 11,
       "start_date": "2025-11-01",
-      "end_date": "2025-11-12"
+      "end_date": "2025-11-19"
     }
   ],
   "columns": [
@@ -3297,6 +3297,6 @@
       "us_state_id": "MP"
     }
   ],
-  "generated_at": "2025-11-13T14:54:29.908896",
+  "generated_at": "2025-11-20T16:29:37.408200",
   "file_structure": "consistent_monthly"
 }
